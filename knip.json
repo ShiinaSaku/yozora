@@ -1,0 +1,27 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": [
+    "src/router.tsx",
+    "src/start.ts",
+    "src/routes/**/*.{ts,tsx}",
+    "src/lib/api/app.ts",
+    "src/lib/env.ts"
+  ],
+  "project": [
+    "**/*.{ts,tsx}"
+  ],
+  "ignore": [
+    "src/routeTree.gen.ts",
+    ".output/**",
+    ".nitro/**"
+  ],
+  "ignoreDependencies": [
+    "@base-ui/react",
+    "tailwindcss",
+    "tw-animate-css",
+    "shadcn",
+    "@fontsource/capriola",
+    "@fontsource/space-mono",
+    "@fontsource/zen-maru-gothic"
+  ]
+}

@@ -1,0 +1,475 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@clerk/ui/themes/shadcn.css";
+@import "./typeset.css";
+/* capriola-latin-400-normal (same-origin, preloaded in root head to avoid swap reflow) */
+@font-face {
+  font-family: 'Capriola';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(/fonts/capriola-latin-400-normal.woff2) format('woff2');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+
+/* inter-latin-wght-normal (variable font 100-900) */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url(/fonts/inter-latin-wght-normal.woff2) format('woff2');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+
+/* space-mono-latin-400-normal */
+@font-face {
+  font-family: 'Space Mono';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(/fonts/space-mono-latin-400-normal.woff2) format('woff2');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+
+/* zen-maru-gothic-japanese-400-normal — unicode-range keeps this out of Latin text rendering */
+@font-face {
+  font-family: 'Zen Maru Gothic';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(/fonts/zen-maru-gothic-japanese-400-normal.woff2) format('woff2');
+  unicode-range: U+3000-30FF,U+3105-312F,U+3130-318F,U+31A0-31BF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+A960-A97F,U+AC00-D7AF,U+F900-FAFF,U+FF00-FFEF,U+1F200-1F2FF;
+}
+
+.typeset-docs {
+  --typeset-font-body: var(--font-sans);
+  --typeset-font-heading: var(--font-sans);
+  --typeset-font-mono: 'Space Mono', monospace;
+  --typeset-size: 15px;
+  --typeset-leading: 1.75;
+  --typeset-flow: 1.25em;
+}
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: 'Capriola', 'Zen Maru Gothic', sans-serif;
+  --font-japanese: 'Zen Maru Gothic', sans-serif;
+  --font-mono: 'Inter', monospace;
+  --font-numeric: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-code: 'Space Mono', monospace;
+  --font-heading: var(--font-sans);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+  --color-destructive-foreground: var(--destructive-foreground);
+}
+
+:root {
+  --card: oklch(1 0.008 88);
+  --card-foreground: oklch(0.19 0.035 255);
+  --popover: oklch(1 0.008 88);
+  --popover-foreground: oklch(0.19 0.035 255);
+  --primary: oklch(0.50 0.17 252);
+  --primary-foreground: oklch(0.985 0.012 88);
+  --secondary: oklch(0.955 0.018 250);
+  --secondary-foreground: oklch(0.25 0.055 250);
+  --muted: oklch(0.965 0.012 255);
+  --muted-foreground: oklch(0.46 0.035 255);
+  --accent: oklch(0.94 0.035 230);
+  --accent-foreground: oklch(0.3 0.075 235);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.9 0.025 255);
+  --input: oklch(0.9 0.025 255);
+  --ring: oklch(0.62 0.15 252);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.985 0.01 88);
+  --sidebar-foreground: oklch(0.19 0.035 255);
+  --sidebar-primary: oklch(0.50 0.17 252);
+  --sidebar-primary-foreground: oklch(0.985 0.012 88);
+  --sidebar-accent: oklch(0.95 0.028 250);
+  --sidebar-accent-foreground: oklch(0.25 0.055 250);
+  --sidebar-border: oklch(0.9 0.025 255);
+  --sidebar-ring: oklch(0.62 0.15 252);
+  --background: oklch(0.985 0.01 88);
+  --foreground: oklch(0.19 0.035 255);
+  --destructive-foreground: var(--color-red-700);
+}
+
+.dark {
+  --background: oklch(0.105 0.008 255);
+  --foreground: oklch(0.965 0.014 88);
+  --card: oklch(0.145 0.012 255);
+  --card-foreground: oklch(0.965 0.014 88);
+  --popover: oklch(0.135 0.012 255);
+  --popover-foreground: oklch(0.965 0.014 88);
+  --primary: oklch(0.70 0.15 250);
+  --primary-foreground: oklch(0.12 0.014 255);
+  --secondary: oklch(0.19 0.018 250);
+  --secondary-foreground: oklch(0.95 0.015 88);
+  --muted: oklch(0.18 0.012 252);
+  --muted-foreground: oklch(0.74 0.035 250);
+  --accent: oklch(0.245 0.05 235);
+  --accent-foreground: oklch(0.95 0.02 230);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(0.95 0.018 255 / 11%);
+  --input: oklch(0.95 0.018 255 / 15%);
+  --ring: oklch(0.68 0.15 250);
+  --chart-1: oklch(0.78 0.14 250);
+  --chart-2: oklch(0.72 0.13 220);
+  --chart-3: oklch(0.82 0.1 85);
+  --chart-4: oklch(0.64 0.12 265);
+  --chart-5: oklch(0.7 0.08 240);
+  --sidebar: oklch(0.12 0.01 255);
+  --sidebar-foreground: oklch(0.965 0.014 88);
+  --sidebar-primary: oklch(0.70 0.15 250);
+  --sidebar-primary-foreground: oklch(0.12 0.014 255);
+  --sidebar-accent: oklch(0.185 0.025 250);
+  --sidebar-accent-foreground: oklch(0.95 0.015 88);
+  --sidebar-border: oklch(0.95 0.018 255 / 11%);
+  --sidebar-ring: oklch(0.68 0.15 250);
+  --destructive-foreground: var(--color-red-400);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply antialiased font-sans;
+    font-optical-sizing: auto;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading);
+    letter-spacing: -0.025em;
+    text-wrap: balance;
+  }
+}
+
+/* Apple Design System Utilities & Micro-Interactions */
+:root {
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-quad: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.glass-surface {
+  background: color-mix(in oklch, var(--background) 75%, transparent);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+}
+
+.glass-surface-heavy {
+  background: color-mix(in oklch, var(--background) 88%, transparent);
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+}
+
+.glass-card {
+  background: color-mix(in oklch, var(--card) 85%, transparent);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid color-mix(in oklch, var(--border) 60%, transparent);
+}
+
+.interactive-press {
+  transition:
+    transform 140ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 140ms ease,
+    background-color 140ms ease;
+}
+
+.interactive-press:active {
+  transform: scale(0.97);
+}
+
+/* Prevent icon boundary truncation across all SVGs and icons */
+svg {
+  overflow: visible;
+}
+
+/* Shimmer Loading Skeleton Animation */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.animate-shimmer::after {
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in oklch, var(--foreground) 5%, transparent) 25%,
+    color-mix(in oklch, var(--foreground) 10%, transparent) 50%,
+    color-mix(in oklch, var(--foreground) 5%, transparent) 75%,
+    transparent 100%
+  );
+  animation: shimmer 2s infinite ease-in-out;
+  content: '';
+}
+
+/* Safe-area insets for notched / home-indicator devices */
+.pb-safe {
+  padding-bottom: max(env(safe-area-inset-bottom), 0.25rem);
+}
+.pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+
+/* Subtle scroll-edge fade for floating chrome overlap */
+.mask-fade-b {
+  -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 3rem), transparent);
+  mask-image: linear-gradient(to bottom, black calc(100% - 3rem), transparent);
+}
+
+/* Grid background pattern for feature/hero sections */
+.bg-grid {
+  background-image:
+    linear-gradient(
+      to right,
+      color-mix(in oklch, var(--foreground) 6%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to bottom,
+      color-mix(in oklch, var(--foreground) 6%, transparent) 1px,
+      transparent 1px
+    );
+  background-size: 3rem 3rem;
+}
+
+/* Soft radial glow utility */
+.glow-primary {
+  background: radial-gradient(
+    circle at center,
+    color-mix(in oklch, var(--primary) 15%, transparent),
+    transparent 70%
+  );
+}
+
+/* Reduced Motion & Transparency Accommodations */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .interactive-press:active {
+    transform: none !important;
+  }
+  .animate-shimmer::after {
+    display: none !important;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass-surface,
+  .glass-surface-heavy,
+  .glass-card {
+    background: var(--background) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+/* TanStack Markdown Alert Callouts */
+.markdown-alert {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  padding: 0.875rem 1rem;
+  border-radius: 0.75rem;
+  border-left-width: 4px;
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.markdown-alert-title {
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+  letter-spacing: -0.01em;
+}
+
+.markdown-alert-note {
+  border-color: color-mix(in oklch, #0284c7 40%, transparent);
+  background-color: color-mix(in oklch, #0284c7 10%, transparent);
+  color: #0284c7;
+}
+
+.markdown-alert-tip {
+  border-color: color-mix(in oklch, #10b981 40%, transparent);
+  background-color: color-mix(in oklch, #10b981 10%, transparent);
+  color: #10b981;
+}
+
+.markdown-alert-important {
+  border-color: color-mix(in oklch, #a855f7 40%, transparent);
+  background-color: color-mix(in oklch, #a855f7 10%, transparent);
+  color: #a855f7;
+}
+
+.markdown-alert-warning {
+  border-color: color-mix(in oklch, #f59e0b 40%, transparent);
+  background-color: color-mix(in oklch, #f59e0b 10%, transparent);
+  color: #f59e0b;
+}
+
+.markdown-alert-caution {
+  border-color: color-mix(in oklch, #f43f5e 40%, transparent);
+  background-color: color-mix(in oklch, #f43f5e 10%, transparent);
+  color: #f43f5e;
+}
+
+.markdown-alert-content {
+  color: var(--foreground);
+  opacity: 0.9;
+  font-weight: 400;
+}
+
+/* TanStack Syntax Highlighting Theme Tokens */
+:root {
+  --th-token: #24292f;
+  --th-attr: #0550ae;
+  --th-code-inline: #953800;
+  --th-command: #8250df;
+  --th-comment: #6e7781;
+  --th-deleted: #82071e;
+  --th-function: #8250df;
+  --th-heading: #0550ae;
+  --th-inserted: #116329;
+  --th-keyword: #cf222e;
+  --th-link: #0969da;
+  --th-literal: #0550ae;
+  --th-meta: #6e7781;
+  --th-number: #0550ae;
+  --th-operator: #0550ae;
+  --th-property: #0550ae;
+  --th-selector: #116329;
+  --th-string: #0a3069;
+  --th-tag: #116329;
+  --th-type: #953800;
+  --th-variable: #953800;
+}
+
+.dark {
+  --th-token: #c9d1d9;
+  --th-attr: #79c0ff;
+  --th-code-inline: #ffa657;
+  --th-command: #d2a8ff;
+  --th-comment: #8b949e;
+  --th-deleted: #ff7b72;
+  --th-function: #d2a8ff;
+  --th-heading: #79c0ff;
+  --th-inserted: #7ee787;
+  --th-keyword: #ff7b72;
+  --th-link: #58a6ff;
+  --th-literal: #79c0ff;
+  --th-meta: #8b949e;
+  --th-number: #79c0ff;
+  --th-operator: #d2a8ff;
+  --th-property: #79c0ff;
+  --th-selector: #7ee787;
+  --th-string: #a5d6ff;
+  --th-tag: #7ee787;
+  --th-type: #ffa657;
+  --th-variable: #ffa657;
+}
+
+.th-token { color: var(--th-token); }
+.th-keyword { color: var(--th-keyword); font-weight: 600; }
+.th-string { color: var(--th-string); }
+.th-comment { color: var(--th-comment); font-style: italic; }
+.th-function { color: var(--th-function); font-weight: 500; }
+.th-type { color: var(--th-type); }
+.th-property { color: var(--th-property); }
+.th-tag { color: var(--th-tag); }
+.th-attr { color: var(--th-attr); }
+.th-literal { color: var(--th-literal); }
+.th-number { color: var(--th-number); }
+.th-variable { color: var(--th-variable); }
+.th-operator { color: var(--th-operator); }
+.th-inserted { color: var(--th-inserted); }
+.th-deleted { color: var(--th-deleted); }
+.th-meta { color: var(--th-meta); }
+.th-heading { color: var(--th-heading); }
+.th-link { color: var(--th-link); }
+.th-code-inline { color: var(--th-code-inline); }
+.th-selector { color: var(--th-selector); }
+.th-command { color: var(--th-command); }
+.th-line { display: inline-block; min-width: 100%; width: max-content; }
+
+/* Numeric and timestamp typography with Inter tabular figures */
+.font-mono,
+time,
+[data-slot="timestamp"],
+[data-slot="date"] {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-feature-settings: "tnum" 1, "cv05" 1, "cv08" 1, "cv11" 1;
+  font-variant-numeric: tabular-nums;
+}

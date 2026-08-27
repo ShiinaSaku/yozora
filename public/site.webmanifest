@@ -1,0 +1,66 @@
+{
+  "id": "/",
+  "name": "Yozora — Anime Discovery & Soundtracks",
+  "short_name": "Yozora",
+  "description": "Discover anime, follow live airing schedules, explore characters, and play opening and ending themes on Yozora.",
+  "lang": "en",
+  "dir": "ltr",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#06070b",
+  "theme_color": "#0b0d14",
+  "categories": ["entertainment", "lifestyle", "music"],
+  "icons": [
+    {
+      "src": "/yozora-icon-48.png",
+      "sizes": "48x48",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/yozora-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/yozora-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/yozora-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Search anime",
+      "short_name": "Search",
+      "description": "Find anime by English, romaji, or native title",
+      "url": "/search?source=shortcut",
+      "icons": [{ "src": "/yozora-icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Seasonal charts",
+      "short_name": "Seasonal",
+      "description": "Browse this season's anime",
+      "url": "/seasonal?source=shortcut",
+      "icons": [{ "src": "/yozora-icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Airing schedule",
+      "short_name": "Airing",
+      "description": "See upcoming episode countdowns",
+      "url": "/airing?source=shortcut",
+      "icons": [{ "src": "/yozora-icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ],
+  "prefer_related_applications": false
+}

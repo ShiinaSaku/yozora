@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
+  <ShortName>Yozora Anime</ShortName>
+  <Description>Search anime by English, romaji, or native title on Yozora</Description>
+  <InputEncoding>UTF-8</InputEncoding>
+  <Image height="48" width="48" type="image/png">https://yozora.moe/hikari-icon-48.png</Image>
+  <Url type="text/html" method="get" template="https://yozora.moe/search?q={searchTerms}" />
+  <Url type="application/opensearchdescription+xml" rel="self" template="https://yozora.moe/opensearch.xml" />
+  <SearchForm>https://yozora.moe/search</SearchForm>
+</OpenSearchDescription>

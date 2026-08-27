@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<browserconfig>
+  <msapplication>
+    <tile>
+      <square150x150logo src="/hikari-icon-192.png" />
+      <square310x310logo src="/hikari-icon-512.png" />
+      <TileColor>#06070b</TileColor>
+    </tile>
+  </msapplication>
+</browserconfig>

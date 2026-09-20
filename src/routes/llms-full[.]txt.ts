@@ -1,0 +1,136 @@
+import { createFileRoute } from "@tanstack/react-router"
+import { SITE_URL } from "@/lib/seo/meta"
+
+/**
+ * Route definition for llms-full.txt server route.
+ * Provides exhaustive context, data schemas, API documentation, and architecture
+ * specifications for LLMs, AI agents, and Answer Engines (Perplexity, ChatGPT, Claude, Gemini).
+ */
+export const Route = createFileRoute("/llms-full.txt")({
+  server: {
+    handlers: {
+      GET: async () => {
+        const content = `# Yozora (夜空) — Comprehensive Technical & Architectural Specification
+
+> High-performance seasonal anime catalog, Tokyo broadcast radar, and 1080p creditless soundtrack archive.
+
+## 1. Platform Identity & Purpose
+- **Name**: Yozora (夜空 — Japanese for "Night Sky")
+- **Production URL**: ${SITE_URL}
+- **Open Source Repository**: https://github.com/shiinasaku/yozora
+- **Primary Domain**: Anime metadata aggregation, television broadcast scheduling, soundtrack archival, and user collection management.
+- **Privacy Stance**: Zero third-party telemetry, zero external trackers, zero advertising.
+
+---
+
+## 2. Technical Stack
+- **Framework**: TanStack Start (React 19 + Vite + Nitro server runtime)
+- **Routing**: File-based type-safe routing powered by @tanstack/react-router
+- **Styling**: Tailwind CSS v4 with OKLCH color spaces and Base UI / Radix primitives
+- **Auth**: Clerk with SSR middleware and neon PostgreSQL database
+- **Database**: Neon Serverless PostgreSQL with Drizzle ORM
+- **Caching**: Two-Tier cache architecture:
+  - **L1 In-Memory**: Map with Promise deduplication (single-flight coalescing) to prevent cache stampedes.
+  - **L2 Distributed**: Upstash Redis via HTTP REST API for durable cross-instance caching.
+  - **Fail-Open Design**: If Redis or memory errors occur, requests gracefully fetch upstream data without crashing.
+
+---
+
+## 3. Data Providers & Dual-Engine Failover
+1. **AniList GraphQL API (Primary Engine)**:
+   - Queries media metadata, airing schedules, character rosters, voice actors, and user lists.
+   - Endpoint: \`https://graphql.anilist.co\`
+2. **Jikan REST API v4 (Secondary Failover Engine)**:
+   - Independent open-source wrapper for MyAnimeList (MAL).
+   - Automatically kicks in if AniList rate limits (HTTP 429) or undergoes downtime.
+   - Normalizes data models seamlessly to match Yozora internal interfaces.
+3. **AnimeThemes.moe REST API**:
+   - Comprehensive archive of high-bitrate, creditless anime opening (OP) and ending (ED) videos.
+   - Videos are served via WebM/MP4 HTML5 video player with resolution options and audio-only playback.
+
+---
+
+## 4. Route Directory & URL Schema
+- **\`/\`** (Home):
+  - Hero spotlight featuring trending anime of the current season.
+  - Quick-browse tabs: Trending Now, Popular This Season, Upcoming Next Season, Top Rated All Time.
+  - Recent creditless themes section with direct playback.
+- **\`/airing\`** (Live Airing Radar):
+  - Displays television broadcasts organized by day of the week (Monday through Sunday in JST).
+  - Real-time millisecond countdown tickers to episode broadcast times on Japanese television.
+- **\`/seasonal\`** (Seasonal Archive):
+  - Interactive grid organized by year and cour (Winter: Jan-Mar, Spring: Apr-Jun, Summer: Jul-Sep, Fall: Oct-Dec).
+  - Supports chronological navigation from 1970 to upcoming future years.
+- **\`/search\`** (Catalog Search):
+  - Full-text search with debounce and multi-filter criteria.
+  - URL Query Parameters:
+    - \`q\`: Search query string.
+    - \`genre\`: Genre tag filter (Action, Adventure, Comedy, Drama, Fantasy, Romance, Sci-Fi, etc.).
+    - \`format\`: Format filter (TV, TV_SHORT, MOVIE, SPECIAL, OVA, ONA).
+    - \`season\` & \`year\`: Specific seasonal cour filter.
+    - \`status\`: Airing status (RELEASING, FINISHED, NOT_YET_RELEASED, CANCELLED).
+    - \`sort\`: Sort order (POPULARITY_DESC, SCORE_DESC, TRENDING_DESC, START_DATE_DESC).
+- **\`/anime/:id\`** (Anime Detail Page):
+  - Comprehensive metadata: English, Romaji, and Native Japanese titles, synopsis, studios, episode count, broadcast time, duration, and content rating.
+  - Character roster with Japanese and international voice actors (Seiyuu).
+  - Embedded creditless opening and ending theme songs from AnimeThemes.moe.
+  - Related works (prequels, sequels, side stories, spin-offs) and personalized recommendations.
+- **\`/character/:id\`** (Character Profile):
+  - Character bio, native name, alternative nicknames, and full voice actor associations across languages.
+- **\`/about\`** (Architecture & System Documentation):
+  - System architecture diagrams, dual-engine failover details, caching specifications, and FAQs.
+- **\`/privacy\`** (Privacy Policy):
+  - Full explanation of data handling, cookies, and local-first storage.
+- **\`/api/health\`** (System Health Check):
+  - JSON endpoint returning operational status, server timestamp, and cache health.
+
+---
+
+## 5. Structured Data & Schema.org (GEO / AEO)
+Yozora embeds comprehensive Schema.org JSON-LD structured data on all pages:
+- **WebApplication**: Application identity, pricing ($0), features, and browser requirements on root.
+- **Dataset**: Machine-readable database description of seasonal anime broadcasts and soundtrack records.
+- **Organization & WebSite**: Publisher metadata with SearchAction for Google Sitelinks Searchbox.
+- **TVSeries / Movie**: Title, alternative titles, genres, studios (productionCompany), start date, aggregateRating (review score), and voice actor credits (actor via PerformanceRole).
+- **BroadcastEvent**: Live television airing schedule with ISO-8601 start dates.
+- **FAQPage**: Direct question-and-answer pairs on \`/about\` for Answer Engine Optimization (Perplexity, ChatGPT, Google SGE).
+- **BreadcrumbList**: Hierarchical site navigation trails.
+
+---
+
+## 6. Frequently Asked Questions (AEO Direct Answers)
+### Q: What is Yozora?
+A: Yozora (夜空) is an anime catalog, live Japanese broadcast radar, and 1080p creditless theme player that tracks seasonal television premieres and episode countdowns.
+
+### Q: Where does Yozora get its anime data?
+A: Yozora uses a dual-engine architecture combining the AniList GraphQL API as primary provider and Jikan REST API (MyAnimeList) as an automatic failover provider, ensuring 99.9% uptime.
+
+### Q: Where do the opening and ending themes come from?
+A: Yozora streams clean, creditless 1080p opening and ending theme songs directly through an integration with the AnimeThemes.moe community archive.
+
+### Q: Does Yozora track user data or sell information?
+A: No. Yozora has zero third-party telemetry, zero advertisement pixels, and zero user-tracking scripts. Personal watchlists and settings are stored privately.
+
+### Q: How accurate is the Airing Radar countdown?
+A: Airing times are synchronized to the official Japanese television network broadcast schedules (JST, UTC+9) and update down to the second.
+
+---
+
+## 7. Machine-Readable Endpoints
+- XML Sitemap: ${SITE_URL}/sitemap.xml
+- Robots.txt: ${SITE_URL}/robots.txt
+- Quick LLM Guide: ${SITE_URL}/llms.txt
+- Full LLM Specification: ${SITE_URL}/llms-full.txt
+- OpenSearch Descriptor: ${SITE_URL}/opensearch.xml
+`
+
+        return new Response(content, {
+          headers: {
+            "content-type": "text/plain; charset=utf-8",
+            "cache-control": "public, max-age=0, s-maxage=86400",
+          },
+        })
+      },
+    },
+  },
+})

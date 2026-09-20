@@ -1,6 +1,6 @@
 <div align="center">
 
-# Yozora (夜空)
+# Yozora
 
 **The modern anime discovery engine, broadcast radar, and theme song player.**
 

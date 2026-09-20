@@ -4,7 +4,7 @@
 
 **The modern anime discovery engine, broadcast radar, and theme song player.**
 
-[Live Application](https://yozora.moe) · [Report Bug](https://github.com/sakshxr/yozora/issues) · [Feature Request](https://github.com/sakshxr/yozora/issues)
+[Live Application](https://yozora.moe) · [Report Bug](https://github.com/shiinasaku/yozora/issues) · [Feature Request](https://github.com/shiinasaku/yozora/issues)
 
 <br />
 
@@ -45,7 +45,7 @@ Yozora is a fast, modern anime web platform designed for discovering seasonal re
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/sakshxr/yozora.git
+git clone https://github.com/shiinasaku/yozora.git
 cd yozora
 ```
 

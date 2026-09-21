@@ -6,6 +6,7 @@ import { AnimeDetailSidebar } from "@/components/anime/anime-detail-sidebar"
 import { AnimeDetailTrailer } from "@/components/anime/anime-detail-trailer"
 import { SaveDialog } from "@/components/anime/save-dialog"
 import { ThemePlayer } from "@/components/anime/theme-player"
+import { TrailerDialog } from "@/components/anime/trailer-dialog"
 import { MarkdownRenderer } from "@/components/ui/markdown-renderer"
 import type { Anime, AnimeDetailResponse, AnimeTheme } from "@/lib/types/anime"
 
@@ -14,17 +15,11 @@ interface AnimeDetailClientProps {
   themes: AnimeTheme[]
 }
 
-function scrollToTrailer() {
-  const el = document.getElementById("trailer")
-  if (el) {
-    el.scrollIntoView({ behavior: "smooth" })
-  }
-}
-
 export function AnimeDetailClient({ detail, themes }: AnimeDetailClientProps) {
   const { anime, characters, relations, recommendations, externalLinks } =
     detail
   const [saveOpen, setSaveOpen] = React.useState(false)
+  const [trailerOpen, setTrailerOpen] = React.useState(false)
   const [selectedForSave, setSelectedForSave] = React.useState<Anime | null>(
     null
   )
@@ -39,7 +34,7 @@ export function AnimeDetailClient({ detail, themes }: AnimeDetailClientProps) {
       <AnimeDetailHero
         anime={anime}
         onSaveClick={() => handleOpenSave(anime)}
-        onTrailerClick={anime.trailer ? scrollToTrailer : undefined}
+        onTrailerClick={anime.trailer ? () => setTrailerOpen(true) : undefined}
       />
 
       <div className="container mx-auto grid max-w-7xl grid-cols-1 gap-10 px-4 sm:px-6 lg:grid-cols-3">
@@ -54,7 +49,11 @@ export function AnimeDetailClient({ detail, themes }: AnimeDetailClientProps) {
           )}
 
           {anime.trailer && (
-            <AnimeDetailTrailer trailer={anime.trailer} title={anime.title} />
+            <AnimeDetailTrailer
+              trailer={anime.trailer}
+              title={anime.title}
+              onOpenCinema={() => setTrailerOpen(true)}
+            />
           )}
 
           {themes.length > 0 && (
@@ -110,6 +109,13 @@ export function AnimeDetailClient({ detail, themes }: AnimeDetailClientProps) {
         anime={selectedForSave}
         open={saveOpen}
         onOpenChange={setSaveOpen}
+      />
+
+      <TrailerDialog
+        trailer={anime.trailer}
+        title={anime.title}
+        open={trailerOpen}
+        onOpenChange={setTrailerOpen}
       />
     </div>
   )

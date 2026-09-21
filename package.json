@@ -45,6 +45,7 @@
     "hono": "^4.13.8",
     "loomix": "^1.1.1",
     "lucide-react": "^1.47.0",
+    "media-chrome": "^4.19.2",
     "motion": "^13.4.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
@@ -60,7 +61,7 @@
   "devDependencies": {
     "@antfu/eslint-config": "^9.5.1",
     "@cloudflare/vite-plugin": "^1.56.0",
-    "@eslint-react/eslint-plugin": "^5.20.0",
+    "@eslint-react/eslint-plugin": "^5.20.1",
     "@tailwindcss/vite": "4.3.3",
     "@tanstack/devtools-vite": "^0.8.5",
     "@tanstack/eslint-config": "^0.4.0",

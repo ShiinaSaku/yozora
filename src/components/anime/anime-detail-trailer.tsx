@@ -2,12 +2,13 @@ import { HugeiconsIcon } from "@hugeicons/react"
 import { Video02Icon } from "@hugeicons/core-free-icons"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { YouTubeIcon } from "@/components/icons/platform-icons"
-import { Video } from "@/components/ui/video"
+import { YouTubePlayer } from "@/components/ui/youtube-video-player"
 import type { AnimeTrailer } from "@/lib/types/anime"
 
 interface AnimeDetailTrailerProps {
   trailer?: AnimeTrailer | null
   title: string
+  onOpenCinema?: () => void
 }
 
 export function AnimeDetailTrailer({
@@ -42,11 +43,11 @@ export function AnimeDetailTrailer({
       </CardHeader>
 
       <CardContent className="p-3 sm:p-6">
-        <Video
-          youtubeId={trailer.id}
-          poster={fallbackThumbnail}
+        <YouTubePlayer
+          videoId={trailer.id}
           title={`${title} - Official Trailer`}
-          ambient={true}
+          customThumbnail={fallbackThumbnail}
+          className="w-full"
         />
       </CardContent>
     </Card>

@@ -102,7 +102,7 @@ export function SaveDialog({ anime, open, onOpenChange }: SaveDialogProps) {
         if (!anime?.id || !isSignedIn) return null
         const res = await fetch(`/api/entries/${anime.id}`)
         if (!res.ok) return null
-        const json = await res.json<{ data?: AnimeEntry }>()
+        const json: { data?: AnimeEntry } = await res.json()
         return json.data || null
       },
       enabled: !!anime?.id && isSignedIn && open,
@@ -449,7 +449,8 @@ function SaveForm({
         }),
       })
       if (!res.ok) throw new Error("Failed to save")
-      return await res.json<{ data?: AnimeEntry }>()
+      const json: { data?: AnimeEntry } = await res.json()
+      return json
     },
     onSuccess: () => {
       toast.success(existingEntry ? "Library Updated" : "Added to Library", {
@@ -470,7 +471,8 @@ function SaveForm({
     mutationFn: async () => {
       const res = await fetch(`/api/entries/${anime.id}`, { method: "DELETE" })
       if (!res.ok) throw new Error("Failed to delete")
-      return await res.json<{ success?: boolean }>()
+      const json: { success?: boolean } = await res.json()
+      return json
     },
     onSuccess: () => {
       toast.success("Removed from Library", {

@@ -111,11 +111,7 @@ export function ShareMenu({
         {showLabel && <span>{label}</span>}
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent
-        align={align}
-        alignOffset={0}
-        sideOffset={6}
-      >
+      <DropdownMenuContent align={align} alignOffset={0} sideOffset={6}>
         <DropdownMenuItem
           onClick={() => {
             void copyText(absoluteUrl).then((copied) => {

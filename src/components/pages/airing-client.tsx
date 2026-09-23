@@ -156,9 +156,7 @@ export function AiringClient({
                     className="object-cover"
                   />
                   <div className="absolute top-1.5 left-1.5">
-                    <Badge variant="overlay">
-                      EP {item.episode}
-                    </Badge>
+                    <Badge variant="overlay">EP {item.episode}</Badge>
                   </div>
                 </div>
 

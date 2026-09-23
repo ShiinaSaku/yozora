@@ -454,7 +454,7 @@ async function executeJikanFetch<T>(path: string): Promise<T> {
       }
       let errMessage = `Jikan returned status ${res.status}`
       try {
-        const errorJson = await res.json<JikanApiResponse<never>>()
+        const errorJson: JikanApiResponse<never> = await res.json()
         errMessage = errorJson.message || errMessage
       } catch {}
       throw new JikanUpstreamError(
@@ -463,7 +463,7 @@ async function executeJikanFetch<T>(path: string): Promise<T> {
       )
     }
 
-    const json = await res.json<JikanApiResponse<T>>()
+    const json: JikanApiResponse<T> = await res.json()
     if (json.status && json.status >= 400) {
       throw new JikanUpstreamError(
         json.message || "Jikan API error",

@@ -163,7 +163,7 @@ export async function getAnimeThemes(
         return result
       }
 
-      const payload = await res.json<AnimeThemesRestResponse>()
+      const payload: AnimeThemesRestResponse = await res.json()
       const match = payload.anime?.[0]
       if (!match || !match.animethemes) {
         const result: AnimeThemesResponse = { animeId, themes: [] }

@@ -37,8 +37,7 @@ export const linkVariants = cva("", {
         "inline-flex h-10 items-center justify-start gap-3 rounded-xl bg-secondary px-3 font-semibold text-secondary-foreground shadow-xs",
       "nav-icon":
         "flex min-w-0 flex-1 flex-col items-center justify-center rounded-xl px-0.5 py-1 text-muted-foreground transition-colors hover:text-foreground",
-      brand:
-        "group flex shrink-0 items-center gap-2.5 sm:gap-3",
+      brand: "group flex shrink-0 items-center gap-2.5 sm:gap-3",
     },
   },
   defaultVariants: {

@@ -176,7 +176,7 @@ export function ProfileSettingsClient({
       if (!res.ok) {
         return null
       }
-      const json = await res.json<{ data: ProfileState }>()
+      const json: { data: ProfileState } = await res.json()
       return json.data
     },
     enabled: !!isSignedIn,
@@ -262,10 +262,10 @@ export function ProfileSettingsClient({
         }),
       })
 
-      const json = await res.json<{
+      const json: {
         data: ProfileState
         error?: string
-      }>()
+      } = await res.json()
       if (!res.ok) {
         throw new Error(json.error || "Failed to update profile")
       }
@@ -720,7 +720,9 @@ function ProfileAppearanceCard() {
 
       <CardContent>
         <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-          <span className="text-sm font-medium text-foreground">Theme Mode</span>
+          <span className="text-sm font-medium text-foreground">
+            Theme Mode
+          </span>
           <ThemeSegmentedToggle />
         </div>
       </CardContent>
@@ -759,7 +761,7 @@ function PinnedAnimeCard({
         `/api/catalog/search?q=${encodeURIComponent(debounced)}`
       )
       if (!res.ok) return []
-      const json = await res.json<{ data: PinnedSearchResult[] }>()
+      const json: { data: PinnedSearchResult[] } = await res.json()
       return json.data.slice(0, 6)
     },
     enabled: debounced.length >= 2,
@@ -771,7 +773,7 @@ function PinnedAnimeCard({
       if (pinnedIds.length === 0) return []
       const res = await fetch(`/api/catalog/batch?ids=${pinnedIds.join(",")}`)
       if (!res.ok) return []
-      const json = await res.json<{ data: PinnedSearchResult[] }>()
+      const json: { data: PinnedSearchResult[] } = await res.json()
       return json.data
     },
     enabled: pinnedIds.length > 0,
@@ -842,7 +844,9 @@ function PinnedAnimeCard({
 
           {pinnedIds.length < MAX_PINS && (
             <Field>
-              <FieldLabel htmlFor="pinned-search">Search anime to pin</FieldLabel>
+              <FieldLabel htmlFor="pinned-search">
+                Search anime to pin
+              </FieldLabel>
               <div className="relative">
                 <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -857,52 +861,52 @@ function PinnedAnimeCard({
             </Field>
           )}
 
-        {debounced.length >= 2 && pinnedIds.length < MAX_PINS && (
-          <div className="divide-y divide-border/40 overflow-hidden rounded-xl border border-border/50 bg-background/60">
-            {isFetching && results.length === 0 && (
-              <div className="flex items-center gap-2 p-3 text-xs text-muted-foreground">
-                <Loader2 className="size-3.5 animate-spin" />
-                Searching…
-              </div>
-            )}
-            {!isFetching && results.length === 0 && (
-              <div className="p-3 text-xs text-muted-foreground">
-                No results found.
-              </div>
-            )}
-            {results.map((result) => (
-              <button
-                key={result.id}
-                type="button"
-                onClick={() => addPin(result.id)}
-                disabled={pinnedIds.includes(result.id)}
-                className="flex w-full cursor-pointer items-center gap-3 p-2 text-left transition-colors hover:bg-muted/40 disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                <div className="relative size-10 shrink-0 overflow-hidden rounded-md bg-muted">
-                  {(result.coverMedium || result.cover) && (
-                    <Image
-                      src={result.coverMedium || result.cover}
-                      alt={result.title}
-                      fill
-                      unoptimized
-                      sizes="40px"
-                      className="object-cover"
-                    />
-                  )}
+          {debounced.length >= 2 && pinnedIds.length < MAX_PINS && (
+            <div className="divide-y divide-border/40 overflow-hidden rounded-xl border border-border/50 bg-background/60">
+              {isFetching && results.length === 0 && (
+                <div className="flex items-center gap-2 p-3 text-xs text-muted-foreground">
+                  <Loader2 className="size-3.5 animate-spin" />
+                  Searching…
                 </div>
-                <span className="min-w-0 flex-1 truncate text-xs font-semibold text-foreground">
-                  {result.title}
-                  {result.year ? (
-                    <span className="ml-1.5 font-normal text-muted-foreground">
-                      ({result.year})
-                    </span>
-                  ) : null}
-                </span>
-                <Plus className="size-4 shrink-0 text-muted-foreground" />
-              </button>
-            ))}
-          </div>
-        )}
+              )}
+              {!isFetching && results.length === 0 && (
+                <div className="p-3 text-xs text-muted-foreground">
+                  No results found.
+                </div>
+              )}
+              {results.map((result) => (
+                <button
+                  key={result.id}
+                  type="button"
+                  onClick={() => addPin(result.id)}
+                  disabled={pinnedIds.includes(result.id)}
+                  className="flex w-full cursor-pointer items-center gap-3 p-2 text-left transition-colors hover:bg-muted/40 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <div className="relative size-10 shrink-0 overflow-hidden rounded-md bg-muted">
+                    {(result.coverMedium || result.cover) && (
+                      <Image
+                        src={result.coverMedium || result.cover}
+                        alt={result.title}
+                        fill
+                        unoptimized
+                        sizes="40px"
+                        className="object-cover"
+                      />
+                    )}
+                  </div>
+                  <span className="min-w-0 flex-1 truncate text-xs font-semibold text-foreground">
+                    {result.title}
+                    {result.year ? (
+                      <span className="ml-1.5 font-normal text-muted-foreground">
+                        ({result.year})
+                      </span>
+                    ) : null}
+                  </span>
+                  <Plus className="size-4 shrink-0 text-muted-foreground" />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
@@ -919,12 +923,13 @@ function DangerZoneCard() {
     mutationFn: async () => {
       const res = await fetch("/api/user/data", { method: "DELETE" })
       if (!res.ok) {
-        const json = await res.json<{ error?: string }>()
+        const json: { error?: string } = await res.json()
         throw new Error(json.error || "Failed to delete data")
       }
-      return await res.json<{
+      const data: {
         data: { deletedEntries: number; deletedCollections: number }
-      }>()
+      } = await res.json()
+      return data
     },
     onSuccess: ({ data }) => {
       toast.success("All Data Deleted", {

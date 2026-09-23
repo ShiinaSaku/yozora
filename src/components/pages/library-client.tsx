@@ -35,10 +35,10 @@ export function LibraryClient({
       if (!res.ok) {
         return { entries: [], anime: [] }
       }
-      const json = await res.json<{
+      const json: {
         data?: AnimeEntry[]
         anime?: Anime[]
-      }>()
+      } = await res.json()
       return {
         entries: json.data || [],
         anime: json.anime || [],
@@ -68,7 +68,8 @@ export function LibraryClient({
       if (!res.ok) {
         throw new Error("Failed to increment")
       }
-      return await res.json<{ data?: AnimeEntry }>()
+      const json: { data?: AnimeEntry } = await res.json()
+      return json
     },
     onSuccess: (data) => {
       const entry = data.data

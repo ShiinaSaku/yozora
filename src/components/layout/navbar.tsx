@@ -94,100 +94,97 @@ function NavbarMobileSheet({
         <Menu data-icon="inline-start" className="size-5" />
         <span className="sr-only">Open navigation menu</span>
       </SheetTrigger>
-      <SheetContent
-        side="left"
-        className="w-72 sm:w-80"
-      >
+      <SheetContent side="left" className="w-72 sm:w-80">
         <div className="flex flex-col gap-6 p-6">
           <SheetHeader className="text-left">
-          <div className="flex items-center gap-3">
-            <BrandLogo className="size-8" />
-            <span className="text-base leading-none font-black tracking-tight text-foreground">
-              Yozora
-            </span>
-          </div>
-          <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-          <SheetDescription className="sr-only">
-            Navigate through Yozora anime showcase, charts, soundtracks, and
-            personal library.
-          </SheetDescription>
-        </SheetHeader>
+            <div className="flex items-center gap-3">
+              <BrandLogo className="size-8" />
+              <span className="text-base leading-none font-black tracking-tight text-foreground">
+                Yozora
+              </span>
+            </div>
+            <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+            <SheetDescription className="sr-only">
+              Navigate through Yozora anime showcase, charts, soundtracks, and
+              personal library.
+            </SheetDescription>
+          </SheetHeader>
 
-        <nav
-          aria-label="Sidebar mobile navigation"
-          className="flex flex-col gap-2"
-        >
-          <div className="px-2 text-xs font-bold tracking-wider text-muted-foreground/70 uppercase">
-            Discover
-          </div>
-          {navLinks.map((link) => {
-            if (link.auth && !isSignedIn) return null
-            const isActive = pathname === link.href
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => onOpenChange(false)}
-                variant={isActive ? "nav-link-active" : "nav-link"}
-              >
-                <HugeiconsIcon
-                  icon={link.icon}
-                  size={18}
-                  strokeWidth={2}
-                  data-icon="inline-start"
-                />
-                <span>{link.label}</span>
-              </Link>
-            )
-          })}
-
-          <div className="px-2 pt-3 text-xs font-bold tracking-wider text-muted-foreground/70 uppercase">
-            Platform
-          </div>
-          <Link
-            href="/about"
-            onClick={() => onOpenChange(false)}
-            variant={pathname === "/about" ? "nav-link-active" : "nav-link"}
+          <nav
+            aria-label="Sidebar mobile navigation"
+            className="flex flex-col gap-2"
           >
-            <HugeiconsIcon
-              icon={Video02Icon}
-              size={18}
-              strokeWidth={2}
-              data-icon="inline-start"
-            />
-            <span>About Yozora</span>
-          </Link>
+            <div className="px-2 text-xs font-bold tracking-wider text-muted-foreground/70 uppercase">
+              Discover
+            </div>
+            {navLinks.map((link) => {
+              if (link.auth && !isSignedIn) return null
+              const isActive = pathname === link.href
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => onOpenChange(false)}
+                  variant={isActive ? "nav-link-active" : "nav-link"}
+                >
+                  <HugeiconsIcon
+                    icon={link.icon}
+                    size={18}
+                    strokeWidth={2}
+                    data-icon="inline-start"
+                  />
+                  <span>{link.label}</span>
+                </Link>
+              )
+            })}
 
-          {isSignedIn && (
+            <div className="px-2 pt-3 text-xs font-bold tracking-wider text-muted-foreground/70 uppercase">
+              Platform
+            </div>
             <Link
-              href="/settings/profile"
+              href="/about"
               onClick={() => onOpenChange(false)}
-              variant="nav-link"
+              variant={pathname === "/about" ? "nav-link-active" : "nav-link"}
             >
               <HugeiconsIcon
-                icon={UserIcon}
+                icon={Video02Icon}
                 size={18}
                 strokeWidth={2}
                 data-icon="inline-start"
               />
-              <span>Profile Settings</span>
+              <span>About Yozora</span>
             </Link>
-          )}
 
-          {!isSignedIn && (
-            <div className="mt-4 flex flex-col gap-3 rounded-2xl border border-border/50 bg-muted/30 p-4">
-              <p className="text-xs leading-relaxed text-muted-foreground">
-                Sign in to track your watchlist, rate anime, and build custom
-                collections.
-              </p>
-              <SignInButton mode="modal">
-                <Button size="sm" className="w-full">
-                  Sign In / Sign Up
-                </Button>
-              </SignInButton>
-            </div>
-          )}
-        </nav>
+            {isSignedIn && (
+              <Link
+                href="/settings/profile"
+                onClick={() => onOpenChange(false)}
+                variant="nav-link"
+              >
+                <HugeiconsIcon
+                  icon={UserIcon}
+                  size={18}
+                  strokeWidth={2}
+                  data-icon="inline-start"
+                />
+                <span>Profile Settings</span>
+              </Link>
+            )}
+
+            {!isSignedIn && (
+              <div className="mt-4 flex flex-col gap-3 rounded-2xl border border-border/50 bg-muted/30 p-4">
+                <p className="text-xs leading-relaxed text-muted-foreground">
+                  Sign in to track your watchlist, rate anime, and build custom
+                  collections.
+                </p>
+                <SignInButton mode="modal">
+                  <Button size="sm" className="w-full">
+                    Sign In / Sign Up
+                  </Button>
+                </SignInButton>
+              </div>
+            )}
+          </nav>
         </div>
       </SheetContent>
     </Sheet>
@@ -208,7 +205,9 @@ function NavbarDesktopMenu({
       <NavigationMenu>
         <NavigationMenuList>
           <NavigationMenuItem>
-            <NavigationMenuTrigger variant={isDiscoverActive ? "nav-active" : "nav"}>
+            <NavigationMenuTrigger
+              variant={isDiscoverActive ? "nav-active" : "nav"}
+            >
               <HugeiconsIcon
                 icon={Compass01Icon}
                 size={15}
@@ -221,7 +220,11 @@ function NavbarDesktopMenu({
               <div className="grid w-105 grid-cols-2 gap-2 p-1">
                 <NavigationMenuLink
                   render={
-                    <Link href="/" variant="nav-item" aria-label="Explore Showcase">
+                    <Link
+                      href="/"
+                      variant="nav-item"
+                      aria-label="Explore Showcase"
+                    >
                       <div className="flex items-center gap-2 text-xs font-bold text-foreground transition-colors group-hover:text-primary">
                         <HugeiconsIcon
                           icon={Compass01Icon}
@@ -240,7 +243,11 @@ function NavbarDesktopMenu({
 
                 <NavigationMenuLink
                   render={
-                    <Link href="/seasonal" variant="nav-item" aria-label="Seasonal Anime Charts">
+                    <Link
+                      href="/seasonal"
+                      variant="nav-item"
+                      aria-label="Seasonal Anime Charts"
+                    >
                       <div className="flex items-center gap-2 text-xs font-bold text-foreground transition-colors group-hover:text-primary">
                         <HugeiconsIcon
                           icon={Calendar03Icon}
@@ -259,7 +266,11 @@ function NavbarDesktopMenu({
 
                 <NavigationMenuLink
                   render={
-                    <Link href="/airing" variant="nav-item" aria-label="Airing Anime Today">
+                    <Link
+                      href="/airing"
+                      variant="nav-item"
+                      aria-label="Airing Anime Today"
+                    >
                       <div className="flex items-center gap-2 text-xs font-bold text-foreground transition-colors group-hover:text-primary">
                         <HugeiconsIcon
                           icon={RadioIcon}
@@ -308,7 +319,9 @@ function NavbarDesktopMenu({
                 render={
                   <Link
                     href="/library"
-                    variant={pathname === "/library" ? "nav-link-active" : "nav-link"}
+                    variant={
+                      pathname === "/library" ? "nav-link-active" : "nav-link"
+                    }
                     aria-label="My Library & Watchlist"
                   >
                     <HugeiconsIcon
@@ -389,30 +402,19 @@ function NavbarAuthControls({
     <div className="flex items-center gap-1.5 sm:gap-2">
       <div className="sm:hidden">
         <SignInButton mode="modal">
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="Sign in"
-          >
+          <Button variant="ghost" size="icon" aria-label="Sign in">
             <HugeiconsIcon icon={UserIcon} size={17} strokeWidth={2} />
           </Button>
         </SignInButton>
       </div>
       <div className="hidden sm:flex sm:items-center sm:gap-2">
         <SignInButton mode="modal">
-          <Button
-            variant="ghost"
-            size="sm"
-          >
+          <Button variant="ghost" size="sm">
             Sign In
           </Button>
         </SignInButton>
         <SignUpButton mode="modal">
-          <Button
-            size="sm"
-          >
-            Sign Up
-          </Button>
+          <Button size="sm">Sign Up</Button>
         </SignUpButton>
       </div>
     </div>
@@ -443,11 +445,7 @@ function NavbarMobileBottomBar({
         const isActive = pathname === link.href
 
         return (
-          <Link
-            key={link.href}
-            href={link.href}
-            variant="nav-icon"
-          >
+          <Link key={link.href} href={link.href} variant="nav-icon">
             <div
               className={`flex size-7 items-center justify-center rounded-lg ${isActive ? "text-primary" : ""}`}
             >
@@ -483,10 +481,7 @@ function NavbarMobileBottomBar({
       </button>
 
       {isSignedIn && (
-        <Link
-          href="/settings/profile"
-          variant="nav-icon"
-        >
+        <Link href="/settings/profile" variant="nav-icon">
           <div
             className={`flex size-7 items-center justify-center rounded-lg ${pathname === "/settings/profile" ? "text-primary" : ""}`}
           >
@@ -575,10 +570,7 @@ export function Navbar() {
               isSignedIn={Boolean(isSignedIn)}
             />
 
-            <Link
-              href="/"
-              variant="brand"
-            >
+            <Link href="/" variant="brand">
               <BrandLogo className="size-9 transition-transform duration-200 group-hover:scale-105" />
               <span className="hidden text-lg leading-none font-black tracking-tight text-foreground sm:inline-block">
                 Yozora

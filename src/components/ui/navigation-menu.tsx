@@ -64,7 +64,7 @@ export const navigationMenuTriggerVariants = cva(
       variant: {
         default:
           "rounded-2xl px-4.5 py-2.5 text-sm font-medium hover:bg-muted focus:bg-muted data-popup-open:bg-muted/50 data-popup-open:hover:bg-muted data-open:bg-muted/50 data-open:hover:bg-muted data-open:focus:bg-muted",
-        nav: "gap-1.5 rounded-xl px-3 text-xs font-semibold text-muted-foreground hover:text-foreground sm:text-sm data-popup-open:bg-secondary/70 data-popup-open:text-foreground data-open:bg-secondary/70 data-open:text-foreground",
+        nav: "gap-1.5 rounded-xl px-3 text-xs font-semibold text-muted-foreground hover:text-foreground data-popup-open:bg-secondary/70 data-popup-open:text-foreground sm:text-sm data-open:bg-secondary/70 data-open:text-foreground",
         "nav-active":
           "gap-1.5 rounded-xl bg-secondary/70 px-3 text-xs font-semibold text-foreground sm:text-sm",
       },
@@ -87,7 +87,11 @@ function NavigationMenuTrigger({
   return (
     <NavigationMenuPrimitive.Trigger
       data-slot="navigation-menu-trigger"
-      className={cn(navigationMenuTriggerVariants({ variant }), "group", className)}
+      className={cn(
+        navigationMenuTriggerVariants({ variant }),
+        "group",
+        className
+      )}
       {...props}
     >
       {children}{" "}

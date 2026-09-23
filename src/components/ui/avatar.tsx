@@ -48,8 +48,7 @@ export const avatarFallbackVariants = cva(
       variant: {
         default:
           "rounded-full bg-muted text-muted-foreground group-data-[size=sm]/avatar:text-xs",
-        profile:
-          "rounded-2xl bg-primary/10 text-3xl font-black text-primary",
+        profile: "rounded-2xl bg-primary/10 text-3xl font-black text-primary",
       },
     },
     defaultVariants: {

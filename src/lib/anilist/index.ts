@@ -501,7 +501,7 @@ async function executeAniListFetch<T>(
     if (!res.ok) {
       let upstreamMessage = `AniList returned status ${res.status}`
       try {
-        const errorResponse = await res.json<AniListResponse<never>>()
+        const errorResponse: AniListResponse<never> = await res.json()
         upstreamMessage = errorResponse.errors?.[0]?.message || upstreamMessage
       } catch {
         // Preserve the status-only message when the upstream body is not JSON.
@@ -525,7 +525,7 @@ async function executeAniListFetch<T>(
       )
     }
 
-    const response = await res.json<AniListResponse<T>>()
+    const response: AniListResponse<T> = await res.json()
     const apiErrors = response.errors
 
     if (apiErrors && apiErrors.length > 0) {

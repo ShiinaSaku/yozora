@@ -109,9 +109,7 @@ function ProfileHeader({ profile }: { profile: UserProfile }) {
               <h1 className="text-2xl font-black tracking-tight text-foreground sm:text-3xl md:text-4xl">
                 {profile.displayName}
               </h1>
-              <Badge variant="subtle">
-                PRO Curator
-              </Badge>
+              <Badge variant="subtle">PRO Curator</Badge>
             </div>
 
             <p className="mt-0.5 font-mono text-sm text-muted-foreground">
@@ -162,11 +160,7 @@ function ProfileHeader({ profile }: { profile: UserProfile }) {
             </a>
           )}
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={copyProfileLink}
-          >
+          <Button variant="outline" size="sm" onClick={copyProfileLink}>
             {copied ? (
               <>
                 <Check className="size-3.5 text-emerald-500" />
@@ -267,9 +261,7 @@ function ProfileStatsGrid({
         <div className="flex items-center justify-between text-xs">
           <div className="flex items-center gap-2">
             <span className="font-bold text-foreground">Completion Rate</span>
-            <Badge variant="tag">
-              {completedPercent}%
-            </Badge>
+            <Badge variant="tag">{completedPercent}%</Badge>
           </div>
           <div className="flex items-center gap-4 font-mono text-xs text-muted-foreground">
             <span className="flex items-center gap-1.5">
@@ -329,7 +321,7 @@ function PinnedShowcase({
     queryFn: async () => {
       const res = await fetch(`/api/catalog/batch?ids=${pinnedIds.join(",")}`)
       if (!res.ok) return []
-      const json = await res.json<{ data: Anime[] }>()
+      const json: { data: Anime[] } = await res.json()
       // Preserve the user's chosen pin order
       return pinnedIds
         .map((id) => json.data.find((a) => a.id === id))
@@ -635,12 +627,12 @@ export function UserProfileClient({ handle, initialData }: ProfileClientProps) {
     queryFn: async () => {
       const res = await fetch(`/api/user/profile/${handle}`)
       if (!res.ok) throw new Error("User not found")
-      const json = await res.json<{
+      const json: {
         data: {
           profile: UserProfile
           stats: UserStats
         }
-      }>()
+      } = await res.json()
       return json.data
     },
     initialData: {
@@ -654,10 +646,10 @@ export function UserProfileClient({ handle, initialData }: ProfileClientProps) {
     queryFn: async () => {
       const res = await fetch(`/api/entries/user/${handle}?include=anime`)
       if (!res.ok) return { entries: [], anime: [] }
-      const json = await res.json<{
+      const json: {
         data?: AnimeEntry[]
         anime?: Anime[]
-      }>()
+      } = await res.json()
       return {
         entries: json.data || [],
         anime: json.anime || [],

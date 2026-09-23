@@ -77,14 +77,14 @@ function SearchPage() {
 
   return (
     <div className="container mx-auto flex max-w-7xl flex-col gap-8 px-4 py-10 sm:px-6 sm:py-14">
-      <section className="relative overflow-hidden rounded-3xl border border-border/60 bg-[radial-gradient(circle_at_85%_10%,rgba(167,139,250,.16),transparent_42%),linear-gradient(135deg,rgba(17,25,54,.96),rgba(60,40,84,.92))] px-5 py-8 text-white shadow-xl sm:px-10 sm:py-11">
+      <section className="search-hero-bg relative overflow-hidden rounded-3xl border border-border/60 px-5 py-8 text-white shadow-xl sm:px-10 sm:py-11">
         <div className="relative z-10 flex max-w-3xl flex-col gap-5">
-          <div className="flex items-center gap-2 font-mono text-[10px] font-bold tracking-[0.18em] text-rose-200 uppercase">
+          <div className="flex items-center gap-2 font-mono text-xs font-bold tracking-widest text-rose-200 uppercase">
             <Compass className="size-3.5" />
             Yozora anime search
           </div>
           <div className="flex flex-col gap-2">
-            <h1 className="text-3xl font-black tracking-tight text-[#fff9e9] sm:text-4xl">
+            <h1 className="text-3xl font-black tracking-tight text-cream-light sm:text-4xl">
               {hasQuery ? `Results for “${query}”` : "Find your next story"}
             </h1>
             <p className="max-w-2xl text-sm leading-relaxed text-white/65">
@@ -112,13 +112,11 @@ function SearchPage() {
                 autoComplete="off"
                 placeholder="Try “Cowboy Bebop” or “Sousou no Frieren”"
                 aria-label="Search anime"
-                className="h-11 rounded-xl border-white/15 bg-black/20 pl-10 text-sm text-white shadow-none placeholder:text-white/35 focus-visible:border-rose-200/50 focus-visible:ring-rose-200/20"
+                variant="glass"
+                size="search"
               />
             </div>
-            <Button
-              type="submit"
-              className="h-11 rounded-xl bg-[#fff0d2] px-5 font-bold text-[#161a35] hover:bg-white"
-            >
+            <Button type="submit" variant="cream" className="h-11">
               Search anime
             </Button>
           </form>
@@ -134,7 +132,7 @@ function SearchPage() {
             <Link
               key={item}
               href={`/search?q=${encodeURIComponent(item)}`}
-              className="rounded-full border border-border/60 bg-muted/40 px-3 py-1.5 text-xs font-semibold text-foreground transition-colors hover:border-primary/40 hover:bg-primary/10 hover:text-primary"
+              variant="pill-primary"
             >
               {item}
             </Link>

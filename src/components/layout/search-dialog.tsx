@@ -412,7 +412,7 @@ function SearchDialogInner({ open, onOpenChange }: SearchDialogProps) {
           </div>
           <span className="flex-1 text-sm font-medium">{entry.page.title}</span>
           {entry.page.badge && (
-            <span className="rounded-md bg-emerald-500/10 px-1.5 py-0.5 font-mono text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+            <span className="rounded-md bg-emerald-500/10 px-1.5 py-0.5 font-mono text-xs font-bold text-emerald-600 dark:text-emerald-400">
               {entry.page.badge}
             </span>
           )}
@@ -459,19 +459,19 @@ function SearchDialogInner({ open, onOpenChange }: SearchDialogProps) {
         <>
           <div className="relative size-9 shrink-0 overflow-hidden rounded-lg border border-border/40 bg-muted shadow-2xs">
             <Image
+              variant="thumb"
               src={entry.anime.cover}
               alt={entry.anime.title}
               fill
               unoptimized
               sizes="36px"
-              className="object-cover transition-transform duration-200 group-data-highlighted:scale-105"
             />
           </div>
           <div className="flex min-w-0 flex-1 flex-col">
             <span className="truncate text-sm font-medium text-foreground">
               {entry.anime.title}
             </span>
-            <div className="flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground">
+            <div className="flex items-center gap-1.5 font-mono text-xs text-muted-foreground">
               <span>{entry.anime.format}</span>
               <span>·</span>
               <span>{entry.anime.year}</span>
@@ -546,7 +546,7 @@ function SearchDialogInner({ open, onOpenChange }: SearchDialogProps) {
 
           {!hasResults && !isSearching && (
             <CommandFooter>
-              <span className="font-mono text-[10px] text-muted-foreground/60">
+              <span className="font-mono text-xs text-muted-foreground/60">
                 Yozora
               </span>
             </CommandFooter>
@@ -556,24 +556,24 @@ function SearchDialogInner({ open, onOpenChange }: SearchDialogProps) {
             <div className="flex items-center gap-4">
               <span className="flex items-center gap-1.5 font-medium">
                 <span>Open</span>
-                <kbd className="flex h-5 items-center justify-center rounded border border-border/70 bg-muted/80 px-1.5 font-mono text-[10px]">
+                <kbd className="flex h-5 items-center justify-center rounded border border-border/70 bg-muted/80 px-1.5 font-mono text-xs">
                   ↵
                 </kbd>
               </span>
               <span className="hidden items-center gap-1.5 sm:flex">
                 <span>Navigate</span>
-                <kbd className="flex h-5 items-center justify-center rounded border border-border/70 bg-muted/80 px-1 font-mono text-[10px]">
+                <kbd className="flex h-5 items-center justify-center rounded border border-border/70 bg-muted/80 px-1 font-mono text-xs">
                   ↑↓
                 </kbd>
               </span>
               <span className="hidden items-center gap-1.5 sm:flex">
                 <span>Close</span>
-                <kbd className="flex h-5 items-center justify-center rounded border border-border/70 bg-muted/80 px-1.5 font-mono text-[10px]">
+                <kbd className="flex h-5 items-center justify-center rounded border border-border/70 bg-muted/80 px-1.5 font-mono text-xs">
                   esc
                 </kbd>
               </span>
             </div>
-            <span className="font-mono text-[10px] text-muted-foreground/60">
+            <span className="font-mono text-xs text-muted-foreground/60">
               Yozora
             </span>
           </CommandFooter>

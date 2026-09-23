@@ -79,13 +79,10 @@ export function YouTubePlayerControls({
         >
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Button
-              variant="secondary"
+              variant="glass-dark"
               size="icon"
               onClick={onToggleExpand}
-              className={cn(
-                "h-8 w-8 rounded-full border border-white/10 bg-background/50 backdrop-blur-md hover:bg-background/80 focus-visible:ring-ring/50 md:h-9 md:w-9",
-                expandButtonClassName
-              )}
+              className={expandButtonClassName}
               aria-label={expanded ? "Minimize video" : "Maximize video"}
             >
               <motion.div
@@ -217,7 +214,7 @@ export function YouTubePlayer({
               playerClassName
             )}
           >
-            {!playing ? (
+            {!playing || expanded ? (
               <>
                 <motion.div
                   layoutId={`youtube-player-thumbnail-container-${videoId}`}
@@ -246,19 +243,15 @@ export function YouTubePlayer({
                   className="absolute inset-0 z-10 flex flex-col items-center justify-center p-4 text-center"
                 >
                   <Button
-                    size="lg"
-                    variant="secondary"
-                    className={cn(
-                      "relative size-16 rounded-full border border-white/20 bg-background/80 p-0 text-foreground shadow-2xl backdrop-blur-md transition-transform duration-300 hover:scale-110 active:scale-95 md:size-20",
-                      "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none",
-                      playButtonClassName
-                    )}
+                    size="play"
+                    variant="play"
+                    className={playButtonClassName}
                     onClick={handlePlay}
                     aria-label="Play video"
                   >
                     <Play
                       className={cn(
-                        "size-6 translate-x-[2px] fill-primary text-primary md:size-8",
+                        "size-6 translate-x-0.5 fill-primary text-primary md:size-8",
                         playIconClassName
                       )}
                     />
@@ -322,7 +315,7 @@ export function YouTubePlayer({
               <motion.div
                 layoutId={`youtube-player-${videoId}`}
                 className={cn(
-                  "pointer-events-auto aspect-video max-h-[90vh] w-[95vw] max-w-5xl overflow-hidden rounded-2xl border border-white/20 bg-card text-card-foreground shadow-2xl",
+                  "pointer-events-auto aspect-video max-h-full w-full max-w-5xl overflow-hidden rounded-2xl border border-white/20 bg-card text-card-foreground shadow-2xl",
                   expandedClassName
                 )}
                 onMouseEnter={() => setIsHovered(true)}
@@ -363,19 +356,15 @@ export function YouTubePlayer({
                         className="absolute inset-0 z-10 flex flex-col items-center justify-center p-4 text-center"
                       >
                         <Button
-                          size="lg"
-                          variant="secondary"
-                          className={cn(
-                            "relative size-16 rounded-full border border-white/20 bg-background/80 p-0 text-foreground shadow-2xl backdrop-blur-md transition-transform duration-300 hover:scale-110 active:scale-95 md:size-20",
-                            "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none",
-                            playButtonClassName
-                          )}
+                          size="play"
+                          variant="play"
+                          className={playButtonClassName}
                           onClick={handlePlay}
                           aria-label="Play video"
                         >
                           <Play
                             className={cn(
-                              "size-6 translate-x-[2px] fill-primary text-primary md:size-8",
+                              "size-6 translate-x-0.5 fill-primary text-primary md:size-8",
                               playIconClassName
                             )}
                           />

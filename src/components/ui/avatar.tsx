@@ -1,36 +1,88 @@
 import * as React from "react"
 import { Avatar as AvatarPrimitive } from "@base-ui/react/avatar"
+import { cva } from "class-variance-authority"
+import type { VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
+export const avatarVariants = cva(
+  "group/avatar relative flex shrink-0 select-none after:absolute after:inset-0 after:mix-blend-darken dark:after:mix-blend-lighten",
+  {
+    variants: {
+      variant: {
+        default:
+          "rounded-full after:rounded-full after:border after:border-border",
+        profile:
+          "rounded-3xl border-4 border-card bg-card shadow-2xl ring-2 ring-primary/20 after:hidden",
+      },
+      size: {
+        default: "size-8",
+        sm: "size-6",
+        lg: "size-10",
+        profile: "size-28 sm:size-32",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  }
+)
+
+export const avatarImageVariants = cva("aspect-square size-full object-cover", {
+  variants: {
+    variant: {
+      default: "rounded-full",
+      profile: "rounded-2xl",
+    },
+  },
+  defaultVariants: {
+    variant: "default",
+  },
+})
+
+export const avatarFallbackVariants = cva(
+  "flex size-full items-center justify-center text-sm",
+  {
+    variants: {
+      variant: {
+        default:
+          "rounded-full bg-muted text-muted-foreground group-data-[size=sm]/avatar:text-xs",
+        profile:
+          "rounded-2xl bg-primary/10 text-3xl font-black text-primary",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+)
+
 function Avatar({
   className,
-  size = "default",
+  variant,
+  size,
   ...props
-}: AvatarPrimitive.Root.Props & {
-  size?: "default" | "sm" | "lg"
-}) {
+}: AvatarPrimitive.Root.Props & VariantProps<typeof avatarVariants>) {
   return (
     <AvatarPrimitive.Root
       data-slot="avatar"
       data-size={size}
-      className={cn(
-        "group/avatar relative flex size-8 shrink-0 rounded-full select-none after:absolute after:inset-0 after:rounded-full after:border after:border-border after:mix-blend-darken data-[size=lg]:size-10 data-[size=sm]:size-6 dark:after:mix-blend-lighten",
-        className
-      )}
+      className={cn(avatarVariants({ variant, size }), className)}
       {...props}
     />
   )
 }
 
-function AvatarImage({ className, ...props }: AvatarPrimitive.Image.Props) {
+function AvatarImage({
+  className,
+  variant,
+  ...props
+}: AvatarPrimitive.Image.Props & VariantProps<typeof avatarImageVariants>) {
   return (
     <AvatarPrimitive.Image
       data-slot="avatar-image"
-      className={cn(
-        "aspect-square size-full rounded-full object-cover",
-        className
-      )}
+      className={cn(avatarImageVariants({ variant }), className)}
       {...props}
     />
   )
@@ -38,15 +90,14 @@ function AvatarImage({ className, ...props }: AvatarPrimitive.Image.Props) {
 
 function AvatarFallback({
   className,
+  variant,
   ...props
-}: AvatarPrimitive.Fallback.Props) {
+}: AvatarPrimitive.Fallback.Props &
+  VariantProps<typeof avatarFallbackVariants>) {
   return (
     <AvatarPrimitive.Fallback
       data-slot="avatar-fallback"
-      className={cn(
-        "flex size-full items-center justify-center rounded-full bg-muted text-sm text-muted-foreground group-data-[size=sm]/avatar:text-xs",
-        className
-      )}
+      className={cn(avatarFallbackVariants({ variant }), className)}
       {...props}
     />
   )

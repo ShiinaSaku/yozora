@@ -55,7 +55,7 @@ export function CommandDialogPopup({
       <CommandDialogBackdrop />
       <CommandDialogPrimitive.Popup
         className={cn(
-          "fixed top-[10vh] left-1/2 z-50 flex max-h-[min(32rem,80vh)] min-h-0 w-[calc(100%-1.5rem)] max-w-xl -translate-x-1/2 flex-col overflow-hidden rounded-2xl border bg-popover text-popover-foreground shadow-2xl transition-[scale,opacity] duration-200 ease-out outline-none data-ending-style:scale-98 data-ending-style:opacity-0 data-starting-style:scale-98 data-starting-style:opacity-0 sm:top-[14vh]",
+          "fixed top-16 left-1/2 z-50 flex max-h-128 min-h-0 w-11/12 max-w-xl -translate-x-1/2 flex-col overflow-hidden rounded-2xl border bg-popover text-popover-foreground shadow-2xl transition-all duration-200 ease-out outline-none data-ending-style:scale-98 data-ending-style:opacity-0 data-starting-style:scale-98 data-starting-style:opacity-0 sm:top-24 sm:w-full",
           className
         )}
         data-slot="command-dialog-popup"
@@ -118,7 +118,7 @@ export function CommandList({
   return (
     <AutocompletePrimitive.List
       className={cn(
-        "max-h-[62vh] min-h-0 flex-1 overflow-y-auto overscroll-contain p-2",
+        "max-h-96 min-h-0 flex-1 overflow-y-auto overscroll-contain p-2",
         className
       )}
       data-slot="command-list"
@@ -230,7 +230,7 @@ export function CommandShortcut({
   return (
     <kbd
       className={cn(
-        "ms-auto font-mono text-[10px] tracking-widest text-muted-foreground/72",
+        "ms-auto font-mono text-xs tracking-widest text-muted-foreground/72",
         className
       )}
       data-slot="command-shortcut"

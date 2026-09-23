@@ -448,13 +448,13 @@ function DirectStreamPlayer({
           onPointerCancel={() => setIsScrubbing(false)}
           className="group/timeline relative flex h-4 w-full cursor-pointer touch-none items-center py-1.5"
         >
-          <div className="relative h-1 w-full overflow-hidden rounded-full bg-white/25 transition-[height] duration-150 group-hover/timeline:h-1.5">
+          <div className="relative h-1 w-full overflow-hidden rounded-full bg-white/25 transition-all duration-150 group-hover/timeline:h-1.5">
             <div
               className="absolute top-0 left-0 h-full rounded-full bg-white/40"
               style={{ width: `${bufferedPercent}%` }}
             />
             <div
-              className="absolute top-0 left-0 h-full rounded-full bg-primary transition-[width] duration-75"
+              className="absolute top-0 left-0 h-full rounded-full bg-primary transition-all duration-75"
               style={{ width: `${playedPercent}%` }}
             />
           </div>
@@ -526,7 +526,7 @@ function DirectStreamPlayer({
               />
             </div>
 
-            <div className="ml-1 font-mono text-[11px] text-white/80 sm:text-xs">
+            <div className="ml-1 font-mono text-xs text-white/80">
               <span>{formatDuration(currentTime)}</span>
               <span className="mx-1 text-white/40">/</span>
               <span>{formatDuration(duration)}</span>

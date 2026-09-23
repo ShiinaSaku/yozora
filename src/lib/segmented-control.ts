@@ -6,9 +6,9 @@ export const segmentedControlItemSizeClassNames: Record<
   SegmentedControlSize,
   string
 > = {
-  default: "h-8.5 px-[calc(--spacing(2.5)-1px)] sm:h-7.5",
-  lg: "h-9.5 px-[calc(--spacing(3)-1px)] sm:h-8.5",
-  sm: "h-7.5 px-[calc(--spacing(2)-1px)] sm:h-6.5",
+  default: "h-8.5 px-2.5 sm:h-7.5",
+  lg: "h-9.5 px-3 sm:h-8.5",
+  sm: "h-7.5 px-2 sm:h-6.5",
 }
 
 export const segmentedControlRootClassName =
@@ -19,7 +19,7 @@ export const segmentedControlItemLayoutClassName =
 
 export const segmentedControlItemVariants = cva(
   [
-    "relative inline-flex shrink-0 cursor-pointer items-center justify-center rounded-md border border-transparent text-base font-medium whitespace-nowrap text-muted-foreground/72 outline-2 outline-transparent transition-[outline-color] select-none hover:bg-transparent hover:text-muted-foreground focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-64 sm:text-sm data-disabled:pointer-events-none data-disabled:opacity-64",
+    "relative inline-flex shrink-0 cursor-pointer items-center justify-center rounded-md border border-transparent text-base font-medium whitespace-nowrap text-muted-foreground/72 outline-2 outline-transparent transition-colors select-none hover:bg-transparent hover:text-muted-foreground focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-64 sm:text-sm data-disabled:pointer-events-none data-disabled:opacity-64",
     segmentedControlItemLayoutClassName,
   ],
   {

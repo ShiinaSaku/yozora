@@ -36,10 +36,7 @@ export function AnimeCard({
   const animeHref = getAnimeUrl(anime)
 
   return (
-    <Card
-      id={`anime-card-${anime.id}`}
-      className="group relative flex flex-col overflow-hidden rounded-2xl border-border/50 bg-card p-0 transition-[transform,border-color,box-shadow] duration-250 ease-out hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl active:scale-[0.98]"
-    >
+    <Card id={`anime-card-${anime.id}`} variant="interactive" size="none">
       <div className="relative aspect-3/4 w-full overflow-hidden bg-muted">
         <Link
           href={animeHref}
@@ -47,6 +44,7 @@ export function AnimeCard({
           className="absolute inset-0 block size-full"
         >
           <Image
+            variant="zoom"
             src={anime.coverLarge || anime.cover}
             srcSet={getCoverSrcSet(anime)}
             alt={anime.title}
@@ -55,21 +53,13 @@ export function AnimeCard({
             fill
             quality={85}
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
-            className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
 
           <div className="absolute inset-0 bg-linear-to-t from-background/90 via-background/20 to-transparent opacity-60 transition-opacity group-hover:opacity-80" />
         </Link>
 
         <div className="pointer-events-none absolute top-2.5 left-2.5 z-10 flex flex-wrap gap-1.5">
-          {anime.format && (
-            <Badge
-              variant="secondary"
-              className="bg-background/80 text-[10px] font-bold tracking-wider uppercase backdrop-blur-md"
-            >
-              {anime.format}
-            </Badge>
-          )}
+          {anime.format && <Badge variant="overlay">{anime.format}</Badge>}
         </div>
 
         {anime.score > 0 && (
@@ -85,25 +75,26 @@ export function AnimeCard({
         )}
 
         {onSaveClick && (
-          <Button
-            size="icon-sm"
-            variant="secondary"
-            onClick={(e) => {
-              e.preventDefault()
-              e.stopPropagation()
-              onSaveClick(anime)
-            }}
-            className="absolute right-2.5 bottom-2.5 z-10 size-8 cursor-pointer bg-background/90 opacity-0 backdrop-blur-md transition-opacity group-hover:opacity-100 hover:bg-primary hover:text-primary-foreground"
-            aria-label={`Add to Watchlist: ${anime.title}`}
-          >
-            <HugeiconsIcon icon={Add01Icon} size={15} strokeWidth={2.5} />
-          </Button>
+          <div className="absolute right-2.5 bottom-2.5 z-10 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
+            <Button
+              size="icon-sm"
+              variant="overlay"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                onSaveClick(anime)
+              }}
+              aria-label={`Add to Watchlist: ${anime.title}`}
+            >
+              <HugeiconsIcon icon={Add01Icon} size={15} strokeWidth={2.5} />
+            </Button>
+          </div>
         )}
 
         {showProgress && (
           <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-1.5 bg-muted">
             <div
-              className="h-full bg-primary transition-[width] duration-300"
+              className="h-full bg-primary transition-all duration-300"
               style={{
                 width: `${Math.min(100, Math.round(((progress || 0) / (totalEpisodes || anime.episodes || 1)) * 100))}%`,
               }}
@@ -143,7 +134,7 @@ export function AnimeCard({
 
 export function AnimeCardSkeleton() {
   return (
-    <Card className="animate-shimmer flex flex-col overflow-hidden rounded-2xl border-border/40 bg-card p-0 shadow-xs">
+    <Card variant="shimmer" size="none">
       <div className="relative aspect-3/4 w-full overflow-hidden bg-muted/60" />
       <div className="flex flex-1 flex-col justify-between gap-2.5 p-3">
         <div className="flex flex-col gap-1.5">

@@ -67,7 +67,7 @@ function ProfileHeader({ profile }: { profile: UserProfile }) {
   return (
     <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-card shadow-lg">
       <div
-        className="pointer-events-none absolute -top-24 left-1/2 h-56 w-xl max-w-[120%] -translate-x-1/2 rounded-full bg-primary/15 blur-3xl"
+        className="pointer-events-none absolute -top-24 left-1/2 h-56 w-xl max-w-full -translate-x-1/2 rounded-full bg-primary/15 blur-3xl"
         aria-hidden="true"
       />
 
@@ -85,7 +85,7 @@ function ProfileHeader({ profile }: { profile: UserProfile }) {
           <div className="size-full bg-linear-to-br from-primary/25 via-accent/15 to-secondary/30" />
         )}
         <div
-          className="bg-grid absolute inset-0 opacity-[0.04]"
+          className="bg-grid absolute inset-0 opacity-5"
           aria-hidden="true"
         />
         <div className="absolute inset-0 bg-linear-to-t from-card via-card/20 to-transparent" />
@@ -93,13 +93,13 @@ function ProfileHeader({ profile }: { profile: UserProfile }) {
 
       <div className="relative z-10 -mt-16 flex flex-col justify-between gap-6 px-6 pt-0 pb-6 sm:-mt-20 sm:flex-row sm:items-end sm:px-10">
         <div className="flex flex-col items-center gap-5 text-center sm:flex-row sm:items-end sm:text-left">
-          <Avatar className="size-28 shrink-0 rounded-3xl border-4 border-card bg-card shadow-2xl ring-2 ring-primary/20 sm:size-32">
+          <Avatar variant="profile" size="profile">
             <AvatarImage
+              variant="profile"
               src={profile.avatarUrl ?? undefined}
               alt={profile.displayName}
-              className="object-cover"
             />
-            <AvatarFallback className="bg-primary/10 text-3xl font-black text-primary">
+            <AvatarFallback variant="profile">
               {profile.displayName.slice(0, 2).toUpperCase() || "U"}
             </AvatarFallback>
           </Avatar>
@@ -109,10 +109,7 @@ function ProfileHeader({ profile }: { profile: UserProfile }) {
               <h1 className="text-2xl font-black tracking-tight text-foreground sm:text-3xl md:text-4xl">
                 {profile.displayName}
               </h1>
-              <Badge
-                variant="secondary"
-                className="border border-primary/20 bg-primary/10 px-2 py-0.5 text-[11px] font-bold text-primary"
-              >
+              <Badge variant="subtle">
                 PRO Curator
               </Badge>
             </div>
@@ -142,7 +139,7 @@ function ProfileHeader({ profile }: { profile: UserProfile }) {
               href={`https://anilist.co/user/${profile.anilistUsername}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 rounded-xl border border-[#02A9FF]/20 bg-[#02A9FF]/10 px-3 py-1.5 text-xs font-semibold text-[#02A9FF] shadow-2xs transition-[color,background-color,border-color,transform] hover:bg-[#02A9FF]/20 active:scale-95"
+              className="flex items-center gap-1.5 rounded-xl border border-anilist/20 bg-anilist/10 px-3 py-1.5 text-xs font-semibold text-anilist shadow-2xs transition-all hover:bg-anilist/20 active:scale-95"
               title={`AniList: ${profile.anilistUsername}`}
             >
               <AniListIcon className="size-3.5 shrink-0" />
@@ -156,7 +153,7 @@ function ProfileHeader({ profile }: { profile: UserProfile }) {
               href={`https://myanimelist.net/profile/${profile.malUsername}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 rounded-xl border border-[#2E51A2]/20 bg-[#2E51A2]/10 px-3 py-1.5 text-xs font-semibold text-[#2E51A2] shadow-2xs transition-[color,background-color,border-color,transform] hover:bg-[#2E51A2]/20 active:scale-95 dark:text-[#4A72D9]"
+              className="flex items-center gap-1.5 rounded-xl border border-mal/20 bg-mal/10 px-3 py-1.5 text-xs font-semibold text-mal shadow-2xs transition-all hover:bg-mal/20 active:scale-95 dark:text-mal-light"
               title={`MyAnimeList: ${profile.malUsername}`}
             >
               <MyAnimeListIcon className="size-3.5 shrink-0" />
@@ -169,7 +166,6 @@ function ProfileHeader({ profile }: { profile: UserProfile }) {
             variant="outline"
             size="sm"
             onClick={copyProfileLink}
-            className="cursor-pointer gap-1.5 rounded-xl text-xs font-semibold shadow-2xs"
           >
             {copied ? (
               <>
@@ -215,31 +211,31 @@ function ProfileStatsGrid({
   return (
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <Card className="flex flex-col items-center justify-center gap-1 rounded-2xl border-border/50 bg-card p-4 text-center shadow-xs transition-colors hover:border-primary/30 sm:p-5">
+        <Card variant="stat" size="stat">
           <div className="mb-1 flex size-8 items-center justify-center rounded-xl bg-primary/10 text-primary">
             <Layers className="size-4" />
           </div>
           <p className="font-mono text-2xl font-black tracking-tight text-foreground sm:text-3xl">
             {total}
           </p>
-          <p className="text-[11px] font-bold tracking-wider text-muted-foreground uppercase">
+          <p className="text-xs font-bold tracking-wider text-muted-foreground uppercase">
             Total Anime
           </p>
         </Card>
 
-        <Card className="flex flex-col items-center justify-center gap-1 rounded-2xl border-border/50 bg-card p-4 text-center shadow-xs transition-colors hover:border-primary/30 sm:p-5">
+        <Card variant="stat" size="stat">
           <div className="mb-1 flex size-8 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-500">
             <CheckCircle2 className="size-4" />
           </div>
           <p className="font-mono text-2xl font-black tracking-tight text-foreground sm:text-3xl">
             {completed}
           </p>
-          <p className="text-[11px] font-bold tracking-wider text-muted-foreground uppercase">
+          <p className="text-xs font-bold tracking-wider text-muted-foreground uppercase">
             Completed
           </p>
         </Card>
 
-        <Card className="flex flex-col items-center justify-center gap-1 rounded-2xl border-border/50 bg-card p-4 text-center shadow-xs transition-colors hover:border-primary/30 sm:p-5">
+        <Card variant="stat" size="stat">
           <div className="mb-1 flex size-8 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500">
             <Clock className="size-4" />
           </div>
@@ -249,19 +245,19 @@ function ProfileStatsGrid({
               d
             </span>
           </p>
-          <p className="text-[11px] font-bold tracking-wider text-muted-foreground uppercase">
+          <p className="text-xs font-bold tracking-wider text-muted-foreground uppercase">
             Days Watched
           </p>
         </Card>
 
-        <Card className="flex flex-col items-center justify-center gap-1 rounded-2xl border-border/50 bg-card p-4 text-center shadow-xs transition-colors hover:border-primary/30 sm:p-5">
+        <Card variant="stat" size="stat">
           <div className="mb-1 flex size-8 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500">
             <Star className="size-4" />
           </div>
           <p className="font-mono text-2xl font-black tracking-tight text-foreground sm:text-3xl">
             {stats?.meanScore ? stats.meanScore.toFixed(1) : "—"}
           </p>
-          <p className="text-[11px] font-bold tracking-wider text-muted-foreground uppercase">
+          <p className="text-xs font-bold tracking-wider text-muted-foreground uppercase">
             Mean Score
           </p>
         </Card>
@@ -271,14 +267,11 @@ function ProfileStatsGrid({
         <div className="flex items-center justify-between text-xs">
           <div className="flex items-center gap-2">
             <span className="font-bold text-foreground">Completion Rate</span>
-            <Badge
-              variant="secondary"
-              className="px-1.5 py-0 font-mono text-[10px]"
-            >
+            <Badge variant="tag">
               {completedPercent}%
             </Badge>
           </div>
-          <div className="flex items-center gap-4 font-mono text-[11px] text-muted-foreground">
+          <div className="flex items-center gap-4 font-mono text-xs text-muted-foreground">
             <span className="flex items-center gap-1.5">
               <span className="size-2 rounded-full bg-emerald-500" />
               {watching} Watching
@@ -299,17 +292,17 @@ function ProfileStatsGrid({
             <>
               <div
                 style={{ width: `${(watching / total) * 100}%` }}
-                className="h-full bg-emerald-500 transition-[width] duration-500"
+                className="h-full bg-emerald-500 transition-all duration-500"
                 title={`${watching} Watching`}
               />
               <div
                 style={{ width: `${(completed / total) * 100}%` }}
-                className="h-full bg-indigo-500 transition-[width] duration-500"
+                className="h-full bg-indigo-500 transition-all duration-500"
                 title={`${completed} Completed`}
               />
               <div
                 style={{ width: `${(planning / total) * 100}%` }}
-                className="h-full bg-muted-foreground/30 transition-[width] duration-500"
+                className="h-full bg-muted-foreground/30 transition-all duration-500"
                 title={`${planning} Planning`}
               />
             </>
@@ -363,7 +356,7 @@ function PinnedShowcase({
           >
             Pinned Anime
           </h2>
-          <span className="text-[11px] font-medium text-muted-foreground">
+          <span className="text-xs font-medium text-muted-foreground">
             Hand-picked by @{handle} — their top anime recommendations
           </span>
         </div>
@@ -394,7 +387,8 @@ function PinnedShowcase({
           <Link
             key={anime.id}
             href={getAnimeUrl(anime)}
-            className="group relative flex flex-col overflow-hidden rounded-2xl border border-border/50 bg-card shadow-xs transition-all duration-200 hover:border-primary/40 hover:shadow-lg active:scale-[0.99]"
+            variant="card"
+            className="group relative flex flex-col active:scale-95"
           >
             <div className="relative h-24 overflow-hidden bg-muted sm:h-28">
               {anime.banner ? (
@@ -404,17 +398,17 @@ function PinnedShowcase({
                   fill
                   unoptimized
                   sizes="(max-width: 640px) 100vw, 400px"
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  variant="zoom"
                 />
               ) : (
                 <div className="size-full bg-linear-to-r from-primary/20 via-accent/15 to-secondary/25" />
               )}
               <div className="absolute inset-0 bg-linear-to-t from-card via-card/30 to-transparent" />
-              <span className="absolute top-2 left-2 flex size-6 items-center justify-center rounded-lg border border-border/50 bg-background/85 font-mono text-[10px] font-bold text-foreground backdrop-blur-xs">
+              <span className="absolute top-2 left-2 flex size-6 items-center justify-center rounded-lg border border-border/50 bg-background/85 font-mono text-xs font-bold text-foreground backdrop-blur-xs">
                 {index + 1}
               </span>
               {anime.score > 0 && (
-                <span className="absolute top-2 right-2 flex items-center gap-1 rounded-full border border-border/50 bg-background/85 px-2 py-0.5 font-mono text-[10px] font-bold text-amber-500 backdrop-blur-xs">
+                <span className="absolute top-2 right-2 flex items-center gap-1 rounded-full border border-border/50 bg-background/85 px-2 py-0.5 font-mono text-xs font-bold text-amber-500 backdrop-blur-xs">
                   <Star className="size-2.5 fill-amber-500" />
                   {anime.score.toFixed(1)}
                 </span>
@@ -436,7 +430,7 @@ function PinnedShowcase({
                 <span className="line-clamp-2 text-sm leading-tight font-bold text-foreground transition-colors group-hover:text-primary">
                   {anime.title}
                 </span>
-                <span className="mt-1 text-[11px] font-medium text-muted-foreground">
+                <span className="mt-1 text-xs font-medium text-muted-foreground">
                   {[
                     anime.year,
                     anime.format,
@@ -456,7 +450,7 @@ function PinnedShowcase({
 
 function ProfileBioCard({ bio }: { bio: string }) {
   return (
-    <Card className="rounded-3xl border-border/60 bg-card p-6 shadow-xs sm:p-8">
+    <Card variant="large" size="xl">
       <h3 className="mb-4 text-sm font-bold tracking-wider text-muted-foreground uppercase">
         About
       </h3>
@@ -536,79 +530,93 @@ function ProfileLibraryTabs({
 
   return (
     <Tabs defaultValue="all" className="w-full">
-      <TabsList className="flex w-full max-w-3xl flex-wrap justify-start gap-1 rounded-xl bg-muted/40 p-1">
-        <TabsTrigger value="all">
-          All ({filteredAndSortedEntries.length})
-        </TabsTrigger>
-        <TabsTrigger value="watching">
-          Watching ({watchingEntries.length})
-        </TabsTrigger>
-        <TabsTrigger value="completed">
-          Completed ({completedEntries.length})
-        </TabsTrigger>
-        <TabsTrigger value="planning">
-          Plan to Watch ({planningEntries.length})
-        </TabsTrigger>
-        <TabsTrigger value="paused">
-          Paused ({pausedEntries.length})
-        </TabsTrigger>
-        <TabsTrigger value="dropped">
-          Dropped ({droppedEntries.length})
-        </TabsTrigger>
-      </TabsList>
+      <div className="w-full max-w-3xl">
+        <TabsList>
+          <TabsTrigger value="all">
+            All ({filteredAndSortedEntries.length})
+          </TabsTrigger>
+          <TabsTrigger value="watching">
+            Watching ({watchingEntries.length})
+          </TabsTrigger>
+          <TabsTrigger value="completed">
+            Completed ({completedEntries.length})
+          </TabsTrigger>
+          <TabsTrigger value="planning">
+            Plan to Watch ({planningEntries.length})
+          </TabsTrigger>
+          <TabsTrigger value="paused">
+            Paused ({pausedEntries.length})
+          </TabsTrigger>
+          <TabsTrigger value="dropped">
+            Dropped ({droppedEntries.length})
+          </TabsTrigger>
+        </TabsList>
+      </div>
 
-      <TabsContent value="all" className="pt-6">
-        <ProfileAnimeShelf
-          items={filteredAndSortedEntries}
-          animeMap={animeMap}
-          emptyMessage="No anime found in library."
-          onSave={onSave}
-        />
+      <TabsContent value="all">
+        <div className="pt-6">
+          <ProfileAnimeShelf
+            items={filteredAndSortedEntries}
+            animeMap={animeMap}
+            emptyMessage="No anime found in library."
+            onSave={onSave}
+          />
+        </div>
       </TabsContent>
 
-      <TabsContent value="watching" className="pt-6">
-        <ProfileAnimeShelf
-          items={watchingEntries}
-          animeMap={animeMap}
-          emptyMessage="No anime currently being watched."
-          onSave={onSave}
-        />
+      <TabsContent value="watching">
+        <div className="pt-6">
+          <ProfileAnimeShelf
+            items={watchingEntries}
+            animeMap={animeMap}
+            emptyMessage="No anime currently being watched."
+            onSave={onSave}
+          />
+        </div>
       </TabsContent>
 
-      <TabsContent value="completed" className="pt-6">
-        <ProfileAnimeShelf
-          items={completedEntries}
-          animeMap={animeMap}
-          emptyMessage="No completed anime recorded yet."
-          onSave={onSave}
-        />
+      <TabsContent value="completed">
+        <div className="pt-6">
+          <ProfileAnimeShelf
+            items={completedEntries}
+            animeMap={animeMap}
+            emptyMessage="No completed anime recorded yet."
+            onSave={onSave}
+          />
+        </div>
       </TabsContent>
 
-      <TabsContent value="planning" className="pt-6">
-        <ProfileAnimeShelf
-          items={planningEntries}
-          animeMap={animeMap}
-          emptyMessage="No anime planned to watch."
-          onSave={onSave}
-        />
+      <TabsContent value="planning">
+        <div className="pt-6">
+          <ProfileAnimeShelf
+            items={planningEntries}
+            animeMap={animeMap}
+            emptyMessage="No anime planned to watch."
+            onSave={onSave}
+          />
+        </div>
       </TabsContent>
 
-      <TabsContent value="paused" className="pt-6">
-        <ProfileAnimeShelf
-          items={pausedEntries}
-          animeMap={animeMap}
-          emptyMessage="No paused anime."
-          onSave={onSave}
-        />
+      <TabsContent value="paused">
+        <div className="pt-6">
+          <ProfileAnimeShelf
+            items={pausedEntries}
+            animeMap={animeMap}
+            emptyMessage="No paused anime."
+            onSave={onSave}
+          />
+        </div>
       </TabsContent>
 
-      <TabsContent value="dropped" className="pt-6">
-        <ProfileAnimeShelf
-          items={droppedEntries}
-          animeMap={animeMap}
-          emptyMessage="No dropped anime."
-          onSave={onSave}
-        />
+      <TabsContent value="dropped">
+        <div className="pt-6">
+          <ProfileAnimeShelf
+            items={droppedEntries}
+            animeMap={animeMap}
+            emptyMessage="No dropped anime."
+            onSave={onSave}
+          />
+        </div>
       </TabsContent>
     </Tabs>
   )
@@ -740,7 +748,7 @@ export function UserProfileClient({ handle, initialData }: ProfileClientProps) {
               onChange={(e) => setSearchFilter(e.target.value)}
               placeholder="Search in this library..."
               aria-label="Search in this library"
-              className="h-9 rounded-xl border-border/50 bg-card pl-9 text-xs"
+              size="icon"
             />
           </div>
 
@@ -752,7 +760,6 @@ export function UserProfileClient({ handle, initialData }: ProfileClientProps) {
               variant={sortBy === "recent" ? "secondary" : "ghost"}
               size="xs"
               onClick={() => setSortBy("recent")}
-              className="rounded-lg text-xs font-semibold"
             >
               Recent
             </Button>
@@ -760,7 +767,6 @@ export function UserProfileClient({ handle, initialData }: ProfileClientProps) {
               variant={sortBy === "score" ? "secondary" : "ghost"}
               size="xs"
               onClick={() => setSortBy("score")}
-              className="rounded-lg text-xs font-semibold"
             >
               Score
             </Button>
@@ -768,7 +774,6 @@ export function UserProfileClient({ handle, initialData }: ProfileClientProps) {
               variant={sortBy === "title" ? "secondary" : "ghost"}
               size="xs"
               onClick={() => setSortBy("title")}
-              className="rounded-lg text-xs font-semibold"
             >
               A–Z
             </Button>

@@ -84,7 +84,7 @@ export function AiringClient({
                   >
                     ·
                   </span>
-                  <span className="inline-flex items-center gap-1 rounded-md bg-muted/60 px-2 py-0.5 font-mono text-[11px] text-muted-foreground">
+                  <span className="inline-flex items-center gap-1 rounded-md bg-muted/60 px-2 py-0.5 font-mono text-xs text-muted-foreground">
                     <HugeiconsIcon
                       icon={Globe02Icon}
                       size={11}
@@ -143,7 +143,8 @@ export function AiringClient({
                 id={`airing-card-${item.id}`}
                 href={getAnimeUrl(item.media)}
                 aria-label={`${item.media.title} Episode ${item.episode}, ${countdownText}`}
-                className="group relative flex gap-4 rounded-3xl border border-border/40 bg-card p-4 shadow-xs transition-[transform,border-color,background-color,box-shadow] duration-200 hover:border-primary/40 hover:bg-muted/40 hover:shadow-md active:scale-[0.99]"
+                variant="card"
+                className="group relative flex active:scale-95"
               >
                 <div className="relative h-28 w-20 shrink-0 overflow-hidden rounded-2xl border border-border/50 bg-muted shadow-2xs transition-transform duration-300 group-hover:scale-102">
                   <Image
@@ -155,7 +156,7 @@ export function AiringClient({
                     className="object-cover"
                   />
                   <div className="absolute top-1.5 left-1.5">
-                    <Badge className="border-white/10 bg-black/75 px-1.5 py-0 font-mono text-[10px] font-bold text-white backdrop-blur-md">
+                    <Badge variant="overlay">
                       EP {item.episode}
                     </Badge>
                   </div>
@@ -166,7 +167,7 @@ export function AiringClient({
                     <h3 className="line-clamp-2 text-sm leading-snug font-bold text-foreground transition-colors group-hover:text-primary">
                       {item.media.title}
                     </h3>
-                    <div className="flex items-center gap-2 font-mono text-[11px] text-muted-foreground">
+                    <div className="flex items-center gap-2 font-mono text-xs text-muted-foreground">
                       <span>{item.media.format || "TV"}</span>
                       {item.media.studios && item.media.studios.length > 0 && (
                         <>
@@ -181,7 +182,7 @@ export function AiringClient({
 
                   <div className="flex flex-col gap-1.5 border-t border-border/30 pt-2">
                     <div className="flex items-center justify-between">
-                      <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-muted-foreground">
+                      <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
                         <HugeiconsIcon
                           icon={Calendar03Icon}
                           size={12}

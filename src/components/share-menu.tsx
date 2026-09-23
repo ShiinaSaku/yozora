@@ -8,7 +8,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { cn } from "@/lib/utils"
 
 export interface ShareMenuProps {
   /** Title passed to the native share sheet. */
@@ -80,30 +79,21 @@ export function ShareMenu({
   const isWebShareAvailable =
     typeof navigator !== "undefined" && "share" in navigator
 
-  const sizeClasses = showLabel
-    ? size === "lg"
-      ? "h-11 px-4 text-sm font-semibold rounded-xl sm:h-12 sm:px-5 gap-2"
+  const buttonSize = showLabel
+    ? size === "icon-sm"
+      ? "sm"
+      : size === "icon-lg"
+        ? "lg"
+        : size === "icon"
+          ? "default"
+          : size
+    : size === "default"
+      ? "icon"
       : size === "sm"
-        ? "h-8 px-2.5 text-xs font-medium rounded-lg sm:h-7.5 gap-1.5"
-        : size === "xs"
-          ? "h-7 px-2 text-xs font-medium rounded-md sm:h-6 gap-1"
-          : "h-9 px-3 text-sm font-medium rounded-xl sm:h-8 gap-2"
-    : size === "lg"
-      ? "size-11 rounded-xl sm:size-12 p-0 aspect-square shrink-0"
-      : size === "sm"
-        ? "size-8 rounded-lg sm:size-7.5 p-0 aspect-square shrink-0"
-        : size === "xs"
-          ? "size-7 rounded-md sm:size-6 p-0 aspect-square shrink-0"
-          : size === "icon-sm"
-            ? "size-8 rounded-lg sm:size-7 p-0 aspect-square shrink-0"
-            : size === "icon-lg"
-              ? "size-10 rounded-xl sm:size-9 p-0 aspect-square shrink-0"
-              : "size-9 rounded-xl sm:size-8 p-0 aspect-square shrink-0"
-
-  const outlineStyles =
-    variant === "outline"
-      ? "border border-border/80 hover:border-border bg-card/85 hover:bg-card text-foreground shadow-xs hover:shadow-sm before:hidden backdrop-blur-md"
-      : ""
+        ? "icon-sm"
+        : size === "lg"
+          ? "icon-lg"
+          : size
 
   return (
     <DropdownMenu>
@@ -111,13 +101,9 @@ export function ShareMenu({
         render={
           <Button
             variant={variant}
+            size={buttonSize}
             aria-label={label}
-            className={cn(
-              "interactive-press transition-all select-none",
-              outlineStyles,
-              sizeClasses,
-              className
-            )}
+            className={className}
           />
         }
       >
@@ -126,7 +112,6 @@ export function ShareMenu({
       </DropdownMenuTrigger>
 
       <DropdownMenuContent
-        className="w-48 rounded-2xl border border-border/70 p-1 shadow-2xl backdrop-blur-md"
         align={align}
         alignOffset={0}
         sideOffset={6}

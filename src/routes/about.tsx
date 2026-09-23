@@ -5,11 +5,11 @@ import {
   ArrowRight01Icon,
   CpuIcon,
   FlashIcon,
-  GithubIcon,
   HeartIcon,
   Layers01Icon,
   Video02Icon,
 } from "@hugeicons/core-free-icons"
+import { GithubIcon } from "@/components/icons/platform-icons"
 import { Card } from "@/components/ui/card"
 import { BrandLogo } from "@/components/layout/brand-logo"
 import Link from "@/components/ui/link"
@@ -130,13 +130,13 @@ function AboutPage() {
             <span className="text-2xl leading-none font-black tracking-tight text-foreground sm:text-3xl">
               Yozora
             </span>
-            <span className="mt-1 font-mono text-xs font-medium tracking-[0.18em] text-muted-foreground uppercase">
+            <span className="mt-1 font-mono text-xs font-medium tracking-widest text-muted-foreground uppercase">
               夜空 · Next-Gen Anime Hub
             </span>
           </div>
         </div>
 
-        <h1 className="text-3xl leading-[1.12] font-black tracking-tight text-balance text-foreground sm:text-5xl">
+        <h1 className="text-3xl leading-tight font-black tracking-tight text-balance text-foreground sm:text-5xl">
           Seasonal anime discovery, broadcast radar, and soundtrack archives.
         </h1>
 
@@ -147,10 +147,7 @@ function AboutPage() {
         </p>
 
         <div className="flex flex-wrap items-center gap-3 pt-2">
-          <Link
-            href="/airing"
-            className="interactive-press inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-xs font-semibold text-primary-foreground shadow-xs transition-colors hover:bg-primary/90"
-          >
+          <Link href="/airing" variant="button">
             <span>Live Airing Radar</span>
             <HugeiconsIcon
               icon={ArrowRight01Icon}
@@ -158,10 +155,7 @@ function AboutPage() {
               strokeWidth={2.5}
             />
           </Link>
-          <Link
-            href="/seasonal"
-            className="interactive-press inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border/60 bg-background/80 px-4 text-xs font-semibold text-foreground shadow-2xs transition-colors hover:bg-muted/60"
-          >
+          <Link href="/seasonal" variant="button-outline">
             <span>Seasonal Lineup</span>
           </Link>
           <a
@@ -170,7 +164,7 @@ function AboutPage() {
             rel="noopener noreferrer"
             className="interactive-press inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border/60 bg-background/80 px-4 text-xs font-semibold text-foreground shadow-2xs transition-colors hover:bg-muted/60"
           >
-            <HugeiconsIcon icon={GithubIcon} size={16} strokeWidth={2} />
+            <GithubIcon className="size-4 shrink-0" />
             <span>Open Source</span>
           </a>
         </div>
@@ -236,7 +230,7 @@ function AboutPage() {
               <span className="font-mono text-xs font-bold text-foreground">
                 Tier 1: In-Memory
               </span>
-              <span className="rounded-md bg-emerald-500/10 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-emerald-600 dark:text-emerald-400">
+              <span className="rounded-md bg-emerald-500/10 px-1.5 py-0.5 font-mono text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                 &lt;1ms
               </span>
             </div>
@@ -251,7 +245,7 @@ function AboutPage() {
               <span className="font-mono text-xs font-bold text-foreground">
                 Tier 2: Upstash Redis
               </span>
-              <span className="rounded-md bg-sky-500/10 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-sky-600 dark:text-sky-400">
+              <span className="rounded-md bg-sky-500/10 px-1.5 py-0.5 font-mono text-xs font-semibold text-sky-600 dark:text-sky-400">
                 Persistent
               </span>
             </div>
@@ -266,13 +260,13 @@ function AboutPage() {
               <span className="font-mono text-xs font-bold text-foreground">
                 Edge CDN Cache
               </span>
-              <span className="rounded-md bg-amber-500/10 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-amber-600 dark:text-amber-400">
+              <span className="rounded-md bg-amber-500/10 px-1.5 py-0.5 font-mono text-xs font-semibold text-amber-600 dark:text-amber-400">
                 SWR
               </span>
             </div>
             <p className="text-xs leading-relaxed text-muted-foreground">
               Public catalog loaders emit{" "}
-              <code className="font-mono text-[10px] text-foreground">
+              <code className="font-mono text-xs text-foreground">
                 stale-while-revalidate
               </code>{" "}
               headers for global Edge propagation.
@@ -294,10 +288,7 @@ function AboutPage() {
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {ABOUT_FAQS.map((faq) => (
-            <Card
-              key={faq.question}
-              className="flex flex-col gap-2.5 rounded-2xl border-border/40 bg-card p-5 shadow-2xs"
-            >
+            <Card key={faq.question} variant="subtle" size="md">
               <h3 className="text-sm leading-snug font-bold text-foreground">
                 {faq.question}
               </h3>
@@ -327,7 +318,7 @@ function AboutPage() {
           rel="noopener noreferrer"
           className="interactive-press inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl bg-foreground px-4 text-xs font-semibold text-background shadow-xs transition-opacity hover:opacity-90"
         >
-          <HugeiconsIcon icon={GithubIcon} size={16} strokeWidth={2} />
+          <GithubIcon className="size-4 shrink-0" />
           <span>Star on GitHub</span>
         </a>
       </section>
@@ -344,7 +335,7 @@ interface FeatureCardProps {
 
 function FeatureCard({ icon, color, title, description }: FeatureCardProps) {
   return (
-    <Card className="flex flex-col gap-3 rounded-3xl border-border/40 bg-card p-6 shadow-2xs">
+    <Card variant="large" size="lg">
       <div
         className={`flex size-10 items-center justify-center rounded-xl ${color}`}
       >

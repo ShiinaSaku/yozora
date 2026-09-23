@@ -129,14 +129,10 @@ function CharacterPage() {
         <div className="flex flex-1 flex-col items-start gap-4">
           <div className="flex w-full flex-wrap items-center justify-between gap-2">
             <div className="flex flex-wrap items-center gap-2">
-              {char.gender && (
-                <Badge variant="secondary" className="font-bold">
-                  {char.gender}
-                </Badge>
-              )}
+              {char.gender && <Badge variant="bold">{char.gender}</Badge>}
               {char.age && <Badge variant="outline">Age: {char.age}</Badge>}
               {char.favourites && (
-                <Badge variant="secondary" className="font-bold text-rose-500">
+                <Badge variant="rose">
                   <Heart className="size-3 fill-rose-500" />
                   {char.favourites.toLocaleString("en-US")} favorites
                 </Badge>

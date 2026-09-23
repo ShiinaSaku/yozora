@@ -178,7 +178,7 @@ export function LibraryClient({
                   variant="secondary"
                   disabled={incrementMutation.isPending}
                   onClick={() => incrementMutation.mutate(anime.id)}
-                  className="mt-2 w-full text-xs font-bold"
+                  className="mt-2 w-full"
                 >
                   {isCurrentPending ? (
                     <Loader2
@@ -221,13 +221,13 @@ export function LibraryClient({
             placeholder="Filter library..."
             value={filterQuery}
             onChange={(e) => setFilterQuery(e.target.value)}
-            className="pl-9"
+            size="icon"
           />
         </div>
       </div>
 
       <Tabs defaultValue="watching" className="w-full">
-        <TabsList className="flex w-full max-w-2xl flex-wrap justify-start gap-1 bg-muted/40 p-1">
+        <TabsList className="flex w-full max-w-2xl flex-wrap justify-start">
           <TabsTrigger value="watching">
             Watching ({watching.length})
           </TabsTrigger>
@@ -241,28 +241,38 @@ export function LibraryClient({
           <TabsTrigger value="dropped">Dropped ({dropped.length})</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="watching" className="pt-6">
-          {renderShelfGrid(
-            watching,
-            "No anime currently in watching status",
-            true
-          )}
+        <TabsContent value="watching">
+          <div className="pt-6">
+            {renderShelfGrid(
+              watching,
+              "No anime currently in watching status",
+              true
+            )}
+          </div>
         </TabsContent>
 
-        <TabsContent value="completed" className="pt-6">
-          {renderShelfGrid(completed, "No completed anime in library")}
+        <TabsContent value="completed">
+          <div className="pt-6">
+            {renderShelfGrid(completed, "No completed anime in library")}
+          </div>
         </TabsContent>
 
-        <TabsContent value="planning" className="pt-6">
-          {renderShelfGrid(planning, "No anime in plan to watch")}
+        <TabsContent value="planning">
+          <div className="pt-6">
+            {renderShelfGrid(planning, "No anime in plan to watch")}
+          </div>
         </TabsContent>
 
-        <TabsContent value="paused" className="pt-6">
-          {renderShelfGrid(paused, "No paused anime")}
+        <TabsContent value="paused">
+          <div className="pt-6">
+            {renderShelfGrid(paused, "No paused anime")}
+          </div>
         </TabsContent>
 
-        <TabsContent value="dropped" className="pt-6">
-          {renderShelfGrid(dropped, "No dropped anime")}
+        <TabsContent value="dropped">
+          <div className="pt-6">
+            {renderShelfGrid(dropped, "No dropped anime")}
+          </div>
         </TabsContent>
       </Tabs>
 

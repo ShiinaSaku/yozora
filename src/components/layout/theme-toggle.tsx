@@ -88,7 +88,7 @@ export function ThemeToggle() {
       variant="ghost"
       size="icon-sm"
       onClick={toggleTheme}
-      className="group size-9 cursor-pointer rounded-xl border-0 bg-transparent text-muted-foreground transition-colors duration-200 hover:bg-muted/60 hover:text-foreground active:scale-95"
+      className="group size-9 cursor-pointer active:scale-95"
       aria-label={`Toggle theme (currently ${theme})`}
       title={`Theme: ${theme}`}
     >

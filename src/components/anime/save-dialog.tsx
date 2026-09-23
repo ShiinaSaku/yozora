@@ -112,7 +112,7 @@ export function SaveDialog({ anime, open, onOpenChange }: SaveDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="p-6 sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader className="sr-only">
           <DialogTitle>Track {anime.title} in Library</DialogTitle>
           <DialogDescription>
@@ -135,12 +135,9 @@ export function SaveDialog({ anime, open, onOpenChange }: SaveDialogProps) {
               </p>
             </div>
             <SignInButton mode="modal">
-              <Button
-                size="default"
-                className="interactive-press rounded-xl font-semibold"
-              >
-                Sign In
-              </Button>
+              <div className="interactive-press">
+                <Button>Sign In</Button>
+              </div>
             </SignInButton>
           </div>
         ) : isEntryLoading ? (
@@ -195,15 +192,9 @@ function SaveHeaderCard({
 
       <Button
         type="button"
-        variant={favorite ? "secondary" : "outline"}
+        variant={favorite ? "rose" : "ghost"}
         size="sm"
         onClick={onToggleFavorite}
-        className={cn(
-          "h-9 shrink-0 gap-1.5 rounded-xl px-3 font-semibold transition-[color,background-color,border-color,transform]",
-          favorite
-            ? "border-rose-500/30 bg-rose-500/10 text-rose-500 hover:bg-rose-500/20"
-            : "text-muted-foreground hover:text-foreground"
-        )}
       >
         <Heart
           className={cn(
@@ -239,13 +230,7 @@ function SaveDeleteConfirm({
       </div>
 
       <div className="flex items-center justify-end gap-2 border-t border-destructive/15 pt-2">
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={onCancel}
-          className="rounded-xl text-xs font-semibold"
-        >
+        <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
           Keep in Library
         </Button>
         <Button
@@ -254,7 +239,6 @@ function SaveDeleteConfirm({
           size="sm"
           onClick={onConfirm}
           disabled={isPending}
-          className="gap-1.5 rounded-xl text-xs font-semibold"
         >
           {isPending && <Loader2 className="size-3.5 animate-spin" />}
           Yes, Remove
@@ -273,9 +257,7 @@ function SaveStatusSelector({
 }) {
   return (
     <Field>
-      <FieldLabel className="text-xs font-bold tracking-wider text-muted-foreground uppercase">
-        Watch Status
-      </FieldLabel>
+      <FieldLabel variant="subtle">Watch Status</FieldLabel>
       <div className="mt-1.5 grid grid-cols-2 gap-2 sm:grid-cols-3">
         {statusOptions.map((opt) => {
           const isSelected = status === opt.value
@@ -285,7 +267,7 @@ function SaveStatusSelector({
               type="button"
               onClick={() => onChange(opt.value)}
               className={cn(
-                "flex cursor-pointer items-center gap-2 rounded-xl border p-2.5 text-start text-xs font-semibold transition-[color,background-color,border-color] select-none",
+                "flex cursor-pointer items-center gap-2 rounded-xl border p-2.5 text-start text-xs font-semibold transition-colors select-none",
                 isSelected
                   ? cn("shadow-xs ring-1 ring-primary/30", opt.activeClass)
                   : "border-input bg-card/60 text-muted-foreground hover:bg-accent/40 hover:text-foreground"
@@ -320,17 +302,14 @@ function SaveEpisodeStepper({
   return (
     <Field>
       <div className="flex items-center justify-between">
-        <FieldLabel
-          htmlFor="progress"
-          className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
-        >
+        <FieldLabel htmlFor="progress" variant="subtle">
           Episode Progress
         </FieldLabel>
         {maxEpisodes > 0 ? (
           <button
             type="button"
             onClick={() => onChange(maxEpisodes)}
-            className="cursor-pointer text-[11px] font-semibold text-primary hover:underline"
+            className="cursor-pointer text-xs font-semibold text-primary hover:underline"
           >
             Set to Max ({maxEpisodes})
           </button>
@@ -341,10 +320,9 @@ function SaveEpisodeStepper({
         <Button
           type="button"
           variant="outline"
-          size="icon-sm"
+          size="icon"
           onClick={() => onChange(Math.max(0, progress - 1))}
           disabled={progress <= 0}
-          className="size-9 shrink-0 rounded-xl"
         >
           <Minus className="size-4" />
         </Button>
@@ -357,17 +335,16 @@ function SaveEpisodeStepper({
             max={maxEpisodes || 9999}
             value={progress}
             onChange={(e) => onChange(Number(e.target.value))}
-            className="h-9 rounded-xl text-center text-sm font-bold"
+            className="text-center"
           />
         </div>
 
         <Button
           type="button"
           variant="outline"
-          size="icon-sm"
+          size="icon"
           onClick={() => onChange(progress + 1)}
           disabled={maxEpisodes > 0 && progress >= maxEpisodes}
-          className="size-9 shrink-0 rounded-xl"
         >
           <Plus className="size-4" />
         </Button>
@@ -388,10 +365,7 @@ function SaveRatingInput({
 }) {
   return (
     <Field>
-      <FieldLabel
-        htmlFor="score"
-        className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
-      >
+      <FieldLabel htmlFor="score" variant="subtle">
         Rating Score (0–10)
       </FieldLabel>
       <div className="relative mt-1.5">
@@ -407,7 +381,7 @@ function SaveRatingInput({
           onChange={(e) =>
             onChange(e.target.value === "" ? "" : Number(e.target.value))
           }
-          className="h-9 rounded-xl pl-9 text-sm font-semibold"
+          size="icon"
         />
       </div>
       {error && <FieldError>{error}</FieldError>}
@@ -556,7 +530,7 @@ function SaveForm({
           noValidate
           className="flex flex-col gap-5"
         >
-          <FieldGroup className="gap-5">
+          <FieldGroup>
             <SaveStatusSelector
               status={form.status}
               onChange={(status) => setForm((prev) => ({ ...prev, status }))}
@@ -582,10 +556,7 @@ function SaveForm({
             </div>
 
             <Field>
-              <FieldLabel
-                htmlFor="notes"
-                className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
-              >
+              <FieldLabel htmlFor="notes" variant="subtle">
                 Personal Notes & Thoughts
               </FieldLabel>
               <Textarea
@@ -596,7 +567,7 @@ function SaveForm({
                   setForm((prev) => ({ ...prev, notes: e.target.value }))
                 }
                 rows={2}
-                className="mt-1.5 resize-none rounded-xl text-xs sm:text-sm"
+                className="mt-1.5 resize-none"
               />
             </Field>
           </FieldGroup>
@@ -605,10 +576,9 @@ function SaveForm({
             {existingEntry ? (
               <Button
                 type="button"
-                variant="ghost"
+                variant="destructive-outline"
                 size="sm"
                 onClick={() => setShowDeleteConfirm(true)}
-                className="h-9 gap-1.5 rounded-xl text-xs font-semibold text-destructive hover:bg-destructive/10"
               >
                 <Trash2 className="size-3.5" />
                 Remove
@@ -623,16 +593,10 @@ function SaveForm({
                 variant="outline"
                 size="sm"
                 onClick={onClose}
-                className="h-9 rounded-xl px-4 text-xs font-semibold"
               >
                 Cancel
               </Button>
-              <Button
-                type="submit"
-                size="sm"
-                disabled={saveMutation.isPending}
-                className="h-9 gap-1.5 rounded-xl px-5 text-xs font-bold"
-              >
+              <Button type="submit" size="sm" disabled={saveMutation.isPending}>
                 {saveMutation.isPending && (
                   <Loader2 className="size-3.5 animate-spin" />
                 )}

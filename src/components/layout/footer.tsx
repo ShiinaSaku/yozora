@@ -1,9 +1,8 @@
-import { HugeiconsIcon } from "@hugeicons/react"
-import { GithubIcon } from "@hugeicons/core-free-icons"
 import { usePathname } from "@/lib/navigation"
 import Link from "@/components/ui/link"
 import {
   DiscordIcon,
+  GithubIcon,
   XTwitterIcon,
   YouTubeIcon,
 } from "@/components/icons/platform-icons"
@@ -19,34 +18,22 @@ function DiscoverColumn() {
       <h3 className="text-sm font-semibold text-foreground">Discover</h3>
       <ul className="mt-4 grid gap-3 text-sm/relaxed text-muted-foreground">
         <li>
-          <Link
-            href="/"
-            className="transition-colors hover:text-foreground hover:underline"
-          >
+          <Link href="/" variant="underline">
             Trending Lineup
           </Link>
         </li>
         <li>
-          <Link
-            href="/seasonal"
-            className="transition-colors hover:text-foreground hover:underline"
-          >
+          <Link href="/seasonal" variant="underline">
             Seasonal Releases
           </Link>
         </li>
         <li>
-          <Link
-            href="/airing"
-            className="transition-colors hover:text-foreground hover:underline"
-          >
+          <Link href="/airing" variant="underline">
             Airing Countdown
           </Link>
         </li>
         <li>
-          <Link
-            href="/search?sort=SCORE_DESC"
-            className="transition-colors hover:text-foreground hover:underline"
-          >
+          <Link href="/search?sort=SCORE_DESC" variant="underline">
             Top Rated All-Time
           </Link>
         </li>
@@ -61,36 +48,27 @@ function SoundtracksColumn() {
       <h3 className="text-sm font-semibold text-foreground">Soundtracks</h3>
       <ul className="mt-4 grid gap-3 text-sm/relaxed text-muted-foreground">
         <li>
-          <Link
-            href="/about"
-            className="transition-colors hover:text-foreground hover:underline"
-          >
+          <Link href="/about" variant="underline">
             Opening Themes (OP)
           </Link>
         </li>
         <li>
-          <Link
-            href="/about"
-            className="transition-colors hover:text-foreground hover:underline"
-          >
+          <Link href="/about" variant="underline">
             Ending Themes (ED)
           </Link>
         </li>
         <li>
-          <a
+          <Link
             href="https://animethemes.moe"
             target="_blank"
             rel="noopener noreferrer"
-            className="transition-colors hover:text-foreground hover:underline"
+            variant="underline"
           >
             AnimeThemes Vault
-          </a>
+          </Link>
         </li>
         <li>
-          <Link
-            href="/about"
-            className="transition-colors hover:text-foreground hover:underline"
-          >
+          <Link href="/about" variant="underline">
             Audio Deck
           </Link>
         </li>
@@ -105,34 +83,22 @@ function LibraryColumn() {
       <h3 className="text-sm font-semibold text-foreground">Library</h3>
       <ul className="mt-4 grid gap-3 text-sm/relaxed text-muted-foreground">
         <li>
-          <Link
-            href="/library"
-            className="transition-colors hover:text-foreground hover:underline"
-          >
+          <Link href="/library" variant="underline">
             My Watchlist
           </Link>
         </li>
         <li>
-          <Link
-            href="/library"
-            className="transition-colors hover:text-foreground hover:underline"
-          >
+          <Link href="/library" variant="underline">
             Episode Progress
           </Link>
         </li>
         <li>
-          <Link
-            href="/library"
-            className="transition-colors hover:text-foreground hover:underline"
-          >
+          <Link href="/library" variant="underline">
             Custom Shelves
           </Link>
         </li>
         <li>
-          <Link
-            href="/settings/profile"
-            className="transition-colors hover:text-foreground hover:underline"
-          >
+          <Link href="/settings/profile" variant="underline">
             Profile Settings
           </Link>
         </li>
@@ -153,12 +119,7 @@ function CommunityColumn() {
             rel="noopener noreferrer"
             className="group inline-flex items-center gap-2.5 transition-colors hover:text-foreground hover:underline"
           >
-            <HugeiconsIcon
-              icon={GithubIcon}
-              size={15}
-              strokeWidth={2}
-              className="shrink-0 text-muted-foreground transition-colors group-hover:text-foreground"
-            />
+            <GithubIcon className="size-4 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground" />
             <span>GitHub</span>
           </a>
         </li>
@@ -169,7 +130,7 @@ function CommunityColumn() {
             rel="noopener noreferrer"
             className="group inline-flex items-center gap-2.5 transition-colors hover:text-foreground hover:underline"
           >
-            <DiscordIcon className="size-3.5 shrink-0 text-muted-foreground transition-colors group-hover:text-[#5865F2]" />
+            <DiscordIcon className="size-3.5 shrink-0 text-muted-foreground transition-colors group-hover:text-discord" />
             <span>Discord</span>
           </a>
         </li>
@@ -191,7 +152,7 @@ function CommunityColumn() {
             rel="noopener noreferrer"
             className="group inline-flex items-center gap-2.5 transition-colors hover:text-foreground hover:underline"
           >
-            <YouTubeIcon className="size-3.5 shrink-0 text-muted-foreground transition-colors group-hover:text-[#FF0000]" />
+            <YouTubeIcon className="size-3.5 shrink-0 text-muted-foreground transition-colors group-hover:text-youtube" />
             <span>YouTube</span>
           </a>
         </li>
@@ -238,35 +199,31 @@ export function FooterMeta({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "border-t border-border/40 px-6 py-8 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] md:pb-8",
+        "border-t border-border/40 px-6 py-8 pb-24 md:pb-8",
         className
       )}
     >
       <div className="mx-auto flex max-w-7xl flex-col items-start gap-6 sm:flex-row sm:items-center sm:justify-between sm:gap-8">
         <div className="flex items-center gap-3">
-          <Link href="/" className="interactive-press" aria-label="Yozora Home">
-            <BrandLogo className="size-6 transition-transform hover:scale-105" />
-          </Link>
+          <span className="interactive-press">
+            <Link href="/" aria-label="Yozora Home">
+              <BrandLogo className="size-6 transition-transform hover:scale-105" />
+            </Link>
+          </span>
           <ThemeToggle />
         </div>
         <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
           <span>Copyright © {currentYear} Yozora. All rights reserved.</span>
           <span className="hidden sm:inline">&middot;</span>
-          <Link
-            href="/privacy"
-            className="hover:text-foreground hover:underline"
-          >
+          <Link href="/privacy" variant="underline">
             Privacy Policy
           </Link>
           <span className="hidden sm:inline">&middot;</span>
-          <Link
-            href="/privacy"
-            className="hover:text-foreground hover:underline"
-          >
+          <Link href="/privacy" variant="underline">
             Terms of Service
           </Link>
           <span className="hidden sm:inline">&middot;</span>
-          <Link href="/about" className="hover:text-foreground hover:underline">
+          <Link href="/about" variant="underline">
             About
           </Link>
         </div>

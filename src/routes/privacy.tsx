@@ -71,26 +71,28 @@ function PrivacyPage() {
         </p>
       </div>
 
-      <Card className="prose dark:prose-invert max-w-none rounded-3xl border-border/50 bg-card p-8 text-sm leading-relaxed">
-        <h2>1. Authentication</h2>
-        <p>
-          User accounts and authentication are managed securely via Clerk. We do
-          not store plain-text passwords or sensitive credentials on our
-          servers.
-        </p>
+      <Card variant="subtle" size="none">
+        <div className="prose dark:prose-invert max-w-none p-8 text-sm leading-relaxed">
+          <h2>1. Authentication</h2>
+          <p>
+            User accounts and authentication are managed securely via Clerk. We
+            do not store plain-text passwords or sensitive credentials on our
+            servers.
+          </p>
 
-        <h2>2. Library & Profile Data</h2>
-        <p>
-          Your anime watchlist progress, ratings, and custom collections are
-          stored in our Postgres database. You can mark your library as private
-          or public at any time from your profile settings.
-        </p>
+          <h2>2. Library & Profile Data</h2>
+          <p>
+            Your anime watchlist progress, ratings, and custom collections are
+            stored in our Postgres database. You can mark your library as
+            private or public at any time from your profile settings.
+          </p>
 
-        <h2>3. Third-Party Integrations</h2>
-        <p>
-          Yozora interacts with public APIs including AniList GraphQL and
-          AnimeThemes to deliver catalog search and audio streams.
-        </p>
+          <h2>3. Third-Party Integrations</h2>
+          <p>
+            Yozora interacts with public APIs including AniList GraphQL and
+            AnimeThemes to deliver catalog search and audio streams.
+          </p>
+        </div>
       </Card>
     </div>
   )

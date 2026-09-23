@@ -35,13 +35,12 @@ type FormatFn = (prefix: string, suffix?: string, defaultText?: string) => void
 
 function MarkdownToolbar({ onFormat }: { onFormat: FormatFn }) {
   return (
-    <div className="no-scrollbar flex items-center gap-0.5 overflow-x-auto">
+    <div className="no-scrollbar flex items-center gap-0.5 overflow-x-auto text-muted-foreground">
       <Button
         type="button"
         variant="ghost"
         size="icon-xs"
         onClick={() => onFormat("### ", "", "Heading")}
-        className="size-7 rounded-lg text-muted-foreground hover:text-foreground"
         title="Heading (###)"
       >
         <Heading className="size-3.5" />
@@ -51,7 +50,6 @@ function MarkdownToolbar({ onFormat }: { onFormat: FormatFn }) {
         variant="ghost"
         size="icon-xs"
         onClick={() => onFormat("**", "**", "bold text")}
-        className="size-7 rounded-lg text-muted-foreground hover:text-foreground"
         title="Bold (⌘B)"
       >
         <Bold className="size-3.5" />
@@ -61,7 +59,6 @@ function MarkdownToolbar({ onFormat }: { onFormat: FormatFn }) {
         variant="ghost"
         size="icon-xs"
         onClick={() => onFormat("*", "*", "italic text")}
-        className="size-7 rounded-lg text-muted-foreground hover:text-foreground"
         title="Italic (⌘I)"
       >
         <Italic className="size-3.5" />
@@ -71,7 +68,6 @@ function MarkdownToolbar({ onFormat }: { onFormat: FormatFn }) {
         variant="ghost"
         size="icon-xs"
         onClick={() => onFormat("~~", "~~", "strikethrough")}
-        className="size-7 rounded-lg text-muted-foreground hover:text-foreground"
         title="Strikethrough"
       >
         <Strikethrough className="size-3.5" />
@@ -84,7 +80,6 @@ function MarkdownToolbar({ onFormat }: { onFormat: FormatFn }) {
         variant="ghost"
         size="icon-xs"
         onClick={() => onFormat("> ", "", "Quote")}
-        className="size-7 rounded-lg text-muted-foreground hover:text-foreground"
         title="Quote (>)"
       >
         <Quote className="size-3.5" />
@@ -94,7 +89,6 @@ function MarkdownToolbar({ onFormat }: { onFormat: FormatFn }) {
         variant="ghost"
         size="icon-xs"
         onClick={() => onFormat("`", "`", "code")}
-        className="size-7 rounded-lg text-muted-foreground hover:text-foreground"
         title="Inline Code"
       >
         <Code className="size-3.5" />
@@ -104,7 +98,6 @@ function MarkdownToolbar({ onFormat }: { onFormat: FormatFn }) {
         variant="ghost"
         size="icon-xs"
         onClick={() => onFormat("```ts\n", "\n```", "// code here")}
-        className="size-7 rounded-lg text-muted-foreground hover:text-foreground"
         title="Code Block"
       >
         <SquareCode className="size-3.5" />
@@ -117,7 +110,6 @@ function MarkdownToolbar({ onFormat }: { onFormat: FormatFn }) {
         variant="ghost"
         size="icon-xs"
         onClick={() => onFormat("- ", "", "List item")}
-        className="size-7 rounded-lg text-muted-foreground hover:text-foreground"
         title="Bullet List (-)"
       >
         <List className="size-3.5" />
@@ -127,7 +119,6 @@ function MarkdownToolbar({ onFormat }: { onFormat: FormatFn }) {
         variant="ghost"
         size="icon-xs"
         onClick={() => onFormat("1. ", "", "Numbered item")}
-        className="size-7 rounded-lg text-muted-foreground hover:text-foreground"
         title="Numbered List (1.)"
       >
         <ListOrdered className="size-3.5" />
@@ -137,7 +128,6 @@ function MarkdownToolbar({ onFormat }: { onFormat: FormatFn }) {
         variant="ghost"
         size="icon-xs"
         onClick={() => onFormat("- [ ] ", "", "Task item")}
-        className="size-7 rounded-lg text-muted-foreground hover:text-foreground"
         title="Task List (- [ ])"
       >
         <ListTodo className="size-3.5" />
@@ -150,7 +140,6 @@ function MarkdownToolbar({ onFormat }: { onFormat: FormatFn }) {
         variant="ghost"
         size="icon-xs"
         onClick={() => onFormat("[", "](https://)", "Link Title")}
-        className="size-7 rounded-lg text-muted-foreground hover:text-foreground"
         title="Insert Link (⌘K)"
       >
         <Link2 className="size-3.5" />
@@ -160,7 +149,6 @@ function MarkdownToolbar({ onFormat }: { onFormat: FormatFn }) {
         variant="ghost"
         size="icon-xs"
         onClick={() => onFormat("![", "](https://)", "Image Alt")}
-        className="size-7 rounded-lg text-muted-foreground hover:text-foreground"
         title="Insert Image"
       >
         <ImageIcon className="size-3.5" />
@@ -172,7 +160,6 @@ function MarkdownToolbar({ onFormat }: { onFormat: FormatFn }) {
         onClick={() =>
           onFormat("| Header 1 | Header 2 |\n|---|---|\n| Cell 1 | Cell 2 |\n")
         }
-        className="size-7 rounded-lg text-muted-foreground hover:text-foreground"
         title="Insert Table"
       >
         <TableIcon className="size-3.5" />
@@ -184,10 +171,9 @@ function MarkdownToolbar({ onFormat }: { onFormat: FormatFn }) {
         onClick={() =>
           onFormat("> [!TIP]\n> ", "", "Write your tip or note here")
         }
-        className="size-7 rounded-lg text-emerald-500 hover:bg-emerald-500/10"
         title="Insert GitHub Callout Alert"
       >
-        <Lightbulb className="size-3.5" />
+        <Lightbulb className="size-3.5 text-emerald-500" />
       </Button>
     </div>
   )
@@ -259,14 +245,14 @@ function MarkdownStatusBar({
   charCount: number
 }) {
   return (
-    <div className="flex shrink-0 items-center justify-between border-t border-border/40 bg-muted/20 px-4 py-2 font-mono text-[11px] text-muted-foreground">
+    <div className="flex shrink-0 items-center justify-between border-t border-border/40 bg-muted/20 px-4 py-2 font-mono text-xs text-muted-foreground">
       <div className="flex items-center gap-3">
         <span>{wordCount} words</span>
         <span>·</span>
         <span>{charCount} chars</span>
       </div>
 
-      <span className="flex items-center gap-1 text-[10px] text-muted-foreground/80">
+      <span className="flex items-center gap-1 text-xs text-muted-foreground/80">
         GitHub Flavored Markdown (GFM)
       </span>
     </div>
@@ -362,7 +348,7 @@ export function MarkdownEditor({
         )}
 
         {activeTab === "preview" && (
-          <div className={cn("max-h-[500px] overflow-y-auto p-5", minHeight)}>
+          <div className={cn("max-h-125 overflow-y-auto p-5", minHeight)}>
             {value.trim() ? (
               <MarkdownRenderer content={value} />
             ) : (
@@ -390,7 +376,7 @@ export function MarkdownEditor({
             />
             <div
               className={cn(
-                "max-h-[500px] overflow-y-auto bg-muted/10 p-4",
+                "max-h-125 overflow-y-auto bg-muted/10 p-4",
                 minHeight
               )}
             >

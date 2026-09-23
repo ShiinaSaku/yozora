@@ -17,7 +17,7 @@ export function ErrorPage({
   return (
     <div
       id="global-error-page-container"
-      className="container mx-auto flex min-h-[60vh] max-w-xl flex-col items-center justify-center gap-4 px-4 text-center"
+      className="container mx-auto flex min-h-120 max-w-xl flex-col items-center justify-center gap-4 px-4 text-center"
     >
       <h1 className="text-3xl font-black">Something went wrong</h1>
       <p className="text-sm text-muted-foreground">

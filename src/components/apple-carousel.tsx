@@ -433,9 +433,8 @@ function AppleCarouselContent({
       ref={viewportRef}
       data-slot="apple-carousel-content"
       className={cn(
-        "relative no-scrollbar snap-x snap-mandatory overflow-x-auto overflow-y-hidden data-animating:snap-none",
-        "[--apple-carousel-item-width:min(max(87.5cqw,var(--container-3xs)),var(--container-6xl))] [--apple-carousel-padding:max(6.25cqw,(100cqw-var(--container-6xl))/2)]",
-        "@max-3xl:scroll-ps-(--apple-carousel-padding) @max-3xl:[--apple-carousel-item-width:calc(max(87.5cqw,var(--container-3xs))-(--spacing(5)))]",
+        "apple-carousel-viewport relative no-scrollbar snap-x snap-mandatory overflow-x-auto overflow-y-hidden data-animating:snap-none",
+        "@max-3xl:scroll-ps-(--apple-carousel-padding)",
         className
       )}
       {...props}
@@ -508,7 +507,7 @@ function AppleCarouselItem({
       {...props}
     >
       <div
-        className="relative size-full overflow-hidden rounded-[inherit]"
+        className="relative size-full overflow-hidden rounded-4xl"
         inert={isClone || !isCurrent}
       >
         {children}
@@ -625,8 +624,8 @@ function AppleCarouselTab({
       className={cn(
         "relative mx-2 size-2 overflow-hidden rounded-full bg-muted-foreground not-data-current:hover:bg-foreground",
         // Width morphs on screen; the hover color is a quick, small change.
-        "transition-[width,background-color] duration-[400ms,150ms] ease-[cubic-bezier(0.645,0.045,0.355,1),ease]",
-        "motion-reduce:transition-colors motion-reduce:duration-150 motion-reduce:ease-[ease]",
+        "transition-all duration-300 ease-out",
+        "motion-reduce:transition-colors motion-reduce:duration-150",
         "data-current:w-12 @max-3xl:data-current:w-8",
         "focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-ring",
         className
@@ -646,7 +645,7 @@ function AppleCarouselTab({
         ref={isCurrent ? progressFillRef : undefined}
         aria-hidden
         data-slot="apple-carousel-tab-progress"
-        className="absolute inset-0 origin-left scale-x-0 rounded-[inherit] bg-foreground"
+        className="absolute inset-0 origin-left scale-x-0 rounded-full bg-foreground"
       />
       <span className="sr-only">{children}</span>
     </button>
@@ -694,7 +693,7 @@ function AppleCarouselPlayButton({
       data-slot="apple-carousel-play-button"
       className={cn(
         "flex size-14 items-center justify-center rounded-full bg-muted text-foreground",
-        "transition-[background-color,scale] duration-150 ease-out hover:bg-muted/80 active:scale-97 motion-reduce:active:scale-100",
+        "transition-all duration-150 ease-out hover:bg-muted/80 active:scale-97 motion-reduce:active:scale-100",
         "focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-ring",
         className
       )}

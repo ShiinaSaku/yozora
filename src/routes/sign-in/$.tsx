@@ -45,7 +45,7 @@ export const Route = createFileRoute("/sign-in/$")({
 function SignInPage() {
   const { redirect: redirectUrl } = Route.useSearch()
   return (
-    <div className="flex min-h-[70vh] items-center justify-center px-4 py-12">
+    <div className="flex min-h-140 items-center justify-center px-4 py-12">
       <Suspense
         fallback={
           <div className="h-96 w-80 animate-pulse rounded-2xl bg-muted/40" />

@@ -20,10 +20,6 @@ import {
 import { Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
-  buttonVariants,
-  navigationMenuTriggerStyle,
-} from "@/components/ui/button-variants"
-import {
   NavigationMenu,
   NavigationMenuContent,
   NavigationMenuItem,
@@ -86,17 +82,24 @@ function NavbarMobileSheet({
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetTrigger
-        aria-label="Open navigation menu"
-        className="interactive-press flex size-9 cursor-pointer items-center justify-center rounded-xl text-muted-foreground hover:bg-muted/50 hover:text-foreground md:hidden"
+        render={
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Open navigation menu"
+            className="md:hidden"
+          />
+        }
       >
         <Menu data-icon="inline-start" className="size-5" />
         <span className="sr-only">Open navigation menu</span>
       </SheetTrigger>
       <SheetContent
         side="left"
-        className="flex w-72 flex-col gap-6 p-6 sm:w-80"
+        className="w-72 sm:w-80"
       >
-        <SheetHeader className="text-left">
+        <div className="flex flex-col gap-6 p-6">
+          <SheetHeader className="text-left">
           <div className="flex items-center gap-3">
             <BrandLogo className="size-8" />
             <span className="text-base leading-none font-black tracking-tight text-foreground">
@@ -114,7 +117,7 @@ function NavbarMobileSheet({
           aria-label="Sidebar mobile navigation"
           className="flex flex-col gap-2"
         >
-          <div className="px-2 text-[11px] font-bold tracking-wider text-muted-foreground/70 uppercase">
+          <div className="px-2 text-xs font-bold tracking-wider text-muted-foreground/70 uppercase">
             Discover
           </div>
           {navLinks.map((link) => {
@@ -125,16 +128,7 @@ function NavbarMobileSheet({
                 key={link.href}
                 href={link.href}
                 onClick={() => onOpenChange(false)}
-                className={cn(
-                  buttonVariants({
-                    variant: isActive ? "secondary" : "ghost",
-                    size: "sm",
-                  }),
-                  "h-10 justify-start gap-3 rounded-xl px-3 font-semibold",
-                  isActive
-                    ? "bg-secondary text-secondary-foreground shadow-xs"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
+                variant={isActive ? "nav-link-active" : "nav-link"}
               >
                 <HugeiconsIcon
                   icon={link.icon}
@@ -147,22 +141,13 @@ function NavbarMobileSheet({
             )
           })}
 
-          <div className="px-2 pt-3 text-[11px] font-bold tracking-wider text-muted-foreground/70 uppercase">
+          <div className="px-2 pt-3 text-xs font-bold tracking-wider text-muted-foreground/70 uppercase">
             Platform
           </div>
           <Link
             href="/about"
             onClick={() => onOpenChange(false)}
-            className={cn(
-              buttonVariants({
-                variant: pathname === "/about" ? "secondary" : "ghost",
-                size: "sm",
-              }),
-              "h-10 justify-start gap-3 rounded-xl px-3 font-semibold",
-              pathname === "/about"
-                ? "bg-secondary text-secondary-foreground shadow-xs"
-                : "text-muted-foreground hover:text-foreground"
-            )}
+            variant={pathname === "/about" ? "nav-link-active" : "nav-link"}
           >
             <HugeiconsIcon
               icon={Video02Icon}
@@ -177,10 +162,7 @@ function NavbarMobileSheet({
             <Link
               href="/settings/profile"
               onClick={() => onOpenChange(false)}
-              className={cn(
-                buttonVariants({ variant: "ghost", size: "sm" }),
-                "h-10 justify-start gap-3 rounded-xl px-3 font-semibold text-muted-foreground hover:text-foreground"
-              )}
+              variant="nav-link"
             >
               <HugeiconsIcon
                 icon={UserIcon}
@@ -199,13 +181,14 @@ function NavbarMobileSheet({
                 collections.
               </p>
               <SignInButton mode="modal">
-                <Button size="sm" className="w-full rounded-xl font-semibold">
+                <Button size="sm" className="w-full">
                   Sign In / Sign Up
                 </Button>
               </SignInButton>
             </div>
           )}
         </nav>
+        </div>
       </SheetContent>
     </Sheet>
   )
@@ -223,16 +206,9 @@ function NavbarDesktopMenu({
   return (
     <nav aria-label="Main navigation" className="hidden items-center md:flex">
       <NavigationMenu>
-        <NavigationMenuList className="gap-1">
+        <NavigationMenuList>
           <NavigationMenuItem>
-            <NavigationMenuTrigger
-              className={cn(
-                "h-9 gap-1.5 rounded-xl px-3 text-xs font-semibold sm:text-sm",
-                isDiscoverActive
-                  ? "bg-secondary/70 text-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
+            <NavigationMenuTrigger variant={isDiscoverActive ? "nav-active" : "nav"}>
               <HugeiconsIcon
                 icon={Compass01Icon}
                 size={15}
@@ -241,85 +217,88 @@ function NavbarDesktopMenu({
               />
               <span>Discover</span>
             </NavigationMenuTrigger>
-            <NavigationMenuContent className="grid w-105 grid-cols-2 gap-2 rounded-2xl border-border/50 bg-card p-3 shadow-2xl">
-              <NavigationMenuLink
-                render={<Link href="/" aria-label="Explore Showcase" />}
-                className="group flex flex-col gap-1 rounded-xl p-2.5 transition-colors hover:bg-muted/70"
-              >
-                <div className="flex items-center gap-2 text-xs font-bold text-foreground transition-colors group-hover:text-primary">
-                  <HugeiconsIcon
-                    icon={Compass01Icon}
-                    size={15}
-                    strokeWidth={2}
-                    className="text-primary"
-                  />
-                  <span>Showcase</span>
-                </div>
-                <p className="text-[11px] leading-relaxed text-muted-foreground">
-                  Top spotlight anime & editor picks.
-                </p>
-              </NavigationMenuLink>
+            <NavigationMenuContent>
+              <div className="grid w-105 grid-cols-2 gap-2 p-1">
+                <NavigationMenuLink
+                  render={
+                    <Link href="/" variant="nav-item" aria-label="Explore Showcase">
+                      <div className="flex items-center gap-2 text-xs font-bold text-foreground transition-colors group-hover:text-primary">
+                        <HugeiconsIcon
+                          icon={Compass01Icon}
+                          size={15}
+                          strokeWidth={2}
+                          className="text-primary"
+                        />
+                        <span>Showcase</span>
+                      </div>
+                      <p className="text-xs leading-relaxed text-muted-foreground">
+                        Top spotlight anime & editor picks.
+                      </p>
+                    </Link>
+                  }
+                />
 
-              <NavigationMenuLink
-                render={
-                  <Link href="/seasonal" aria-label="Seasonal Anime Charts" />
-                }
-                className="group flex flex-col gap-1 rounded-xl p-2.5 transition-colors hover:bg-muted/70"
-              >
-                <div className="flex items-center gap-2 text-xs font-bold text-foreground transition-colors group-hover:text-primary">
-                  <HugeiconsIcon
-                    icon={Calendar03Icon}
-                    size={15}
-                    strokeWidth={2}
-                    className="text-amber-500"
-                  />
-                  <span>Seasonal Charts</span>
-                </div>
-                <p className="text-[11px] leading-relaxed text-muted-foreground">
-                  Seasonal release schedules.
-                </p>
-              </NavigationMenuLink>
+                <NavigationMenuLink
+                  render={
+                    <Link href="/seasonal" variant="nav-item" aria-label="Seasonal Anime Charts">
+                      <div className="flex items-center gap-2 text-xs font-bold text-foreground transition-colors group-hover:text-primary">
+                        <HugeiconsIcon
+                          icon={Calendar03Icon}
+                          size={15}
+                          strokeWidth={2}
+                          className="text-amber-500"
+                        />
+                        <span>Seasonal Charts</span>
+                      </div>
+                      <p className="text-xs leading-relaxed text-muted-foreground">
+                        Seasonal release schedules.
+                      </p>
+                    </Link>
+                  }
+                />
 
-              <NavigationMenuLink
-                render={<Link href="/airing" aria-label="Airing Anime Today" />}
-                className="group flex flex-col gap-1 rounded-xl p-2.5 transition-colors hover:bg-muted/70"
-              >
-                <div className="flex items-center gap-2 text-xs font-bold text-foreground transition-colors group-hover:text-primary">
-                  <HugeiconsIcon
-                    icon={RadioIcon}
-                    size={15}
-                    strokeWidth={2}
-                    className="text-rose-500"
-                  />
-                  <span>Airing Today</span>
-                </div>
-                <p className="text-[11px] leading-relaxed text-muted-foreground">
-                  Live episode countdown timers.
-                </p>
-              </NavigationMenuLink>
+                <NavigationMenuLink
+                  render={
+                    <Link href="/airing" variant="nav-item" aria-label="Airing Anime Today">
+                      <div className="flex items-center gap-2 text-xs font-bold text-foreground transition-colors group-hover:text-primary">
+                        <HugeiconsIcon
+                          icon={RadioIcon}
+                          size={15}
+                          strokeWidth={2}
+                          className="text-rose-500"
+                        />
+                        <span>Airing Today</span>
+                      </div>
+                      <p className="text-xs leading-relaxed text-muted-foreground">
+                        Live episode countdown timers.
+                      </p>
+                    </Link>
+                  }
+                />
 
-              <NavigationMenuLink
-                render={
-                  <Link
-                    href="/about"
-                    aria-label="About Yozora Soundtracks & Info"
-                  />
-                }
-                className="group flex flex-col gap-1 rounded-xl p-2.5 transition-colors hover:bg-muted/70"
-              >
-                <div className="flex items-center gap-2 text-xs font-bold text-foreground transition-colors group-hover:text-primary">
-                  <HugeiconsIcon
-                    icon={Video02Icon}
-                    size={15}
-                    strokeWidth={2}
-                    className="text-sky-500"
-                  />
-                  <span>Soundtracks & Info</span>
-                </div>
-                <p className="text-[11px] leading-relaxed text-muted-foreground">
-                  OP/ED themes and anime OSTs.
-                </p>
-              </NavigationMenuLink>
+                <NavigationMenuLink
+                  render={
+                    <Link
+                      href="/about"
+                      variant="nav-item"
+                      aria-label="About Yozora Soundtracks & Info"
+                    >
+                      <div className="flex items-center gap-2 text-xs font-bold text-foreground transition-colors group-hover:text-primary">
+                        <HugeiconsIcon
+                          icon={Video02Icon}
+                          size={15}
+                          strokeWidth={2}
+                          className="text-sky-500"
+                        />
+                        <span>Soundtracks & Info</span>
+                      </div>
+                      <p className="text-xs leading-relaxed text-muted-foreground">
+                        OP/ED themes and anime OSTs.
+                      </p>
+                    </Link>
+                  }
+                />
+              </div>
             </NavigationMenuContent>
           </NavigationMenuItem>
 
@@ -327,24 +306,21 @@ function NavbarDesktopMenu({
             <NavigationMenuItem>
               <NavigationMenuLink
                 render={
-                  <Link href="/library" aria-label="My Library & Watchlist" />
+                  <Link
+                    href="/library"
+                    variant={pathname === "/library" ? "nav-link-active" : "nav-link"}
+                    aria-label="My Library & Watchlist"
+                  >
+                    <HugeiconsIcon
+                      icon={Layers01Icon}
+                      size={15}
+                      strokeWidth={2}
+                      data-icon="inline-start"
+                    />
+                    <span>Library</span>
+                  </Link>
                 }
-                className={cn(
-                  navigationMenuTriggerStyle(),
-                  "h-9 cursor-pointer gap-2 rounded-xl px-3 text-xs font-semibold sm:text-sm",
-                  pathname === "/library"
-                    ? "bg-secondary text-secondary-foreground shadow-xs"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <HugeiconsIcon
-                  icon={Layers01Icon}
-                  size={15}
-                  strokeWidth={2}
-                  data-icon="inline-start"
-                />
-                <span>Library</span>
-              </NavigationMenuLink>
+              />
             </NavigationMenuItem>
           )}
         </NavigationMenuList>
@@ -363,20 +339,22 @@ function NavbarAuthControls({
   if (isSignedIn) {
     return (
       <div className="flex items-center gap-2">
-        <Link
-          href={userProfileUrl}
-          className="hidden items-center gap-1.5 rounded-full border border-border/40 bg-muted/40 px-3 py-1.5 text-xs font-semibold text-foreground/80 transition-all duration-150 hover:border-border/80 hover:bg-muted hover:text-foreground sm:inline-flex"
-          aria-label="My Profile"
-          title="My Profile"
-        >
-          <HugeiconsIcon
-            icon={UserIcon}
-            size={14}
-            strokeWidth={2.2}
-            className="text-primary"
-          />
-          <span>My Profile</span>
-        </Link>
+        <div className="hidden sm:block">
+          <Link
+            href={userProfileUrl}
+            variant="pill"
+            aria-label="My Profile"
+            title="My Profile"
+          >
+            <HugeiconsIcon
+              icon={UserIcon}
+              size={14}
+              strokeWidth={2.2}
+              className="text-primary"
+            />
+            <span>My Profile</span>
+          </Link>
+        </div>
         <UserButton
           userProfileMode="navigation"
           userProfileUrl="/settings/profile?tab=account"
@@ -409,33 +387,34 @@ function NavbarAuthControls({
 
   return (
     <div className="flex items-center gap-1.5 sm:gap-2">
-      <SignInButton mode="modal">
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label="Sign in"
-          className="size-9 rounded-xl text-muted-foreground hover:text-foreground sm:hidden"
-        >
-          <HugeiconsIcon icon={UserIcon} size={17} strokeWidth={2} />
-        </Button>
-      </SignInButton>
-      <SignInButton mode="modal">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="hidden rounded-xl px-2.5 text-xs sm:inline-flex sm:px-3 sm:text-sm"
-        >
-          Sign In
-        </Button>
-      </SignInButton>
-      <SignUpButton mode="modal">
-        <Button
-          size="sm"
-          className="hidden rounded-xl px-3 text-xs font-semibold sm:inline-flex sm:px-4 sm:text-sm"
-        >
-          Sign Up
-        </Button>
-      </SignUpButton>
+      <div className="sm:hidden">
+        <SignInButton mode="modal">
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Sign in"
+          >
+            <HugeiconsIcon icon={UserIcon} size={17} strokeWidth={2} />
+          </Button>
+        </SignInButton>
+      </div>
+      <div className="hidden sm:flex sm:items-center sm:gap-2">
+        <SignInButton mode="modal">
+          <Button
+            variant="ghost"
+            size="sm"
+          >
+            Sign In
+          </Button>
+        </SignInButton>
+        <SignUpButton mode="modal">
+          <Button
+            size="sm"
+          >
+            Sign Up
+          </Button>
+        </SignUpButton>
+      </div>
     </div>
   )
 }
@@ -467,7 +446,7 @@ function NavbarMobileBottomBar({
           <Link
             key={link.href}
             href={link.href}
-            className="interactive-press flex min-w-0 flex-1 flex-col items-center justify-center rounded-xl px-0.5 py-1 transition-colors"
+            variant="nav-icon"
           >
             <div
               className={`flex size-7 items-center justify-center rounded-lg ${isActive ? "text-primary" : ""}`}
@@ -481,7 +460,7 @@ function NavbarMobileBottomBar({
             </div>
             <span
               className={cn(
-                "mt-0.5 text-[10px] leading-none",
+                "mt-0.5 text-xs leading-none",
                 isActive ? "font-bold text-primary" : "text-muted-foreground"
               )}
             >
@@ -500,13 +479,13 @@ function NavbarMobileBottomBar({
         <div className="flex size-7 items-center justify-center rounded-lg">
           <HugeiconsIcon icon={Search01Icon} size={19} strokeWidth={2} />
         </div>
-        <span className="mt-0.5 text-[10px] leading-none">Search</span>
+        <span className="mt-0.5 text-xs leading-none">Search</span>
       </button>
 
       {isSignedIn && (
         <Link
           href="/settings/profile"
-          className="interactive-press flex min-w-0 flex-1 flex-col items-center justify-center rounded-xl px-0.5 py-1 transition-colors"
+          variant="nav-icon"
         >
           <div
             className={`flex size-7 items-center justify-center rounded-lg ${pathname === "/settings/profile" ? "text-primary" : ""}`}
@@ -520,7 +499,7 @@ function NavbarMobileBottomBar({
           </div>
           <span
             className={cn(
-              "mt-0.5 text-[10px] leading-none",
+              "mt-0.5 text-xs leading-none",
               pathname === "/settings/profile"
                 ? "font-bold text-primary"
                 : "text-muted-foreground"
@@ -598,7 +577,7 @@ export function Navbar() {
 
             <Link
               href="/"
-              className="group interactive-press flex shrink-0 items-center gap-2.5 sm:gap-3"
+              variant="brand"
             >
               <BrandLogo className="size-9 transition-transform duration-200 group-hover:scale-105" />
               <span className="hidden text-lg leading-none font-black tracking-tight text-foreground sm:inline-block">
@@ -615,10 +594,9 @@ export function Navbar() {
 
           <div className="flex items-center gap-2 sm:gap-3">
             <Button
-              variant="outline"
-              size="sm"
+              variant="nav-search"
+              size="nav-search"
               onClick={() => setSearchOpen(true)}
-              className="interactive-press flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl border-border/70 bg-background/50 p-0 text-muted-foreground hover:bg-accent/40 hover:text-foreground sm:h-9 sm:w-60 sm:justify-between sm:px-3 md:w-64"
               aria-label="Search anime and characters (Press Command K)"
             >
               <div className="flex min-w-0 items-center gap-2 sm:pr-2">
@@ -632,8 +610,8 @@ export function Navbar() {
                   Search anime, titles...
                 </span>
               </div>
-              <kbd className="pointer-events-none hidden h-5 shrink-0 items-center gap-0.5 rounded border border-border/80 bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-90 select-none sm:flex">
-                <span className="text-[11px]">⌘</span>K
+              <kbd className="pointer-events-none hidden h-5 shrink-0 items-center gap-0.5 rounded border border-border/80 bg-muted px-1.5 font-mono text-xs font-medium text-muted-foreground opacity-90 select-none sm:flex">
+                <span>⌘</span>K
               </kbd>
             </Button>
 

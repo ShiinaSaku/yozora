@@ -38,14 +38,14 @@ function PreBlock({
   return (
     <div className="group relative my-4 overflow-hidden rounded-xl border border-border/60 bg-muted/40 shadow-xs">
       {/* Code Header Bar */}
-      <div className="flex items-center justify-between border-b border-border/40 bg-muted/70 px-3.5 py-1.5 font-mono text-[11px] text-muted-foreground">
-        <span className="text-[10px] font-semibold tracking-wider uppercase">
+      <div className="flex items-center justify-between border-b border-border/40 bg-muted/70 px-3.5 py-1.5 font-mono text-xs text-muted-foreground">
+        <span className="text-xs font-semibold tracking-wider uppercase">
           {displayLang}
         </span>
         <button
           type="button"
           onClick={handleCopy}
-          className="flex cursor-pointer items-center gap-1 rounded-md px-2 py-0.5 font-sans text-[10px] font-medium transition-[color,background-color,transform] hover:bg-background/80 hover:text-foreground active:scale-95"
+          className="flex cursor-pointer items-center gap-1 rounded-md px-2 py-0.5 font-sans text-xs font-medium transition-all hover:bg-background/80 hover:text-foreground active:scale-95"
           title="Copy code"
         >
           {copied ? (
@@ -118,7 +118,7 @@ const markdownComponents: MarkdownComponents = {
     }
     return (
       <code
-        className="rounded-md border border-border/40 bg-muted/80 px-1.5 py-0.5 font-mono text-[11px] font-medium text-foreground"
+        className="rounded-md border border-border/40 bg-muted/80 px-1.5 py-0.5 font-mono text-xs font-medium text-foreground"
         {...props}
       >
         {children}

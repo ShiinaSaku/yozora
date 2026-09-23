@@ -29,7 +29,7 @@ export function AnimeDetailSidebar({
   return (
     <div className="flex flex-col gap-6">
       {anime.nextAiring && (
-        <Card className="flex flex-col gap-2.5 rounded-2xl border-emerald-500/30 bg-emerald-500/5 p-4">
+        <Card variant="success" size="sm">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="flex size-7 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-500">
@@ -39,15 +39,12 @@ export function AnimeDetailSidebar({
                 Episode {anime.nextAiring.episode} Broadcasting
               </span>
             </div>
-            <Badge
-              variant="secondary"
-              className="border-emerald-500/20 bg-emerald-500/10 font-mono text-[10px] text-emerald-500"
-            >
+            <Badge variant="success">
               {formatCountdownRemaining(anime.nextAiring.timeUntilAiring)}
             </Badge>
           </div>
           {isClient && (
-            <div className="flex flex-col gap-1 border-t border-emerald-500/15 pt-2 text-[11px] text-muted-foreground">
+            <div className="flex flex-col gap-1 border-t border-emerald-500/15 pt-2 text-xs text-muted-foreground">
               <div className="flex items-center gap-1.5 font-medium text-foreground">
                 <HugeiconsIcon
                   icon={Calendar03Icon}
@@ -56,7 +53,7 @@ export function AnimeDetailSidebar({
                 />
                 <span>{formatAiringSchedule(anime.nextAiring.airingAt)}</span>
               </div>
-              <span className="flex items-center gap-1 font-mono text-[10px] text-muted-foreground">
+              <span className="flex items-center gap-1 font-mono text-xs text-muted-foreground">
                 <HugeiconsIcon icon={Globe02Icon} size={10} strokeWidth={2} />
                 Adjusted to {timeZone}
               </span>
@@ -65,7 +62,7 @@ export function AnimeDetailSidebar({
         </Card>
       )}
 
-      <Card className="flex flex-col gap-4 rounded-2xl border-border/50 bg-card p-6">
+      <Card size="lg">
         <h3 className="text-sm font-bold tracking-wider text-muted-foreground uppercase">
           Information
         </h3>
@@ -117,7 +114,7 @@ export function AnimeDetailSidebar({
             </span>
             <div className="flex flex-wrap gap-1.5">
               {anime.tags.map((tag) => (
-                <Badge key={tag} variant="secondary" className="text-xs">
+                <Badge key={tag} variant="secondary">
                   {tag}
                 </Badge>
               ))}
@@ -127,7 +124,7 @@ export function AnimeDetailSidebar({
       </Card>
 
       {externalLinks && externalLinks.length > 0 && (
-        <Card className="flex flex-col gap-4 rounded-2xl border-border/50 bg-card p-6">
+        <Card size="lg">
           <h3 className="text-sm font-bold tracking-wider text-muted-foreground uppercase">
             Official & Streaming Links
           </h3>
@@ -142,7 +139,7 @@ export function AnimeDetailSidebar({
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group flex items-center justify-between rounded-xl border border-border/40 bg-muted/20 p-3 text-xs font-semibold transition-[background-color,border-color] hover:border-primary/40 hover:bg-muted/50"
+                  className="group flex items-center justify-between rounded-xl border border-border/40 bg-muted/20 p-3 text-xs font-semibold transition-colors hover:border-primary/40 hover:bg-muted/50"
                 >
                   <div className="flex min-w-0 items-center gap-2.5">
                     <div

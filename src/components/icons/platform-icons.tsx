@@ -1,4 +1,16 @@
 import * as React from "react"
+import { siGithub } from "simple-icons"
+
+/**
+ * Official GitHub Logo from Simple Icons
+ */
+export function GithubIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" {...props}>
+      <path d={siGithub.path} />
+    </svg>
+  )
+}
 
 /**
  * Official Crunchyroll Logo Mark

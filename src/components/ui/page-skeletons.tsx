@@ -11,12 +11,12 @@ function AnimeCardSkeleton() {
       <div className="relative aspect-3/4 w-full overflow-hidden bg-muted" />
       <div className="flex flex-1 flex-col justify-between p-3">
         <div>
-          <Skeleton className="h-4 w-4/5 rounded-md" />
-          <Skeleton className="mt-1 h-3 w-2/5 rounded-md" />
+          <Skeleton variant="md" className="h-4 w-4/5" />
+          <Skeleton variant="md" className="mt-1 h-3 w-2/5" />
         </div>
         <div className="mt-2 flex gap-1">
-          <Skeleton className="h-3 w-12 rounded-md" />
-          <Skeleton className="h-3 w-10 rounded-md" />
+          <Skeleton variant="md" className="h-3 w-12" />
+          <Skeleton variant="md" className="h-3 w-10" />
         </div>
       </div>
     </div>
@@ -44,10 +44,10 @@ function SectionHeaderSkeleton() {
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-2.5">
-        <Skeleton className="size-8 rounded-lg" />
+        <Skeleton variant="lg" className="size-8" />
         <div className="flex flex-col gap-1.5">
-          <Skeleton className="h-5 w-36 rounded-md" />
-          <Skeleton className="h-3 w-56 max-w-full rounded-md" />
+          <Skeleton variant="md" className="h-5 w-36" />
+          <Skeleton variant="md" className="h-3 w-56 max-w-full" />
         </div>
       </div>
     </div>
@@ -67,22 +67,26 @@ export function HomeSkeleton() {
       <section className="relative w-full space-y-4">
         <div className="overflow-hidden py-1">
           <div className="-ml-4 flex sm:-ml-6">
-            <div className="flex-none basis-[94%] pl-4 sm:basis-[88%] sm:pl-6 lg:basis-[82%] xl:basis-[78%]">
-              <Skeleton className="h-105 w-full rounded-3xl sm:h-120 lg:h-127.5" />
+            <div className="flex-none basis-11/12 pl-4 sm:basis-7/8 sm:pl-6 lg:basis-5/6 xl:basis-4/5">
+              <Skeleton
+                variant="3xl"
+                className="h-105 w-full sm:h-120 lg:h-127.5"
+              />
             </div>
           </div>
         </div>
         <div className="flex items-center justify-between px-2 sm:px-4">
-          <Skeleton className="size-9 rounded-full" />
+          <Skeleton variant="full" className="size-9" />
           <div className="flex items-center gap-2">
             {Array.from({ length: 5 }, (_, i) => (
               <Skeleton
                 key={`spot-dot-${i}`}
-                className="size-2.5 rounded-full"
+                variant="full"
+                className="size-2.5"
               />
             ))}
           </div>
-          <Skeleton className="size-9 rounded-full" />
+          <Skeleton variant="full" className="size-9" />
         </div>
       </section>
 
@@ -108,13 +112,13 @@ export function CatalogPageSkeleton() {
     >
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-3.5">
-          <Skeleton className="size-11 shrink-0 rounded-2xl" />
+          <Skeleton variant="2xl" className="size-11 shrink-0" />
           <div className="flex flex-col gap-1.5">
-            <Skeleton className="h-7 w-56 max-w-full rounded-md" />
-            <Skeleton className="h-4 w-80 max-w-full rounded-md" />
+            <Skeleton variant="md" className="h-7 w-56 max-w-full" />
+            <Skeleton variant="md" className="h-4 w-80 max-w-full" />
           </div>
         </div>
-        <Skeleton className="h-9 w-full max-w-xs rounded-xl" />
+        <Skeleton variant="xl" className="h-9 w-full max-w-xs" />
       </div>
       <AnimeGridSkeleton count={12} />
     </div>
@@ -128,14 +132,14 @@ export function CatalogPageSkeleton() {
 function AiringCardSkeleton() {
   return (
     <div className="flex gap-4 rounded-2xl border border-border/50 bg-card p-3">
-      <Skeleton className="relative h-28 w-20 shrink-0 rounded-2xl" />
+      <Skeleton variant="2xl" className="relative h-28 w-20 shrink-0" />
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-        <Skeleton className="h-4 w-4/5 rounded-md" />
-        <Skeleton className="h-3 w-3/5 rounded-md" />
-        <Skeleton className="h-3 w-2/5 rounded-md" />
+        <Skeleton variant="md" className="h-4 w-4/5" />
+        <Skeleton variant="md" className="h-3 w-3/5" />
+        <Skeleton variant="md" className="h-3 w-2/5" />
         <div className="mt-auto flex gap-1.5 border-t border-border/30 pt-2">
-          <Skeleton className="h-3 w-16 rounded-md" />
-          <Skeleton className="h-3 w-10 rounded-md" />
+          <Skeleton variant="md" className="h-3 w-16" />
+          <Skeleton variant="md" className="h-3 w-10" />
         </div>
       </div>
     </div>
@@ -153,13 +157,13 @@ export function AiringPageSkeleton() {
     >
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-3.5">
-          <Skeleton className="size-11 shrink-0 rounded-2xl" />
+          <Skeleton variant="2xl" className="size-11 shrink-0" />
           <div className="flex flex-col gap-1.5">
-            <Skeleton className="h-7 w-48 max-w-full rounded-md" />
-            <Skeleton className="h-4 w-80 max-w-full rounded-md" />
+            <Skeleton variant="md" className="h-7 w-48 max-w-full" />
+            <Skeleton variant="md" className="h-4 w-80 max-w-full" />
           </div>
         </div>
-        <Skeleton className="h-9 w-full max-w-xs rounded-xl" />
+        <Skeleton variant="xl" className="h-9 w-full max-w-xs" />
       </div>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 6 }, (_, i) => (
@@ -181,19 +185,22 @@ export function DetailPageSkeleton() {
       aria-hidden="true"
     >
       <div className="flex flex-col items-start gap-8 md:flex-row">
-        <Skeleton className="mx-auto h-80 w-56 shrink-0 rounded-2xl md:mx-0" />
+        <Skeleton
+          variant="2xl"
+          className="mx-auto h-80 w-56 shrink-0 md:mx-0"
+        />
         <div className="flex w-full min-w-0 flex-1 flex-col gap-4">
-          <Skeleton className="h-4 w-28 rounded-md" />
-          <Skeleton className="h-10 w-full max-w-lg rounded-xl" />
-          <Skeleton className="h-10 w-2/3 max-w-sm rounded-xl" />
+          <Skeleton variant="md" className="h-4 w-28" />
+          <Skeleton variant="xl" className="h-10 w-full max-w-lg" />
+          <Skeleton variant="xl" className="h-10 w-2/3 max-w-sm" />
           <div className="mt-2 flex flex-col gap-2">
-            <Skeleton className="h-3 w-full rounded-md" />
-            <Skeleton className="h-3 w-5/6 rounded-md" />
-            <Skeleton className="h-3 w-3/4 rounded-md" />
+            <Skeleton variant="md" className="h-3 w-full" />
+            <Skeleton variant="md" className="h-3 w-5/6" />
+            <Skeleton variant="md" className="h-3 w-3/4" />
           </div>
           <div className="mt-2 flex gap-3">
-            <Skeleton className="h-10 w-36 rounded-xl" />
-            <Skeleton className="h-10 w-36 rounded-xl" />
+            <Skeleton variant="xl" className="h-10 w-36" />
+            <Skeleton variant="xl" className="h-10 w-36" />
           </div>
         </div>
       </div>

@@ -3,7 +3,6 @@ import { cva } from "class-variance-authority"
 import type { VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
-import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 
 function FieldSet({ className, ...props }: React.ComponentProps<"fieldset">) {
@@ -97,18 +96,31 @@ function FieldContent({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+const fieldLabelVariants = cva(
+  "group/field-label peer/field-label flex w-fit gap-2 text-sm leading-snug font-medium select-none group-data-[disabled=true]/field:opacity-50 has-data-checked:border-primary/30 has-data-checked:bg-primary/5 has-[>[data-slot=field]]:w-full has-[>[data-slot=field]]:flex-col has-[>[data-slot=field]]:rounded-xl has-[>[data-slot=field]]:border has-[>[data-slot=field]]:not-has-[:disabled,[data-disabled]]:hover:bg-input/40 has-[>[data-slot=field]]:has-[:focus-visible]:border-ring has-[>[data-slot=field]]:has-[:focus-visible]:ring-2 has-[>[data-slot=field]]:has-[:focus-visible]:ring-ring/50 *:data-[slot=field]:p-4 dark:has-data-checked:border-primary/20 dark:has-data-checked:bg-primary/10",
+  {
+    variants: {
+      variant: {
+        default: "",
+        subtle:
+          "text-xs font-bold tracking-wider text-muted-foreground uppercase",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+)
+
 function FieldLabel({
   className,
+  variant,
   ...props
-}: React.ComponentProps<typeof Label>) {
+}: React.ComponentProps<"label"> & VariantProps<typeof fieldLabelVariants>) {
   return (
-    <Label
+    <label
       data-slot="field-label"
-      className={cn(
-        "group/field-label peer/field-label flex w-fit gap-2 leading-snug group-data-[disabled=true]/field:opacity-50 has-data-checked:border-primary/30 has-data-checked:bg-primary/5 has-[>[data-slot=field]]:rounded-xl has-[>[data-slot=field]]:border has-[>[data-slot=field]]:not-has-[:disabled,[data-disabled]]:hover:bg-input/40 has-[>[data-slot=field]]:has-[:focus-visible]:border-ring has-[>[data-slot=field]]:has-[:focus-visible]:ring-[3px] has-[>[data-slot=field]]:has-[:focus-visible]:ring-ring/50 *:data-[slot=field]:p-4 dark:has-data-checked:border-primary/20 dark:has-data-checked:bg-primary/10",
-        "has-[>[data-slot=field]]:w-full has-[>[data-slot=field]]:flex-col",
-        className
-      )}
+      className={cn(fieldLabelVariants({ variant }), className)}
       {...props}
     />
   )

@@ -68,7 +68,7 @@ export function ThemeVideoPlayer({
               fill
               unoptimized
               sizes="40px"
-              className="object-cover transition-transform duration-300 hover:scale-105"
+              variant="thumb"
             />
           </div>
           <div className="flex min-w-0 flex-col gap-0.5">
@@ -77,12 +77,12 @@ export function ThemeVideoPlayer({
                 {activeTheme.title ||
                   `${activeTheme.type} ${activeTheme.sequence || 1}`}
               </span>
-              <Badge className="shrink-0 rounded-full border-primary/40 bg-primary/15 px-2 py-0 font-mono text-[9px] font-bold tracking-wider text-primary shadow-xs">
+              <Badge variant="tag">
                 {activeTheme.type}
                 {activeTheme.sequence || 1}
               </Badge>
             </div>
-            <span className="max-w-44 truncate text-[11px] font-medium text-zinc-400 sm:max-w-sm sm:text-xs">
+            <span className="max-w-44 truncate text-xs font-medium text-zinc-400 sm:max-w-sm sm:text-xs">
               {activeTheme.artists.length > 0
                 ? activeTheme.artists.join(", ")
                 : animeTitle}
@@ -124,7 +124,7 @@ export function ThemeVideoPlayer({
             type="button"
             onClick={() => setMode((m) => (m === "video" ? "audio" : "video"))}
             className={cn(
-              "inline-flex cursor-pointer items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold backdrop-blur-md transition-all active:scale-95 sm:px-3 sm:text-xs",
+              "inline-flex cursor-pointer items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold backdrop-blur-md transition-all active:scale-95 sm:px-3",
               mode === "audio"
                 ? "border border-emerald-500/30 bg-emerald-500/15 text-emerald-300 shadow-xs hover:bg-emerald-500/25"
                 : "border border-white/10 bg-white/5 text-zinc-200 hover:border-white/20 hover:bg-white/15 hover:text-white"
@@ -178,7 +178,7 @@ export function ThemeVideoPlayer({
               onPlayingChange?.(false)
               onPlayNext?.()
             }}
-            className="block h-auto max-h-[72vh] w-full max-w-full bg-black object-contain outline-none"
+            className="block h-auto max-h-160 w-full max-w-full bg-black object-contain outline-none"
           />
         </div>
       ) : (
@@ -197,11 +197,11 @@ export function ThemeVideoPlayer({
 
           {/* Vinyl Record Visualizer */}
           <div className="relative z-10 flex flex-col items-center gap-4 text-center">
-            <div className="relative size-32 rounded-full border border-white/15 bg-zinc-950 p-2 shadow-[0_0_50px_rgba(0,0,0,0.8),inset_0_0_20px_rgba(255,255,255,0.05)] ring-1 ring-white/10 sm:size-40">
+            <div className="relative size-32 rounded-full border border-white/15 bg-zinc-950 p-2 shadow-2xl ring-1 inset-shadow-xs ring-white/10 sm:size-40">
               <div
                 className={cn(
-                  "flex size-full items-center justify-center rounded-full bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-zinc-800 via-zinc-950 to-zinc-900 shadow-inner",
-                  isPlaying ? "animate-[spin_12s_linear_infinite]" : ""
+                  "flex size-full items-center justify-center rounded-full bg-radial from-zinc-800 via-zinc-950 to-zinc-900 shadow-inner",
+                  isPlaying ? "animate-spin-slow" : ""
                 )}
               >
                 <div className="relative size-16 overflow-hidden rounded-full border-2 border-zinc-900 shadow-lg sm:size-20">
@@ -220,7 +220,7 @@ export function ThemeVideoPlayer({
 
             <div className="flex flex-col items-center gap-1">
               <div className="flex items-center gap-2">
-                <Badge className="rounded-full border-primary/40 bg-primary/15 px-2 py-0.5 font-mono text-[10px] font-bold text-primary shadow-xs">
+                <Badge variant="tag">
                   {activeTheme.type}
                   {activeTheme.sequence || 1}
                 </Badge>

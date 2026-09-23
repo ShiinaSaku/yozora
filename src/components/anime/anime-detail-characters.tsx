@@ -32,7 +32,8 @@ export function AnimeDetailCharacters({
           <Link
             key={char.id}
             href={getCharacterUrl({ id: char.id, name: { full: char.name } })}
-            className="group flex items-center justify-between rounded-xl border border-border/40 bg-card p-2.5 transition-[border-color,background-color] hover:bg-muted/40"
+            variant="card-character"
+            className="group flex items-center justify-between"
           >
             <div className="flex min-w-0 items-center gap-3">
               <div className="relative size-12 shrink-0 overflow-hidden rounded-lg bg-muted">
@@ -49,7 +50,7 @@ export function AnimeDetailCharacters({
                 <span className="truncate text-sm font-semibold text-foreground transition-colors group-hover:text-primary">
                   {char.name}
                 </span>
-                <span className="text-[11px] text-muted-foreground capitalize">
+                <span className="text-xs text-muted-foreground capitalize">
                   {char.role.toLowerCase()}
                 </span>
               </div>
@@ -61,7 +62,7 @@ export function AnimeDetailCharacters({
                   <span className="max-w-28 truncate text-xs font-medium text-foreground">
                     {char.voiceActor.name}
                   </span>
-                  <span className="text-[10px] text-muted-foreground">
+                  <span className="text-xs text-muted-foreground">
                     {char.voiceActor.language || "Japanese"}
                   </span>
                 </div>

@@ -115,7 +115,8 @@ export function HomePageClient({
           <Link
             id="view-all-seasonal-link"
             href="/seasonal"
-            className="group flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+            variant="primary"
+            className="group flex items-center"
           >
             <span>View Seasonal Chart</span>
             <HugeiconsIcon
@@ -221,7 +222,8 @@ export function AiringRadarSection({ items }: { items: AiringScheduleItem[] }) {
         <Link
           id="view-full-schedule-link"
           href="/airing"
-          className="group flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+          variant="primary"
+          className="group flex items-center"
         >
           <span>Full Schedule</span>
           <HugeiconsIcon
@@ -240,7 +242,8 @@ export function AiringRadarSection({ items }: { items: AiringScheduleItem[] }) {
             key={item.id}
             id={`airing-radar-item-${item.id}`}
             href={getAnimeUrl(item.media)}
-            className="group flex items-center gap-3.5 rounded-2xl border border-border/40 bg-card p-3 transition-[background-color,border-color,transform] duration-150 hover:border-border hover:bg-muted/50 active:scale-98"
+            variant="card-sm"
+            className="group flex items-center active:scale-95"
           >
             <div className="relative size-14 shrink-0 overflow-hidden rounded-xl border border-border/50 bg-muted">
               <Image
@@ -249,14 +252,14 @@ export function AiringRadarSection({ items }: { items: AiringScheduleItem[] }) {
                 fill
                 unoptimized
                 sizes="56px"
-                className="object-cover transition-transform duration-200 group-hover:scale-105"
+                variant="zoom"
               />
             </div>
             <div className="flex min-w-0 flex-1 flex-col">
               <span className="truncate text-xs font-bold text-foreground transition-colors group-hover:text-primary sm:text-sm">
                 {item.media.title}
               </span>
-              <span className="mt-0.5 font-mono text-[11px] text-muted-foreground">
+              <span className="mt-0.5 font-mono text-xs text-muted-foreground">
                 Episode {item.episode}
               </span>
             </div>

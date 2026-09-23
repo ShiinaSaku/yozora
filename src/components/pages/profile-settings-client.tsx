@@ -317,8 +317,8 @@ export function ProfileSettingsClient({
         </p>
       </div>
 
-      <div className="flex flex-col gap-8 md:grid md:grid-cols-[220px_1fr] lg:grid-cols-[240px_1fr]">
-        <aside className="no-scrollbar flex shrink-0 gap-1 overflow-x-auto pb-2 md:flex-col md:overflow-x-visible md:pb-0">
+      <div className="flex flex-col gap-8 md:flex-row">
+        <aside className="no-scrollbar flex shrink-0 gap-1 overflow-x-auto pb-2 md:w-56 md:flex-col md:overflow-x-visible md:pb-0 lg:w-60">
           {TABS.map((tab) => {
             const Icon = tab.icon
             const isSelected = activeTab === tab.id
@@ -378,8 +378,8 @@ export function ProfileSettingsClient({
               <div className="flex justify-end">
                 <Button
                   type="submit"
+                  size="hero"
                   disabled={saveMutation.isPending}
-                  className="cursor-pointer rounded-xl px-6 font-bold"
                 >
                   {saveMutation.isPending ? (
                     <Loader2
@@ -441,8 +441,8 @@ export function ProfileSettingsClient({
               <div className="flex justify-end">
                 <Button
                   type="submit"
+                  size="hero"
                   disabled={saveMutation.isPending}
-                  className="cursor-pointer rounded-xl px-6 font-bold"
                 >
                   {saveMutation.isPending ? (
                     <Loader2
@@ -470,8 +470,8 @@ export function ProfileSettingsClient({
               <div className="flex justify-end">
                 <Button
                   type="submit"
+                  size="hero"
                   disabled={saveMutation.isPending}
-                  className="cursor-pointer rounded-xl px-6 font-bold"
                 >
                   {saveMutation.isPending ? (
                     <Loader2
@@ -501,8 +501,8 @@ export function ProfileSettingsClient({
               <div className="flex justify-end">
                 <Button
                   type="submit"
+                  size="hero"
                   disabled={saveMutation.isPending}
-                  className="cursor-pointer rounded-xl px-6 font-bold"
                 >
                   {saveMutation.isPending ? (
                     <Loader2
@@ -538,15 +538,15 @@ function ProfilePublicInfoCard({
   ) => void
 }) {
   return (
-    <Card className="rounded-2xl border-border/50 bg-card p-6">
-      <CardHeader className="px-0 pt-0">
+    <Card>
+      <CardHeader>
         <CardTitle>Public Information</CardTitle>
         <CardDescription>
           Your public display name, handle, and visual branding on Yozora.
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="px-0 pb-0">
+      <CardContent>
         <FieldGroup>
           <Field>
             <FieldLabel htmlFor="displayName">Display Name</FieldLabel>
@@ -607,8 +607,8 @@ function ProfileBioCard({
   onChange: (value: string) => void
 }) {
   return (
-    <Card className="rounded-2xl border-border/50 bg-card p-6">
-      <CardHeader className="px-0 pt-0">
+    <Card>
+      <CardHeader>
         <CardTitle>About You (Bio)</CardTitle>
         <CardDescription>
           Share your favorite genres, anime milestones, or a short markdown
@@ -616,7 +616,7 @@ function ProfileBioCard({
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="px-0 pb-0">
+      <CardContent>
         <MarkdownEditor
           value={bio}
           onChange={onChange}
@@ -639,8 +639,8 @@ function ProfileIntegrationsCard({
   ) => void
 }) {
   return (
-    <Card className="rounded-2xl border-border/50 bg-card p-6">
-      <CardHeader className="px-0 pt-0">
+    <Card>
+      <CardHeader>
         <CardTitle>Connected Tracker Accounts</CardTitle>
         <CardDescription>
           Link your AniList and MyAnimeList profiles to display badges on your
@@ -648,7 +648,7 @@ function ProfileIntegrationsCard({
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="px-0 pb-0">
+      <CardContent>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field>
             <FieldLabel htmlFor="anilistUsername">AniList Username</FieldLabel>
@@ -683,15 +683,15 @@ function ProfilePrivacyCard({
   onChange: (value: boolean) => void
 }) {
   return (
-    <Card className="rounded-2xl border-border/50 bg-card p-6">
-      <CardHeader className="px-0 pt-0">
+    <Card>
+      <CardHeader>
         <CardTitle>Privacy &amp; Visibility</CardTitle>
         <CardDescription>
           Control who can view your profile and anime library shelf.
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="px-0 pb-0">
+      <CardContent>
         <label className="flex cursor-pointer items-center gap-3">
           <input
             type="checkbox"
@@ -710,17 +710,19 @@ function ProfilePrivacyCard({
 
 function ProfileAppearanceCard() {
   return (
-    <Card className="rounded-2xl border-border/50 bg-card p-6">
-      <CardHeader className="px-0 pt-0">
+    <Card>
+      <CardHeader>
         <CardTitle>Appearance &amp; Theme</CardTitle>
         <CardDescription>
           Select your preferred color theme or sync with system preferences.
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="flex flex-col justify-between gap-3 px-0 pb-0 sm:flex-row sm:items-center">
-        <span className="text-sm font-medium text-foreground">Theme Mode</span>
-        <ThemeSegmentedToggle />
+      <CardContent>
+        <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+          <span className="text-sm font-medium text-foreground">Theme Mode</span>
+          <ThemeSegmentedToggle />
+        </div>
       </CardContent>
     </Card>
   )
@@ -784,11 +786,13 @@ function PinnedAnimeCard({
   const removePin = (id: number) => onChange(pinnedIds.filter((p) => p !== id))
 
   return (
-    <Card className="rounded-2xl border-border/50 bg-card p-6">
-      <CardHeader className="px-0 pt-0">
-        <CardTitle className="flex items-center gap-2">
-          <Pin className="size-4 text-primary" />
-          Pinned Anime
+    <Card>
+      <CardHeader>
+        <CardTitle>
+          <span className="flex items-center gap-2">
+            <Pin className="size-4 text-primary" />
+            Pinned Anime
+          </span>
         </CardTitle>
         <CardDescription>
           Feature up to {MAX_PINS} anime at the top of your public profile —
@@ -796,61 +800,62 @@ function PinnedAnimeCard({
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="flex flex-col gap-4 px-0 pb-0">
-        {pinnedIds.length > 0 && (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            {pinnedIds.map((id) => {
-              const detail = pinnedDetails.find((d) => d.id === id)
-              return (
-                <div
-                  key={id}
-                  className="relative flex items-center gap-2.5 rounded-xl border border-border/50 bg-muted/30 p-2"
-                >
-                  <div className="relative size-12 shrink-0 overflow-hidden rounded-lg bg-muted">
-                    {detail?.coverMedium || detail?.cover ? (
-                      <Image
-                        src={detail.coverMedium || detail.cover}
-                        alt={detail.title}
-                        fill
-                        unoptimized
-                        sizes="48px"
-                        className="object-cover"
-                      />
-                    ) : null}
-                  </div>
-                  <span className="line-clamp-2 min-w-0 text-xs font-semibold text-foreground">
-                    {detail?.title || `Anime #${id}`}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => removePin(id)}
-                    aria-label={`Remove ${detail?.title || "anime"} from pins`}
-                    className="absolute top-1 right-1 flex size-5 cursor-pointer items-center justify-center rounded-full border border-border/50 bg-background/80 text-muted-foreground hover:text-destructive"
+      <CardContent>
+        <div className="flex flex-col gap-4">
+          {pinnedIds.length > 0 && (
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {pinnedIds.map((id) => {
+                const detail = pinnedDetails.find((d) => d.id === id)
+                return (
+                  <div
+                    key={id}
+                    className="relative flex items-center gap-2.5 rounded-xl border border-border/50 bg-muted/30 p-2"
                   >
-                    <X className="size-3" />
-                  </button>
-                </div>
-              )
-            })}
-          </div>
-        )}
-
-        {pinnedIds.length < MAX_PINS && (
-          <Field>
-            <FieldLabel htmlFor="pinned-search">Search anime to pin</FieldLabel>
-            <div className="relative">
-              <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                id="pinned-search"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="e.g. Steins;Gate, Frieren…"
-                autoComplete="off"
-                className="pl-9"
-              />
+                    <div className="relative size-12 shrink-0 overflow-hidden rounded-lg bg-muted">
+                      {detail?.coverMedium || detail?.cover ? (
+                        <Image
+                          src={detail.coverMedium || detail.cover}
+                          alt={detail.title}
+                          fill
+                          unoptimized
+                          sizes="48px"
+                          className="object-cover"
+                        />
+                      ) : null}
+                    </div>
+                    <span className="line-clamp-2 min-w-0 text-xs font-semibold text-foreground">
+                      {detail?.title || `Anime #${id}`}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => removePin(id)}
+                      aria-label={`Remove ${detail?.title || "anime"} from pins`}
+                      className="absolute top-1 right-1 flex size-5 cursor-pointer items-center justify-center rounded-full border border-border/50 bg-background/80 text-muted-foreground hover:text-destructive"
+                    >
+                      <X className="size-3" />
+                    </button>
+                  </div>
+                )
+              })}
             </div>
-          </Field>
-        )}
+          )}
+
+          {pinnedIds.length < MAX_PINS && (
+            <Field>
+              <FieldLabel htmlFor="pinned-search">Search anime to pin</FieldLabel>
+              <div className="relative">
+                <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  id="pinned-search"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="e.g. Steins;Gate, Frieren…"
+                  autoComplete="off"
+                  size="icon"
+                />
+              </div>
+            </Field>
+          )}
 
         {debounced.length >= 2 && pinnedIds.length < MAX_PINS && (
           <div className="divide-y divide-border/40 overflow-hidden rounded-xl border border-border/50 bg-background/60">
@@ -898,6 +903,7 @@ function PinnedAnimeCard({
             ))}
           </div>
         )}
+        </div>
       </CardContent>
     </Card>
   )
@@ -939,11 +945,13 @@ function DangerZoneCard() {
 
   return (
     <>
-      <Card className="rounded-2xl border-destructive/30 bg-destructive/5 p-6">
-        <CardHeader className="px-0 pt-0">
-          <CardTitle className="flex items-center gap-2 text-destructive">
-            <Trash2 className="size-4" />
-            Danger Zone
+      <Card variant="destructive">
+        <CardHeader>
+          <CardTitle>
+            <span className="flex items-center gap-2 text-destructive">
+              <Trash2 className="size-4" />
+              Danger Zone
+            </span>
           </CardTitle>
           <CardDescription>
             Permanently delete your entire Yozora presence: every library entry,
@@ -952,12 +960,12 @@ function DangerZoneCard() {
           </CardDescription>
         </CardHeader>
 
-        <CardContent className="px-0 pb-0">
+        <CardContent>
           <Button
             type="button"
             variant="destructive"
+            size="hero"
             onClick={() => setConfirmOpen(true)}
-            className="cursor-pointer rounded-xl font-bold"
           >
             <Trash2 data-icon="inline-start" className="size-4" />
             Delete All My Data
@@ -966,7 +974,7 @@ function DangerZoneCard() {
       </Card>
 
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-        <DialogContent className="max-w-md rounded-2xl">
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Delete everything?</DialogTitle>
             <DialogDescription>
@@ -995,7 +1003,6 @@ function DangerZoneCard() {
               type="button"
               variant="outline"
               onClick={() => setConfirmOpen(false)}
-              className="cursor-pointer rounded-xl"
             >
               Cancel
             </Button>
@@ -1004,7 +1011,6 @@ function DangerZoneCard() {
               variant="destructive"
               disabled={!canDelete || deleteAllMutation.isPending}
               onClick={() => deleteAllMutation.mutate()}
-              className="cursor-pointer rounded-xl font-bold"
             >
               {deleteAllMutation.isPending ? (
                 <Loader2

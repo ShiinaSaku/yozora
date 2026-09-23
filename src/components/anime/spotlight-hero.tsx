@@ -11,14 +11,9 @@ import {
   useAppleCarouselItem,
 } from "@/components/apple-carousel"
 import { HugeiconsIcon } from "@hugeicons/react"
-import {
-  Add01Icon,
-  PlayIcon,
-  StarIcon,
-  Video02Icon,
-} from "@hugeicons/core-free-icons"
+import { Play } from "lucide-react"
+import { Add01Icon, StarIcon, Video02Icon } from "@hugeicons/core-free-icons"
 import { Button } from "@/components/ui/button"
-import { buttonVariants } from "@/components/ui/button-variants"
 import { TrailerDialog } from "./trailer-dialog"
 import type { Anime } from "@/lib/types/anime"
 import { cn } from "@/lib/utils"
@@ -86,7 +81,7 @@ function SpotlightArtwork({
               alt={anime.title}
               decoding="async"
               draggable={false}
-              className="max-h-[85%] rounded-2xl object-cover shadow-2xl"
+              className="max-h-5/6 rounded-2xl object-cover shadow-2xl"
             />
           </div>
         </>
@@ -103,12 +98,13 @@ function SpotlightArtwork({
       {/* Readability scrims */}
       <div className="absolute inset-0 bg-linear-to-t from-zinc-950 via-zinc-950/75 to-zinc-950/10" />
       <div className="absolute inset-0 w-full bg-linear-to-r from-zinc-950 via-zinc-950/85 to-transparent md:w-3/4" />
+      <div className="absolute inset-y-0 right-0 w-32 bg-linear-to-l from-zinc-950/85 via-zinc-950/40 to-transparent" />
       <div className="absolute inset-x-0 top-0 h-28 bg-linear-to-b from-zinc-950/80 via-zinc-950/30 to-transparent" />
 
-      {/* Subtle dimming layer for peeking cards */}
+      {/* Consistent uniform dimming layer for peeking cards */}
       <div
         className={cn(
-          "absolute inset-0 bg-black/35 transition-opacity duration-300",
+          "absolute inset-0 bg-zinc-950/65 backdrop-blur-xs transition-opacity duration-300",
           isActive ? "opacity-0" : "opacity-100"
         )}
       />
@@ -147,7 +143,7 @@ function SpotlightSlideCard({
           <span
             className={cn(
               "inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-black/60 px-3 py-1 font-mono text-xs font-semibold text-amber-400 shadow-sm backdrop-blur-md transition-opacity duration-300",
-              isCurrent ? "opacity-100" : "opacity-60"
+              isCurrent ? "opacity-100" : "opacity-0"
             )}
             aria-label={`Rating: ${anime.score.toFixed(1)} out of 10`}
           >
@@ -168,7 +164,9 @@ function SpotlightSlideCard({
         className={cn(
           "absolute inset-x-0 bottom-0 z-10 flex max-w-2xl flex-col items-start gap-2.5 p-5 sm:gap-3.5 sm:p-8 lg:p-10",
           "transition-opacity duration-300 ease-out",
-          isCurrent ? "opacity-100 duration-500" : "opacity-40"
+          isCurrent
+            ? "opacity-100 duration-500"
+            : "pointer-events-none opacity-0"
         )}
       >
         {/* Meta badges */}
@@ -199,7 +197,7 @@ function SpotlightSlideCard({
           <Link
             href={getAnimeUrl(anime)}
             tabIndex={isCurrent ? 0 : -1}
-            className="rounded-lg transition-colors hover:text-white/90 focus-visible:outline-2 focus-visible:outline-ring"
+            variant="title"
           >
             {anime.title}
           </Link>
@@ -235,68 +233,65 @@ function SpotlightSlideCard({
             href={getAnimeUrl(anime)}
             tabIndex={isCurrent ? 0 : -1}
             aria-label={`Watch overview for ${anime.title}`}
-            className={cn(
-              buttonVariants({ variant: "default", size: "lg" }),
-              "interactive-press h-10 gap-2 rounded-full bg-white px-5 text-xs font-bold text-zinc-950 shadow-xl transition-transform hover:bg-zinc-200 active:scale-97 sm:h-11 sm:px-6 sm:text-sm",
-              !isCurrent && "pointer-events-none"
-            )}
+            variant="button-white"
+            className={cn(!isCurrent && "pointer-events-none")}
           >
-            <HugeiconsIcon
-              icon={PlayIcon}
-              size={16}
-              strokeWidth={2.5}
-              className="fill-current"
+            <Play
+              className="size-3.5 shrink-0 fill-current"
+              stroke="none"
               data-icon="inline-start"
               aria-hidden="true"
             />
-            Watch Overview
+            <span>Watch Overview</span>
           </Link>
 
           {onSaveClick && (
-            <Button
-              variant="outline"
-              size="lg"
-              tabIndex={isCurrent ? 0 : -1}
-              aria-label={`Add to Watchlist: ${anime.title}`}
-              onClick={(e) => {
-                e.stopPropagation()
-                onSaveClick(anime)
-              }}
-              className="interactive-press h-10 gap-2 rounded-full border-white/20 bg-white/10 px-4 text-xs font-semibold text-white backdrop-blur-md transition-transform hover:bg-white/20 active:scale-97 sm:h-11 sm:px-5 sm:text-sm"
-            >
-              <HugeiconsIcon
-                icon={Add01Icon}
-                size={16}
-                strokeWidth={2}
-                data-icon="inline-start"
-                aria-hidden="true"
-              />
-              Add to Watchlist
-            </Button>
+            <div className="interactive-press">
+              <Button
+                variant="glass"
+                size="lg"
+                tabIndex={isCurrent ? 0 : -1}
+                aria-label={`Add to Watchlist: ${anime.title}`}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onSaveClick(anime)
+                }}
+              >
+                <HugeiconsIcon
+                  icon={Add01Icon}
+                  size={16}
+                  strokeWidth={2}
+                  data-icon="inline-start"
+                  aria-hidden="true"
+                />
+                Add to Watchlist
+              </Button>
+            </div>
           )}
 
           {anime.trailer && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="lg"
-              tabIndex={isCurrent ? 0 : -1}
-              aria-label={`Watch trailer: ${anime.title}`}
-              onClick={(e) => {
-                e.stopPropagation()
-                onOpenTrailer(anime)
-              }}
-              className="interactive-press h-10 gap-1.5 rounded-full border border-white/10 bg-black/30 px-3.5 text-xs font-semibold text-zinc-200 backdrop-blur-md transition-transform hover:bg-white/15 hover:text-white active:scale-97 sm:h-11 sm:px-4"
-            >
-              <HugeiconsIcon
-                icon={Video02Icon}
-                size={15}
-                strokeWidth={2}
-                data-icon="inline-start"
-                aria-hidden="true"
-              />
-              Trailer
-            </Button>
+            <div className="interactive-press">
+              <Button
+                type="button"
+                variant="glass-dark"
+                size="lg"
+                tabIndex={isCurrent ? 0 : -1}
+                aria-label={`Watch trailer: ${anime.title}`}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onOpenTrailer(anime)
+                }}
+              >
+                <HugeiconsIcon
+                  icon={Video02Icon}
+                  size={15}
+                  strokeWidth={2}
+                  data-icon="inline-start"
+                  aria-hidden="true"
+                />
+                Trailer
+              </Button>
+            </div>
           )}
         </div>
       </div>
@@ -330,7 +325,7 @@ export function SpotlightHero({ items, onSaveClick }: SpotlightHeroProps) {
             <AppleCarouselItem
               key={anime.id}
               tabIndex={-1}
-              className="dark relative h-[480px] w-(--apple-carousel-item-width) snap-center overflow-hidden rounded-3xl border border-white/10 bg-zinc-950 text-white shadow-2xl transition-[border-color,box-shadow] duration-500 select-none hover:border-white/20 sm:rounded-4xl lg:h-[540px] xl:h-[580px] @max-3xl:h-[480px] sm:@max-3xl:h-[500px]"
+              className="dark relative h-120 w-(--apple-carousel-item-width) snap-center overflow-hidden rounded-3xl border border-black/10 bg-zinc-950 text-white shadow-xl transition-all duration-500 select-none hover:border-black/20 sm:rounded-4xl lg:h-135 xl:h-145 @max-3xl:h-120 sm:@max-3xl:h-125 dark:border-white/10 dark:hover:border-white/20"
             >
               <SpotlightSlideCard
                 anime={anime}

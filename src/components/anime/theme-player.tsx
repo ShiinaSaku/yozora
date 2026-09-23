@@ -5,7 +5,7 @@ import { HugeiconsIcon } from "@hugeicons/react"
 import { CdIcon, PauseIcon, PlayIcon } from "@hugeicons/core-free-icons"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card } from "@/components/ui/card"
 import type { AnimeTheme } from "@/lib/types/anime"
 import { cn } from "@/lib/utils"
 import { ThemeVideoPlayer } from "./theme-video-player"
@@ -25,19 +25,19 @@ function EqualizerBars({ isPlaying }: { isPlaying: boolean }) {
     <div className="flex h-3.5 items-end gap-0.5 px-0.5" aria-hidden="true">
       <span
         className={cn(
-          "w-0.5 rounded-full bg-current transition-[height] duration-300",
+          "w-0.5 rounded-full bg-current transition-all duration-300",
           isPlaying ? "h-3.5 animate-pulse" : "h-1"
         )}
       />
       <span
         className={cn(
-          "w-0.5 rounded-full bg-current transition-[height] duration-300",
+          "w-0.5 rounded-full bg-current transition-all duration-300",
           isPlaying ? "h-2.5 animate-pulse delay-100" : "h-1.5"
         )}
       />
       <span
         className={cn(
-          "w-0.5 rounded-full bg-current transition-[height] duration-300",
+          "w-0.5 rounded-full bg-current transition-all duration-300",
           isPlaying ? "h-3 animate-pulse delay-200" : "h-1"
         )}
       />
@@ -72,7 +72,7 @@ const ThemeTrackRow = React.memo(
           isCurrent
             ? "border-primary/60 bg-primary/10 shadow-sm ring-1 ring-primary/20"
             : hasVideo
-              ? "cursor-pointer border-border/40 bg-card hover:border-primary/40 hover:bg-muted/30 hover:shadow-xs active:scale-[0.99]"
+              ? "cursor-pointer border-border/40 bg-card hover:border-primary/40 hover:bg-muted/30 hover:shadow-xs active:scale-95"
               : "cursor-not-allowed border-border/20 bg-muted/10 opacity-50"
         )}
         onClick={() => hasVideo && onSelect(theme)}
@@ -110,7 +110,7 @@ const ThemeTrackRow = React.memo(
                 {theme.title || `${theme.type} ${theme.sequence || 1}`}
               </span>
               {theme.entries[0]?.version && theme.entries[0].version > 1 && (
-                <span className="rounded bg-muted/60 px-1.5 py-0.5 font-mono text-[10px] font-bold text-muted-foreground">
+                <span className="rounded bg-muted/60 px-1.5 py-0.5 font-mono text-xs font-bold text-muted-foreground">
                   v{theme.entries[0].version}
                 </span>
               )}
@@ -128,12 +128,6 @@ const ThemeTrackRow = React.memo(
             <Button
               size="sm"
               variant={isCurrent ? "default" : "secondary"}
-              className={cn(
-                "gap-1.5 rounded-xl text-xs font-bold shadow-xs",
-                isCurrent
-                  ? "bg-primary text-primary-foreground"
-                  : "hover:bg-primary hover:text-primary-foreground"
-              )}
               onClick={(e) => {
                 e.stopPropagation()
                 onSelect(theme)
@@ -150,7 +144,7 @@ const ThemeTrackRow = React.memo(
               </span>
             </Button>
           ) : (
-            <span className="text-[11px] text-muted-foreground">No stream</span>
+            <span className="text-xs text-muted-foreground">No stream</span>
           )}
         </div>
       </div>
@@ -214,18 +208,16 @@ export function ThemePlayer({
   const activeAudioUrl = activeVideoNode?.audio?.link || activeVideoUrl
 
   return (
-    <Card className="overflow-hidden rounded-3xl border-border/50 bg-card shadow-lg">
-      <CardHeader className="border-b border-border/40 px-6 pt-6 pb-4">
+    <Card variant="large" size="none">
+      <div className="border-b border-border/40 px-6 pt-6 pb-4">
         <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-          <CardTitle className="flex items-center gap-2.5 text-lg font-bold tracking-tight">
+          <div className="flex items-center gap-2.5 text-lg font-bold tracking-tight">
             <div className="flex size-8 items-center justify-center rounded-xl bg-primary/10 text-primary">
               <HugeiconsIcon icon={CdIcon} size={18} strokeWidth={2} />
             </div>
             <span>Official Themes & Soundtracks</span>
-            <Badge variant="secondary" className="font-mono text-xs font-bold">
-              {themes.length} Tracks
-            </Badge>
-          </CardTitle>
+            <Badge variant="tag">{themes.length} Tracks</Badge>
+          </div>
 
           <div className="flex items-center rounded-xl border border-border/50 bg-muted/40 p-0.5">
             <button
@@ -254,9 +246,9 @@ export function ThemePlayer({
             </button>
           </div>
         </div>
-      </CardHeader>
+      </div>
 
-      <CardContent className="flex flex-col gap-5 p-4 sm:p-6">
+      <div className="flex flex-col gap-5 p-4 sm:p-6">
         {/* Active Theme Video / Audio Player */}
         {activeTheme && activeVideoUrl && (
           <ThemeVideoPlayer
@@ -290,7 +282,7 @@ export function ThemePlayer({
             />
           ))}
         </div>
-      </CardContent>
+      </div>
     </Card>
   )
 }

@@ -1,7 +1,7 @@
 {
   "name": "yozora",
   "version": "0.1.0",
-  "packageManager": "pnpm@12.5.1",
+  "packageManager": "pnpm@12.6.0",
   "license": "MIT",
   "private": true,
   "type": "module",
@@ -37,12 +37,12 @@
     "@upstash/redis": "^1.39.0",
     "@vitejs/plugin-react": "6.1.1",
     "class-variance-authority": "^0.7.1",
-    "cn": "^0.3.2",
+    "cn": "^0.4.0",
     "drizzle-orm": "^0.45.3",
     "hono": "^4.13.8",
     "lucide-react": "^1.47.0",
     "media-chrome": "^4.19.2",
-    "motion": "^13.4.0",
+    "motion": "^13.4.1",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "shadcn": "^4.21.0",
@@ -55,8 +55,8 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
-    "@cloudflare/vite-plugin": "^1.57.1",
-    "@shadcn/lint": "^0.1.5",
+    "@cloudflare/vite-plugin": "^1.57.3",
+    "@shadcn/lint": "^0.2.0",
     "@tailwindcss/vite": "4.3.3",
     "@tanstack/eslint-config": "^0.4.0",
     "@types/node": "^26.6.2",
@@ -65,12 +65,12 @@
     "@typescript-eslint/parser": "^8.70.1",
     "drizzle-kit": "^0.31.11",
     "eslint": "^10.11.0",
-    "knip": "^6.37.0",
-    "prettier": "^3.9.8",
+    "knip": "^6.38.0",
+    "prettier": "^3.9.9",
     "prettier-plugin-tailwindcss": "^0.8.1",
     "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3",
-    "wrangler": "^4.136.1"
+    "wrangler": "^4.136.3"
   },
   "overrides": {
     "@types/react": "^19.3.0",

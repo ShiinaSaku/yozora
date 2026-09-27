@@ -36,6 +36,8 @@ export default [
       ".output",
       "dist",
       "node_modules",
+      "src/routeTree.gen.ts",
+      "src/gql/**",
     ],
   },
 ]

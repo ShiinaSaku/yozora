@@ -1,4 +1,5 @@
 import { createIsomorphicFn } from "@tanstack/react-start"
+import { ClientError, GraphQLClient } from "graphql-request"
 import type {
   AiringScheduleItem,
   Anime,
@@ -6,6 +7,14 @@ import type {
   AnimeDetailResponse,
   CharacterDetail,
 } from "@/lib/types/anime"
+import {
+  AiringScheduleDocument,
+  AnimeCatalogDocument,
+  AnimeDetailDocument,
+  AnimeSearchDocument,
+  BatchAnimeDocument,
+  CharacterDetailDocument,
+} from "./operations"
 
 const DEFAULT_ANILIST_ENDPOINT = "https://graphql.anilist.co"
 const PLACEHOLDER_COVER =
@@ -55,10 +64,11 @@ const redisMSet = createIsomorphicFn()
  * Hashes instead of inlining the full query so Redis keys stay short.
  */
 function hashCacheKey(
-  query: string,
+  query: string | { toString: () => string },
   variables: Record<string, unknown>
 ): string {
-  const raw = `${query}::${JSON.stringify(variables)}`
+  const queryStr = typeof query === "string" ? query : query.toString()
+  const raw = `${queryStr}::${JSON.stringify(variables)}`
   let hash = 5381
   for (let i = 0; i < raw.length; i++) {
     hash = ((hash << 5) + hash + raw.charCodeAt(i)) | 0
@@ -152,169 +162,6 @@ interface AniListAiringSchedule {
   timeUntilAiring: number
   media: AniListMedia
 }
-
-interface AniListResponse<T> {
-  data?: T
-  errors?: Array<{ message: string; status?: number }>
-}
-
-const mediaFields = `
-  id
-  idMal
-  title { romaji english native }
-  coverImage { medium large extraLarge color }
-  bannerImage
-  averageScore
-  seasonYear
-  startDate { year }
-  format
-  status
-  episodes
-  duration
-  popularity
-  favourites
-  genres
-  description(asHtml: false)
-  trailer { id site thumbnail }
-  nextAiringEpisode { episode airingAt timeUntilAiring }
-  studios(isMain: true) { nodes { name } }
-`
-
-const catalogQuery = `
-  query AnimeCatalog(
-    $sort: [MediaSort]
-    $season: MediaSeason
-    $seasonYear: Int
-    $status: MediaStatus
-  ) {
-    Page(page: 1, perPage: 18) {
-      media(
-        type: ANIME
-        isAdult: false
-        sort: $sort
-        season: $season
-        seasonYear: $seasonYear
-        status: $status
-      ) {
-        ${mediaFields}
-      }
-    }
-  }
-`
-
-const searchQuery = `
-  query AnimeSearch($search: String!) {
-    Page(page: 1, perPage: 16) {
-      media(type: ANIME, isAdult: false, search: $search, sort: [SEARCH_MATCH, POPULARITY_DESC]) {
-        ${mediaFields}
-      }
-    }
-  }
-`
-
-const airingQuery = `
-  query AiringSchedule($now: Int!) {
-    Page(page: 1, perPage: 12) {
-      airingSchedules(airingAt_greater: $now, sort: TIME) {
-        id
-        episode
-        airingAt
-        timeUntilAiring
-        media {
-          ${mediaFields}
-        }
-      }
-    }
-  }
-`
-
-const animeDetailQuery = `
-  query AnimeDetail($id: Int!) {
-    Media(id: $id, type: ANIME) {
-      ${mediaFields}
-      relations {
-        edges {
-          node {
-            ${mediaFields}
-          }
-        }
-      }
-      recommendations(page: 1, perPage: 8, sort: RATING_DESC) {
-        nodes {
-          mediaRecommendation {
-            ${mediaFields}
-          }
-        }
-      }
-      characters(page: 1, perPage: 8, sort: [ROLE, RELEVANCE]) {
-        edges {
-          role
-          node {
-            id
-            name { full }
-            image { large medium }
-          }
-          voiceActors(language: JAPANESE) {
-            name { full }
-            image { large medium }
-            language
-          }
-        }
-      }
-      externalLinks {
-        id
-        url
-        site
-        icon
-        color
-        type
-        language
-      }
-    }
-  }
-`
-
-const characterDetailQuery = `
-  query CharacterDetail($id: Int!) {
-    Character(id: $id) {
-      id
-      name {
-        full
-        native
-        alternative
-      }
-      image {
-        large
-        medium
-      }
-      description
-      gender
-      age
-      bloodType
-      dateOfBirth {
-        year
-        month
-        day
-      }
-      favourites
-      media(page: 1, perPage: 12, sort: POPULARITY_DESC, type: ANIME) {
-        nodes {
-          ${mediaFields}
-        }
-      }
-    }
-  }
-`
-
-const batchMediaQuery = `
-  query ($ids: [Int]) {
-    Page(page: 1, perPage: 50) {
-      media(id_in: $ids, type: ANIME) {
-        ${mediaFields}
-      }
-    }
-  }
-`
 
 function getCurrentSeason() {
   const date = new Date()
@@ -485,63 +332,47 @@ export class AniListUpstreamError extends Error {
 }
 
 async function executeAniListFetch<T>(
-  query: string,
+  query: string | { toString: () => string },
   variables: Record<string, unknown>
 ): Promise<T> {
+  const client = new GraphQLClient(getAniListEndpoint(), {
+    headers: {
+      accept: "application/json",
+    },
+  })
+
   const makeRequest = async () => {
-    const res = await fetch(getAniListEndpoint(), {
-      method: "POST",
-      headers: {
-        accept: "application/json",
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({ query, variables }),
-    })
+    try {
+      return await client.request<T>(query.toString(), variables)
+    } catch (err) {
+      if (err instanceof ClientError) {
+        const status = err.response.status
+        const errors = err.response.errors
+        const upstreamMessage =
+          errors?.[0]?.message || `AniList returned status ${status}`
 
-    if (!res.ok) {
-      let upstreamMessage = `AniList returned status ${res.status}`
-      try {
-        const errorResponse: AniListResponse<never> = await res.json()
-        upstreamMessage = errorResponse.errors?.[0]?.message || upstreamMessage
-      } catch {
-        // Preserve the status-only message when the upstream body is not JSON.
-      }
-
-      if (res.status === 404) {
-        throw new Error("Anime not found")
-      }
-      if (
-        res.status === 403 &&
-        upstreamMessage.toLowerCase().includes("manually blocked")
-      ) {
+        if (
+          status === 404 ||
+          errors?.some((e) => (e as { status?: number }).status === 404)
+        ) {
+          throw new Error("Anime not found")
+        }
+        if (
+          status === 403 &&
+          upstreamMessage.toLowerCase().includes("manually blocked")
+        ) {
+          throw new AniListUpstreamError(
+            "AniList blocks requests from this server IP; retrying directly from the browser",
+            503
+          )
+        }
         throw new AniListUpstreamError(
-          "AniList blocks requests from this server IP; retrying directly from the browser",
-          503
+          upstreamMessage,
+          status >= 500 ? 503 : status
         )
       }
-      throw new AniListUpstreamError(
-        upstreamMessage,
-        res.status >= 500 ? 503 : res.status
-      )
+      throw err
     }
-
-    const response: AniListResponse<T> = await res.json()
-    const apiErrors = response.errors
-
-    if (apiErrors && apiErrors.length > 0) {
-      const notFound = apiErrors.some((err) => err.status === 404)
-      throw new Error(
-        notFound
-          ? "Anime not found"
-          : apiErrors[0]?.message || "AniList is unavailable"
-      )
-    }
-
-    if (!response.data) {
-      throw new Error("AniList returned empty data")
-    }
-
-    return response.data
   }
 
   try {
@@ -572,7 +403,7 @@ async function executeAniListFetch<T>(
 }
 
 async function requestAniList<T>(
-  query: string,
+  query: string | { toString: () => string },
   variables: Record<string, unknown>,
   ttlMs = 1000 * 60 * 60
 ): Promise<T> {
@@ -611,7 +442,7 @@ async function requestAniList<T>(
 
 export async function getAnimeCollection(collection: CatalogCollection) {
   const data = await requestAniList<{ Page: { media: AniListMedia[] } }>(
-    catalogQuery,
+    AnimeCatalogDocument,
     getCollectionVariables(collection),
     1000 * 60 * 60 * 2
   )
@@ -620,7 +451,7 @@ export async function getAnimeCollection(collection: CatalogCollection) {
 
 export async function searchAnime(search: string) {
   const data = await requestAniList<{ Page: { media: AniListMedia[] } }>(
-    searchQuery,
+    AnimeSearchDocument,
     { search },
     1000 * 60 * 60 * 6
   )
@@ -634,7 +465,7 @@ export async function getAiringSchedule(): Promise<AiringScheduleItem[]> {
   const now = rawNow - (rawNow % 300)
   const data = await requestAniList<{
     Page: { airingSchedules: AniListAiringSchedule[] }
-  }>(airingQuery, { now }, 1000 * 60 * 30)
+  }>(AiringScheduleDocument, { now }, 1000 * 60 * 30)
 
   return data.Page.airingSchedules.map((schedule) => ({
     id: schedule.id,
@@ -676,7 +507,7 @@ export async function getAnimeDetail(id: number): Promise<AnimeDetailResponse> {
   }
 
   const data = await requestAniList<{ Media: AniListDetailMedia | null }>(
-    animeDetailQuery,
+    AnimeDetailDocument,
     { id },
     1000 * 60 * 60 * 2
   )
@@ -778,7 +609,7 @@ export async function getCharacterDetail(id: number): Promise<CharacterDetail> {
 
   const data = await requestAniList<{
     Character: AniListCharacterDetailGql | null
-  }>(characterDetailQuery, { id }, 1000 * 60 * 60 * 24 * 30)
+  }>(CharacterDetailDocument, { id }, 1000 * 60 * 60 * 24 * 30)
 
   if (!data.Character) throw new Error("Character not found")
 
@@ -875,7 +706,7 @@ export async function getMultipleAnime(ids: number[]): Promise<Anime[]> {
           const data = await requestAniList<{
             Page: { media: AniListMedia[] }
           }>(
-            batchMediaQuery,
+            BatchAnimeDocument,
             { ids: chunk },
             1000 * 60 * 60 * 24 // 24 hour query cache
           )

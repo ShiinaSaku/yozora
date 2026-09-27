@@ -20,14 +20,6 @@ import {
 import { Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-} from "@/components/ui/navigation-menu"
-import {
   Sheet,
   SheetContent,
   SheetDescription,
@@ -39,6 +31,10 @@ import { SearchDialog } from "./search-dialog"
 import { ThemeToggle } from "./theme-toggle"
 import { BrandLogo } from "./brand-logo"
 import { cn } from "@/lib/utils"
+import {
+  segmentedControlItemVariants,
+  segmentedControlRootClassName,
+} from "@/lib/segmented-control"
 
 const navLinks = [
   {
@@ -191,8 +187,12 @@ function NavbarMobileSheet({
   )
 }
 
+const navItemClassName = segmentedControlItemVariants({
+  size: "default",
+  state: "current",
+})
+
 function NavbarDesktopMenu({
-  isDiscoverActive,
   isSignedIn,
   pathname,
 }: {
@@ -202,142 +202,79 @@ function NavbarDesktopMenu({
 }) {
   return (
     <nav aria-label="Main navigation" className="hidden items-center md:flex">
-      <NavigationMenu>
-        <NavigationMenuList>
-          <NavigationMenuItem>
-            <NavigationMenuTrigger
-              variant={isDiscoverActive ? "nav-active" : "nav"}
-            >
-              <HugeiconsIcon
-                icon={Compass01Icon}
-                size={15}
-                strokeWidth={2}
-                data-icon="inline-start"
-              />
-              <span>Discover</span>
-            </NavigationMenuTrigger>
-            <NavigationMenuContent>
-              <div className="grid w-105 grid-cols-2 gap-2 p-1">
-                <NavigationMenuLink
-                  render={
-                    <Link
-                      href="/"
-                      variant="nav-item"
-                      aria-label="Explore Showcase"
-                    >
-                      <div className="flex items-center gap-2 text-xs font-bold text-foreground transition-colors group-hover:text-primary">
-                        <HugeiconsIcon
-                          icon={Compass01Icon}
-                          size={15}
-                          strokeWidth={2}
-                          className="text-primary"
-                        />
-                        <span>Showcase</span>
-                      </div>
-                      <p className="text-xs leading-relaxed text-muted-foreground">
-                        Top spotlight anime & editor picks.
-                      </p>
-                    </Link>
-                  }
-                />
+      <div className={segmentedControlRootClassName}>
+        <Link
+          href="/"
+          aria-current={pathname === "/" ? "page" : undefined}
+          className={navItemClassName}
+        >
+          <HugeiconsIcon
+            icon={Compass01Icon}
+            size={14}
+            strokeWidth={2}
+            data-icon="inline-start"
+          />
+          <span>Showcase</span>
+        </Link>
 
-                <NavigationMenuLink
-                  render={
-                    <Link
-                      href="/seasonal"
-                      variant="nav-item"
-                      aria-label="Seasonal Anime Charts"
-                    >
-                      <div className="flex items-center gap-2 text-xs font-bold text-foreground transition-colors group-hover:text-primary">
-                        <HugeiconsIcon
-                          icon={Calendar03Icon}
-                          size={15}
-                          strokeWidth={2}
-                          className="text-amber-500"
-                        />
-                        <span>Seasonal Charts</span>
-                      </div>
-                      <p className="text-xs leading-relaxed text-muted-foreground">
-                        Seasonal release schedules.
-                      </p>
-                    </Link>
-                  }
-                />
+        <Link
+          href="/seasonal"
+          aria-current={pathname === "/seasonal" ? "page" : undefined}
+          className={navItemClassName}
+        >
+          <HugeiconsIcon
+            icon={Calendar03Icon}
+            size={14}
+            strokeWidth={2}
+            data-icon="inline-start"
+          />
+          <span>Seasonal</span>
+        </Link>
 
-                <NavigationMenuLink
-                  render={
-                    <Link
-                      href="/airing"
-                      variant="nav-item"
-                      aria-label="Airing Anime Today"
-                    >
-                      <div className="flex items-center gap-2 text-xs font-bold text-foreground transition-colors group-hover:text-primary">
-                        <HugeiconsIcon
-                          icon={RadioIcon}
-                          size={15}
-                          strokeWidth={2}
-                          className="text-rose-500"
-                        />
-                        <span>Airing Today</span>
-                      </div>
-                      <p className="text-xs leading-relaxed text-muted-foreground">
-                        Live episode countdown timers.
-                      </p>
-                    </Link>
-                  }
-                />
+        <Link
+          href="/airing"
+          aria-current={pathname === "/airing" ? "page" : undefined}
+          className={navItemClassName}
+        >
+          <HugeiconsIcon
+            icon={RadioIcon}
+            size={14}
+            strokeWidth={2}
+            data-icon="inline-start"
+          />
+          <span>Airing</span>
+        </Link>
 
-                <NavigationMenuLink
-                  render={
-                    <Link
-                      href="/about"
-                      variant="nav-item"
-                      aria-label="About Yozora Soundtracks & Info"
-                    >
-                      <div className="flex items-center gap-2 text-xs font-bold text-foreground transition-colors group-hover:text-primary">
-                        <HugeiconsIcon
-                          icon={Video02Icon}
-                          size={15}
-                          strokeWidth={2}
-                          className="text-sky-500"
-                        />
-                        <span>Soundtracks & Info</span>
-                      </div>
-                      <p className="text-xs leading-relaxed text-muted-foreground">
-                        OP/ED themes and anime OSTs.
-                      </p>
-                    </Link>
-                  }
-                />
-              </div>
-            </NavigationMenuContent>
-          </NavigationMenuItem>
+        <Link
+          href="/about"
+          aria-current={pathname === "/about" ? "page" : undefined}
+          className={navItemClassName}
+        >
+          <HugeiconsIcon
+            icon={Video02Icon}
+            size={14}
+            strokeWidth={2}
+            data-icon="inline-start"
+          />
+          <span>Soundtracks</span>
+        </Link>
 
-          {isSignedIn && (
-            <NavigationMenuItem>
-              <NavigationMenuLink
-                render={
-                  <Link
-                    href="/library"
-                    variant={
-                      pathname === "/library" ? "nav-link-active" : "nav-link"
-                    }
-                    aria-label="My Library & Watchlist"
-                  >
-                    <HugeiconsIcon
-                      icon={Layers01Icon}
-                      size={15}
-                      strokeWidth={2}
-                      data-icon="inline-start"
-                    />
-                    <span>Library</span>
-                  </Link>
-                }
-              />
-            </NavigationMenuItem>
-          )}
-        </NavigationMenuList>
-      </NavigationMenu>
+        {isSignedIn && (
+          <Link
+            href="/library"
+            aria-current={pathname === "/library" ? "page" : undefined}
+            className={navItemClassName}
+          >
+            <HugeiconsIcon
+              icon={Layers01Icon}
+              size={14}
+              strokeWidth={2}
+              data-icon="inline-start"
+            />
+            <span>Library</span>
+          </Link>
+        )}
+      </div>
     </nav>
   )
 }

@@ -33,6 +33,8 @@ export const segmentedControlItemVariants = cva(
           "data-checked:bg-background data-checked:text-foreground data-checked:shadow-sm/5 dark:data-checked:bg-input",
         current:
           "aria-[current=page]:bg-background aria-[current=page]:text-foreground aria-[current=page]:shadow-sm/5 dark:aria-[current=page]:bg-input",
+        active:
+          "data-active:bg-background data-active:text-foreground data-active:shadow-sm/5 dark:data-active:bg-input aria-selected:bg-background aria-selected:text-foreground aria-selected:shadow-sm/5 dark:aria-selected:bg-input",
         pressed:
           "data-pressed:bg-background data-pressed:text-foreground data-pressed:shadow-sm/5 dark:data-pressed:bg-input",
       },

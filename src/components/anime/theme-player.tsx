@@ -8,6 +8,10 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import type { AnimeTheme } from "@/lib/types/anime"
 import { cn } from "@/lib/utils"
+import {
+  segmentedControlItemVariants,
+  segmentedControlRootClassName,
+} from "@/lib/segmented-control"
 import { ThemeVideoPlayer } from "./theme-video-player"
 
 interface ThemePlayerProps {
@@ -219,15 +223,14 @@ export function ThemePlayer({
             <Badge variant="tag">{themes.length} Tracks</Badge>
           </div>
 
-          <div className="flex items-center rounded-xl border border-border/50 bg-muted/40 p-0.5">
+          <div className={segmentedControlRootClassName}>
             <button
               type="button"
               onClick={() => setActiveTab("OP")}
+              aria-current={activeTab === "OP" ? "page" : undefined}
               className={cn(
-                "cursor-pointer rounded-lg px-3 py-1 text-xs font-bold transition-colors",
-                activeTab === "OP"
-                  ? "bg-background text-foreground shadow-xs"
-                  : "text-muted-foreground hover:text-foreground"
+                segmentedControlItemVariants({ size: "sm", state: "current" }),
+                "font-bold"
               )}
             >
               Openings ({openings.length})
@@ -235,11 +238,10 @@ export function ThemePlayer({
             <button
               type="button"
               onClick={() => setActiveTab("ED")}
+              aria-current={activeTab === "ED" ? "page" : undefined}
               className={cn(
-                "cursor-pointer rounded-lg px-3 py-1 text-xs font-bold transition-colors",
-                activeTab === "ED"
-                  ? "bg-background text-foreground shadow-xs"
-                  : "text-muted-foreground hover:text-foreground"
+                segmentedControlItemVariants({ size: "sm", state: "current" }),
+                "font-bold"
               )}
             >
               Endings ({endings.length})

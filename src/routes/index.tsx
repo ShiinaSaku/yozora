@@ -24,13 +24,12 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       {
-        title:
-          "Yozora (夜空) — Free Anime Catalog, Live Airing Schedule & 1080p Themes",
+        title: "Yozora (夜空) — Free Anime Catalog, Radar & 1080p Themes",
       },
       {
         name: "description",
         content:
-          "Explore seasonal anime releases, live Tokyo broadcast countdowns, 1080p creditless anime openings and endings, and synchronize your watchlist on Yozora (夜空).",
+          "Explore seasonal anime, live Tokyo broadcast countdowns, 1080p creditless theme songs, and synced watchlists on Yozora (夜空).",
       },
       {
         name: "keywords",
@@ -39,13 +38,12 @@ export const Route = createFileRoute("/")({
       },
       {
         property: "og:title",
-        content:
-          "Yozora (夜空) — Free Anime Catalog, Live Airing Schedule & 1080p Themes",
+        content: "Yozora (夜空) — Free Anime Catalog, Radar & 1080p Themes",
       },
       {
         property: "og:description",
         content:
-          "Explore seasonal anime releases, live Tokyo broadcast countdowns, 1080p creditless anime openings and endings, and synchronize your watchlist on Yozora (夜空).",
+          "Explore seasonal anime, live Tokyo broadcast countdowns, 1080p creditless theme songs, and synced watchlists on Yozora (夜空).",
       },
       { property: "og:url", content: absoluteUrl("/") },
       {

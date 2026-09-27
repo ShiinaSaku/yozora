@@ -45,6 +45,10 @@ export function HomePageClient({
       id="home-main-container"
       className="container mx-auto flex max-w-7xl flex-col gap-14 px-4 py-6 sm:px-6"
     >
+      <h1 className="sr-only">
+        Yozora (夜空) — Free Anime Catalog, Live Airing Schedule &amp; 1080p
+        Themes
+      </h1>
       {trending.length > 0 && (
         <SpotlightHero items={trending.slice(0, 5)} onSaveClick={handleSave} />
       )}
@@ -171,6 +175,66 @@ export function HomePageClient({
           {popular.slice(0, 12).map((anime) => (
             <AnimeCard key={anime.id} anime={anime} onSaveClick={handleSave} />
           ))}
+        </div>
+      </section>
+
+      {/* Platform Definition & AEO Extractable Block */}
+      <section
+        id="about-yozora-summary"
+        aria-labelledby="about-yozora-heading"
+        className="flex flex-col gap-6 rounded-3xl border border-border/50 bg-card/30 p-6 backdrop-blur-md sm:p-8"
+      >
+        <div className="flex flex-col gap-2">
+          <h2
+            id="about-yozora-heading"
+            className="text-lg font-bold tracking-tight text-foreground sm:text-xl"
+          >
+            What is Yozora?
+          </h2>
+          <p className="max-w-4xl text-xs leading-relaxed text-pretty text-muted-foreground sm:text-sm">
+            Yozora (夜空) is a modern anime catalog, Tokyo television broadcast
+            radar, and soundtrack theme vault. It tracks weekly episode
+            countdowns synchronized to Japanese network timetables (JST UTC+9),
+            streams 1080p creditless opening and ending theme songs via
+            AnimeThemes.moe, and supports resilient AniList watchlist
+            synchronization with zero ads and 100% free open-source access under
+            the MIT License.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 pt-1 sm:grid-cols-4">
+          <div className="flex flex-col gap-0.5 rounded-xl border border-border/40 bg-background/50 p-3">
+            <span className="font-mono text-base font-bold text-foreground">
+              Tokyo JST
+            </span>
+            <span className="text-xs text-muted-foreground">
+              Live Airing Countdowns
+            </span>
+          </div>
+          <div className="flex flex-col gap-0.5 rounded-xl border border-border/40 bg-background/50 p-3">
+            <span className="font-mono text-base font-bold text-foreground">
+              1080p Lossless
+            </span>
+            <span className="text-xs text-muted-foreground">
+              Creditless OP / ED Themes
+            </span>
+          </div>
+          <div className="flex flex-col gap-0.5 rounded-xl border border-border/40 bg-background/50 p-3">
+            <span className="font-mono text-base font-bold text-foreground">
+              Dual-Engine
+            </span>
+            <span className="text-xs text-muted-foreground">
+              AniList + Jikan Failover
+            </span>
+          </div>
+          <div className="flex flex-col gap-0.5 rounded-xl border border-border/40 bg-background/50 p-3">
+            <span className="font-mono text-base font-bold text-foreground">
+              $0 · Ad-Free
+            </span>
+            <span className="text-xs text-muted-foreground">
+              100% Open Source (MIT)
+            </span>
+          </div>
         </div>
       </section>
 

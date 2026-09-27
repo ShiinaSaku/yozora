@@ -8,6 +8,13 @@ import { SaveDialog } from "@/components/anime/save-dialog"
 import { ThemePlayer } from "@/components/anime/theme-player"
 import { TrailerDialog } from "@/components/anime/trailer-dialog"
 import { MarkdownRenderer } from "@/components/ui/markdown-renderer"
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
+import { getAnimeFaqItems } from "@/lib/seo/json-ld"
 import type { Anime, AnimeDetailResponse, AnimeTheme } from "@/lib/types/anime"
 
 interface AnimeDetailClientProps {
@@ -22,6 +29,11 @@ export function AnimeDetailClient({ detail, themes }: AnimeDetailClientProps) {
   const [trailerOpen, setTrailerOpen] = React.useState(false)
   const [selectedForSave, setSelectedForSave] = React.useState<Anime | null>(
     null
+  )
+
+  const faqs = React.useMemo(
+    () => getAnimeFaqItems(anime, themes, characters),
+    [anime, themes, characters]
   )
 
   const handleOpenSave = (target: Anime) => {
@@ -98,6 +110,37 @@ export function AnimeDetailClient({ detail, themes }: AnimeDetailClientProps) {
                   />
                 ))}
               </div>
+            </section>
+          )}
+
+          {/* Frequently Asked Questions (AEO & GEO Extraction) */}
+          {faqs.length > 0 && (
+            <section
+              id="anime-faq-section"
+              aria-labelledby="anime-faq-heading"
+              className="flex flex-col gap-4"
+            >
+              <div className="flex flex-col gap-1">
+                <h2
+                  id="anime-faq-heading"
+                  className="text-lg font-bold tracking-tight text-foreground"
+                >
+                  Frequently Asked Questions
+                </h2>
+                <p className="text-xs text-muted-foreground">
+                  Key details on broadcast schedules, soundtrack themes, and
+                  voice actors for {anime.title}.
+                </p>
+              </div>
+
+              <Accordion defaultValue={["anime-faq-0"]}>
+                {faqs.map((faq, idx) => (
+                  <AccordionItem key={faq.question} value={`anime-faq-${idx}`}>
+                    <AccordionTrigger>{faq.question}</AccordionTrigger>
+                    <AccordionContent>{faq.answer}</AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
             </section>
           )}
         </div>

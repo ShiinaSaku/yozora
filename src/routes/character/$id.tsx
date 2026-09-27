@@ -6,9 +6,16 @@ import { AnimeCard } from "@/components/anime/anime-card"
 import { MarkdownRenderer } from "@/components/ui/markdown-renderer"
 import { ShareButton } from "@/components/ui/share-button"
 import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
+import {
   generateBreadcrumbsJsonLd,
   generateCharacterFaqJsonLd,
   generateCharacterJsonLd,
+  getCharacterFaqItems,
   stringifyJsonLd,
 } from "@/lib/seo/json-ld"
 import { getCharacterPageData } from "@/lib/server/catalog"
@@ -36,10 +43,24 @@ export const Route = createFileRoute("/character/$id")({
       return { meta: [{ title: "Character Profile | Yozora" }] }
     }
     const char = loaderData.character
-    const title = `${char.name.full}${char.name.native ? ` (${char.name.native})` : ""} — Voice Actors, Roles & Bio | Yozora`
-    const description =
-      char.description?.slice(0, 160) ||
+    const nativeSuffix = char.name.native ? ` (${char.name.native})` : ""
+    const charFull = `${char.name.full}${nativeSuffix}`
+    const title =
+      charFull.length <= 34
+        ? `${charFull} — Voice Actors & Roles | Yozora`
+        : `${char.name.full} — Voice Actors & Roles | Yozora`.length <= 58
+          ? `${char.name.full} — Voice Actors & Roles | Yozora`
+          : `${char.name.full} | Yozora`
+
+    const rawDesc = (
+      char.description ||
       `Explore voice actors, character lore, and featured anime roles for ${char.name.full} on Yozora.`
+    )
+      .replace(/<[^>]*>/g, "")
+      .replace(/\s+/g, " ")
+      .trim()
+    const description =
+      rawDesc.length > 155 ? `${rawDesc.slice(0, 152).trim()}...` : rawDesc
     const canonicalPath = `/character/${char.id}`
     const og = openGraphImageUrl({
       type: "character",
@@ -178,6 +199,35 @@ function CharacterPage() {
           </div>
         </section>
       )}
+
+      {/* Frequently Asked Questions (AEO & GEO Extractable Passage Answers) */}
+      <section
+        id="character-faq-section"
+        aria-labelledby="character-faq-heading"
+        className="flex flex-col gap-4"
+      >
+        <div className="flex flex-col gap-1">
+          <h2
+            id="character-faq-heading"
+            className="text-xl font-bold tracking-tight text-foreground"
+          >
+            Frequently Asked Questions
+          </h2>
+          <p className="text-xs text-muted-foreground">
+            Key details on roles, native names, and appearances for{" "}
+            {char.name.full}.
+          </p>
+        </div>
+
+        <Accordion defaultValue={["char-faq-0"]}>
+          {getCharacterFaqItems(char).map((faq, idx) => (
+            <AccordionItem key={faq.question} value={`char-faq-${idx}`}>
+              <AccordionTrigger>{faq.question}</AccordionTrigger>
+              <AccordionContent>{faq.answer}</AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
+      </section>
     </div>
   )
 }

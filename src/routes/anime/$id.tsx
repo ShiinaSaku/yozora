@@ -1,4 +1,5 @@
 import { createFileRoute, notFound } from "@tanstack/react-router"
+import { useSuspenseQuery } from "@tanstack/react-query"
 import { AnimeDetailClient } from "@/components/pages/anime-detail-client"
 import {
   generateAnimeFaqJsonLd,
@@ -6,7 +7,7 @@ import {
   generateBreadcrumbsJsonLd,
   stringifyJsonLd,
 } from "@/lib/seo/json-ld"
-import { getAnimePageData } from "@/lib/server/catalog"
+import { animeDetailQueryOptions } from "@/lib/queries/catalog"
 import { DetailPageSkeleton } from "@/components/ui/page-skeletons"
 import { parseAnimeId } from "@/lib/utils/slug"
 import { absoluteUrl, canonicalLinks } from "@/lib/seo/meta"
@@ -16,13 +17,13 @@ import { absoluteUrl, canonicalLinks } from "@/lib/seo/meta"
  */
 export const Route = createFileRoute("/anime/$id")({
   pendingComponent: DetailPageSkeleton,
-  loader: async ({ params }) => {
+  loader: async ({ params, context }) => {
     const id = parseAnimeId(params.id)
     if (!id) {
       throw notFound()
     }
 
-    return await getAnimePageData({ data: id })
+    return await context.queryClient.query(animeDetailQueryOptions(id))
   },
   head: ({ loaderData }) => {
     if (!loaderData?.detail) {
@@ -30,20 +31,26 @@ export const Route = createFileRoute("/anime/$id")({
     }
     const { anime, characters } = loaderData.detail
     const themes = loaderData.themes
-    const altTitle =
-      anime.titles?.romaji &&
-      anime.titles.romaji.toLowerCase() !== anime.title.toLowerCase()
-        ? anime.titles.romaji
-        : anime.titles?.native || ""
-    const title = `${anime.title}${altTitle ? ` (${altTitle})` : ""}${anime.year ? ` · ${anime.year}` : ""} — Airing Schedule, Episodes & Themes | Yozora`
+    const yearStr = anime.year ? ` (${anime.year})` : ""
+    const baseTitle = `${anime.title}${yearStr}`
+    const title =
+      baseTitle.length <= 36
+        ? `${baseTitle} — Airing & Themes | Yozora`
+        : baseTitle.length <= 48
+          ? `${baseTitle} — Themes | Yozora`
+          : `${anime.title} | Yozora`
+
     const cleanDesc = (
       anime.description ||
       `Explore episodes, characters, themes, and soundtracks for ${anime.title} on Yozora.`
     )
       .replace(/<[^>]*>/g, "")
+      .replace(/\s+/g, " ")
       .trim()
     const description =
-      cleanDesc.length > 200 ? `${cleanDesc.slice(0, 197)}...` : cleanDesc
+      cleanDesc.length > 155
+        ? `${cleanDesc.slice(0, 152).trim()}...`
+        : cleanDesc
 
     const nativeTitles = [
       anime.titles?.english,
@@ -168,6 +175,9 @@ export const Route = createFileRoute("/anime/$id")({
 })
 
 function AnimeDetailPage() {
-  const { detail, themes } = Route.useLoaderData()
-  return <AnimeDetailClient detail={detail} themes={themes} />
+  const { id: rawId } = Route.useParams()
+  const id = parseAnimeId(rawId)
+  if (!id) throw notFound()
+  const { data } = useSuspenseQuery(animeDetailQueryOptions(id))
+  return <AnimeDetailClient detail={data.detail} themes={data.themes} />
 }

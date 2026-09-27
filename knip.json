@@ -4,7 +4,6 @@
     "src/router.tsx",
     "src/start.ts",
     "src/routes/**/*.{ts,tsx}",
-    "src/lib/api/app.ts",
     "src/lib/env.ts"
   ],
   "project": [
@@ -12,6 +11,7 @@
   ],
   "ignore": [
     "src/routeTree.gen.ts",
+    "src/gql/**",
     ".output/**",
     ".nitro/**"
   ],
@@ -19,9 +19,6 @@
     "@base-ui/react",
     "tailwindcss",
     "tw-animate-css",
-    "shadcn",
-    "@fontsource/capriola",
-    "@fontsource/space-mono",
-    "@fontsource/zen-maru-gothic"
+    "shadcn"
   ]
 }

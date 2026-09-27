@@ -31,6 +31,11 @@ import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 import type { Anime } from "@/lib/types/anime"
 import type { AnimeEntry } from "@/lib/db/schema"
+import {
+  animeEntryQueryOptions,
+  myLibraryQueryOptions,
+} from "@/lib/queries/library"
+import { deleteEntryFn, upsertEntryFn } from "@/lib/server/entries"
 
 interface SaveDialogProps {
   anime: Anime | null
@@ -95,18 +100,9 @@ const statusOptions: Array<{
 export function SaveDialog({ anime, open, onOpenChange }: SaveDialogProps) {
   const { isSignedIn } = useUser()
 
-  const { data: existingEntry, isLoading: isEntryLoading } =
-    useQuery<AnimeEntry | null>({
-      queryKey: ["entry", anime?.id],
-      queryFn: async () => {
-        if (!anime?.id || !isSignedIn) return null
-        const res = await fetch(`/api/entries/${anime.id}`)
-        if (!res.ok) return null
-        const json: { data?: AnimeEntry } = await res.json()
-        return json.data || null
-      },
-      enabled: !!anime?.id && isSignedIn && open,
-    })
+  const { data: existingEntry, isLoading: isEntryLoading } = useQuery(
+    animeEntryQueryOptions(anime?.id, Boolean(isSignedIn && open))
+  )
 
   if (!anime) return null
 
@@ -434,11 +430,9 @@ function SaveForm({
   }
 
   const saveMutation = useMutation({
-    mutationFn: async () => {
-      const res = await fetch("/api/entries", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+    mutationFn: () =>
+      upsertEntryFn({
+        data: {
           anilistId: anime.id,
           status: form.status,
           progress: Number(form.progress) || 0,
@@ -446,18 +440,18 @@ function SaveForm({
           score: form.score !== "" ? Math.round(Number(form.score) * 10) : null,
           notes: form.notes.trim() || null,
           favorite: form.favorite,
-        }),
-      })
-      if (!res.ok) throw new Error("Failed to save")
-      const json: { data?: AnimeEntry } = await res.json()
-      return json
-    },
+        },
+      }),
     onSuccess: () => {
       toast.success(existingEntry ? "Library Updated" : "Added to Library", {
         description: `"${anime.title}" has been saved to your ${form.status} list.`,
       })
-      queryClient.invalidateQueries({ queryKey: ["entry", anime.id] })
-      queryClient.invalidateQueries({ queryKey: ["my-entries"] })
+      queryClient.invalidateQueries({
+        queryKey: animeEntryQueryOptions(anime.id).queryKey,
+      })
+      queryClient.invalidateQueries({
+        queryKey: myLibraryQueryOptions().queryKey,
+      })
       onClose()
     },
     onError: () => {
@@ -468,18 +462,17 @@ function SaveForm({
   })
 
   const deleteMutation = useMutation({
-    mutationFn: async () => {
-      const res = await fetch(`/api/entries/${anime.id}`, { method: "DELETE" })
-      if (!res.ok) throw new Error("Failed to delete")
-      const json: { success?: boolean } = await res.json()
-      return json
-    },
+    mutationFn: () => deleteEntryFn({ data: anime.id }),
     onSuccess: () => {
       toast.success("Removed from Library", {
         description: `"${anime.title}" was removed from your watchlist.`,
       })
-      queryClient.invalidateQueries({ queryKey: ["entry", anime.id] })
-      queryClient.invalidateQueries({ queryKey: ["my-entries"] })
+      queryClient.invalidateQueries({
+        queryKey: animeEntryQueryOptions(anime.id).queryKey,
+      })
+      queryClient.invalidateQueries({
+        queryKey: myLibraryQueryOptions().queryKey,
+      })
       onClose()
     },
     onError: () => {

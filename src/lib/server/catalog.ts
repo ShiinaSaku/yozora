@@ -8,6 +8,7 @@ import {
   getAnimeCollection,
   getAnimeDetail,
   getCharacterDetail,
+  getMultipleAnime,
   searchAnime,
 } from "@/lib/catalog"
 import { getAnimeThemes } from "@/lib/themes"
@@ -117,4 +118,20 @@ export const getCharacterPageData = createServerFn({ method: "GET" })
       }
       throw error
     }
+  })
+
+const batchIdsSchema = z.compile(z.array(z.number().int().positive()).max(50))
+
+export const getBatchAnimeData = createServerFn({ method: "GET" })
+  .validator(batchIdsSchema)
+  .handler(async ({ data: ids }) => {
+    if (ids.length === 0) return []
+    return await getMultipleAnime(ids)
+  })
+
+export const searchCatalogFn = createServerFn({ method: "GET" })
+  .validator(searchQuerySchema)
+  .handler(async ({ data: query }) => {
+    if (query.length < 2) return []
+    return await searchAnime(query)
   })

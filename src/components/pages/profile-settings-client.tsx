@@ -45,6 +45,13 @@ import { useRouter } from "@/lib/navigation"
 import { cn } from "@/lib/utils"
 import { z } from "zod"
 import type { SettingsTab } from "@/routes/_authed/settings/profile"
+import { myProfileQueryOptions } from "@/lib/queries/profile"
+import {
+  batchAnimeQueryOptions,
+  searchCatalogQueryOptions,
+} from "@/lib/queries/catalog"
+import { deleteUserDataFn, updateProfileFn } from "@/lib/server/profile"
+import type { Anime } from "@/lib/types/anime"
 
 const profileSchema = z.compile(
   z.object({
@@ -169,18 +176,9 @@ export function ProfileSettingsClient({
   )
 
   // Load current user profile from DB
-  const { data: profile, isLoading } = useQuery({
-    queryKey: ["my-profile"],
-    queryFn: async () => {
-      const res = await fetch("/api/user/profile/me")
-      if (!res.ok) {
-        return null
-      }
-      const json: { data: ProfileState } = await res.json()
-      return json.data
-    },
-    enabled: !!isSignedIn,
-  })
+  const { data: profile, isLoading } = useQuery(
+    myProfileQueryOptions(Boolean(isSignedIn))
+  )
 
   React.useEffect(() => {
     if (profile) {
@@ -195,7 +193,7 @@ export function ProfileSettingsClient({
           isPublic: profile.isPublic,
           anilistUsername: profile.anilistUsername || "",
           malUsername: profile.malUsername || "",
-          pinnedAnimeIds: profile.pinnedAnimeIds,
+          pinnedAnimeIds: profile.pinnedAnimeIds || [],
         },
       })
     } else if (user) {
@@ -245,11 +243,9 @@ export function ProfileSettingsClient({
 
   // Save mutation
   const saveMutation = useMutation({
-    mutationFn: async () => {
-      const res = await fetch("/api/user/profile", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+    mutationFn: () =>
+      updateProfileFn({
+        data: {
           handle: state.handle.trim().toLowerCase(),
           displayName: state.displayName.trim(),
           avatarUrl: state.avatarUrl.trim() || null,
@@ -259,25 +255,21 @@ export function ProfileSettingsClient({
           anilistUsername: state.anilistUsername.trim() || null,
           malUsername: state.malUsername.trim() || null,
           pinnedAnimeIds: state.pinnedAnimeIds,
-        }),
-      })
-
-      const json: {
-        data: ProfileState
-        error?: string
-      } = await res.json()
-      if (!res.ok) {
-        throw new Error(json.error || "Failed to update profile")
-      }
-      return json.data
-    },
+        },
+      }),
     onSuccess: (data) => {
       toast.success("Settings Saved", {
         description:
           "Your profile and preferences are synced live across Yozora.",
       })
-      queryClient.invalidateQueries({ queryKey: ["my-profile"] })
-      queryClient.invalidateQueries({ queryKey: ["profile", data.handle] })
+      queryClient.invalidateQueries({
+        queryKey: myProfileQueryOptions().queryKey,
+      })
+      if (data.handle) {
+        queryClient.invalidateQueries({
+          queryKey: ["public-profile", data.handle.toLowerCase()],
+        })
+      }
     },
     onError: (err: Error) => {
       toast.error("Failed to Save Settings", {
@@ -730,14 +722,6 @@ function ProfileAppearanceCard() {
   )
 }
 
-interface PinnedSearchResult {
-  id: number
-  title: string
-  cover: string
-  coverMedium?: string
-  year?: number
-}
-
 function PinnedAnimeCard({
   pinnedIds,
   onChange,
@@ -754,30 +738,17 @@ function PinnedAnimeCard({
     return () => clearTimeout(timer)
   }, [search])
 
-  const { data: results = [], isFetching } = useQuery({
-    queryKey: ["pinned-search", debounced],
-    queryFn: async () => {
-      const res = await fetch(
-        `/api/catalog/search?q=${encodeURIComponent(debounced)}`
-      )
-      if (!res.ok) return []
-      const json: { data: PinnedSearchResult[] } = await res.json()
-      return json.data.slice(0, 6)
-    },
-    enabled: debounced.length >= 2,
-  })
+  const { data: searchResults = [], isFetching } = useQuery(
+    searchCatalogQueryOptions(debounced)
+  )
+  const results = React.useMemo(
+    () => searchResults.slice(0, 6),
+    [searchResults]
+  )
 
-  const { data: pinnedDetails = [] } = useQuery({
-    queryKey: ["pinned-details", pinnedIds],
-    queryFn: async () => {
-      if (pinnedIds.length === 0) return []
-      const res = await fetch(`/api/catalog/batch?ids=${pinnedIds.join(",")}`)
-      if (!res.ok) return []
-      const json: { data: PinnedSearchResult[] } = await res.json()
-      return json.data
-    },
-    enabled: pinnedIds.length > 0,
-  })
+  const { data: pinnedDetails = [] } = useQuery(
+    batchAnimeQueryOptions(pinnedIds)
+  )
 
   const addPin = (id: number) => {
     if (pinnedIds.includes(id) || pinnedIds.length >= MAX_PINS) return
@@ -807,7 +778,7 @@ function PinnedAnimeCard({
           {pinnedIds.length > 0 && (
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               {pinnedIds.map((id) => {
-                const detail = pinnedDetails.find((d) => d.id === id)
+                const detail = pinnedDetails.find((d: Anime) => d.id === id)
                 return (
                   <div
                     key={id}
@@ -920,18 +891,8 @@ function DangerZoneCard() {
   const [confirmText, setConfirmText] = React.useState("")
 
   const deleteAllMutation = useMutation({
-    mutationFn: async () => {
-      const res = await fetch("/api/user/data", { method: "DELETE" })
-      if (!res.ok) {
-        const json: { error?: string } = await res.json()
-        throw new Error(json.error || "Failed to delete data")
-      }
-      const data: {
-        data: { deletedEntries: number; deletedCollections: number }
-      } = await res.json()
-      return data
-    },
-    onSuccess: ({ data }) => {
+    mutationFn: () => deleteUserDataFn(),
+    onSuccess: (data) => {
       toast.success("All Data Deleted", {
         description: `${data.deletedEntries} entries and ${data.deletedCollections} collections were permanently removed.`,
       })

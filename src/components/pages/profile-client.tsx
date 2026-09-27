@@ -28,6 +28,8 @@ import { AniListIcon, MyAnimeListIcon } from "@/components/icons/platform-icons"
 import type { Anime } from "@/lib/types/anime"
 import type { AnimeEntry, UserProfile } from "@/lib/db/schema"
 import { getAnimeUrl } from "@/lib/utils/slug"
+import { batchAnimeQueryOptions } from "@/lib/queries/catalog"
+import { publicProfileQueryOptions } from "@/lib/queries/profile"
 
 export interface UserStats {
   totalEntries: number
@@ -316,19 +318,15 @@ function PinnedShowcase({
   handle: string
   pinnedIds: number[]
 }) {
-  const { data: pinnedAnime, isLoading } = useQuery({
-    queryKey: ["pinned-anime", pinnedIds],
-    queryFn: async () => {
-      const res = await fetch(`/api/catalog/batch?ids=${pinnedIds.join(",")}`)
-      if (!res.ok) return []
-      const json: { data: Anime[] } = await res.json()
-      // Preserve the user's chosen pin order
-      return pinnedIds
-        .map((id) => json.data.find((a) => a.id === id))
-        .filter((a): a is Anime => Boolean(a))
-    },
-    enabled: pinnedIds.length > 0,
-  })
+  const { data: rawBatch, isLoading } = useQuery(
+    batchAnimeQueryOptions(pinnedIds)
+  )
+  const pinnedAnime = React.useMemo(() => {
+    if (!rawBatch) return []
+    return pinnedIds
+      .map((id) => rawBatch.find((a: Anime) => a.id === id))
+      .filter((a): a is Anime => Boolean(a))
+  }, [rawBatch, pinnedIds])
 
   if (pinnedIds.length === 0) return null
 
@@ -375,7 +373,7 @@ function PinnedShowcase({
             </div>
           ))}
 
-        {pinnedAnime?.map((anime, index) => (
+        {pinnedAnime.map((anime, index) => (
           <Link
             key={anime.id}
             href={getAnimeUrl(anime)}
@@ -622,47 +620,15 @@ export function UserProfileClient({ handle, initialData }: ProfileClientProps) {
     "recent"
   )
 
-  const { data: profileData } = useQuery({
-    queryKey: ["profile", handle],
-    queryFn: async () => {
-      const res = await fetch(`/api/user/profile/${handle}`)
-      if (!res.ok) throw new Error("User not found")
-      const json: {
-        data: {
-          profile: UserProfile
-          stats: UserStats
-        }
-      } = await res.json()
-      return json.data
-    },
-    initialData: {
-      profile: initialData.profile,
-      stats: initialData.stats,
-    },
+  const { data: pageData } = useQuery({
+    ...publicProfileQueryOptions(handle),
+    initialData,
   })
 
-  const { data: userEntriesData } = useQuery({
-    queryKey: ["user-entries", handle],
-    queryFn: async () => {
-      const res = await fetch(`/api/entries/user/${handle}?include=anime`)
-      if (!res.ok) return { entries: [], anime: [] }
-      const json: {
-        data?: AnimeEntry[]
-        anime?: Anime[]
-      } = await res.json()
-      return {
-        entries: json.data || [],
-        anime: json.anime || [],
-      }
-    },
-    initialData: {
-      entries: initialData.entries,
-      anime: initialData.anime,
-    },
-  })
-
-  const entries = userEntriesData.entries
-  const animeList = userEntriesData.anime
+  const profile = pageData.profile
+  const stats = pageData.stats
+  const entries = pageData.entries
+  const animeList = pageData.anime
 
   const animeMap = React.useMemo(() => {
     const map = new Map<number, Anime>()
@@ -697,8 +663,6 @@ export function UserProfileClient({ handle, initialData }: ProfileClientProps) {
 
     return list
   }, [entries, animeMap, searchFilter, sortBy])
-
-  const { profile, stats } = profileData
 
   if (profile.isPublic === false) {
     return (

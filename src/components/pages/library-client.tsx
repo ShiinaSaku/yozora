@@ -10,11 +10,13 @@ import { AnimeCard, AnimeCardSkeleton } from "@/components/anime/anime-card"
 import { SaveDialog } from "@/components/anime/save-dialog"
 import type { Anime } from "@/lib/types/anime"
 import type { AnimeEntry } from "@/lib/db/schema"
+import { myLibraryQueryOptions } from "@/lib/queries/library"
+import { incrementProgressFn } from "@/lib/server/entries"
 
 export function LibraryClient({
-  initialData,
+  data: initialData,
 }: {
-  initialData?: {
+  data?: {
     entries: AnimeEntry[]
     anime: Anime[]
   }
@@ -25,27 +27,10 @@ export function LibraryClient({
   const [selectedAnime, setSelectedAnime] = React.useState<Anime | null>(null)
   const [saveOpen, setSaveOpen] = React.useState(false)
 
-  const { data: libraryData, isLoading: isEntriesLoading } = useQuery<{
-    entries: AnimeEntry[]
-    anime: Anime[]
-  }>({
-    queryKey: ["my-entries"],
-    queryFn: async () => {
-      const res = await fetch("/api/entries/my?include=anime")
-      if (!res.ok) {
-        return { entries: [], anime: [] }
-      }
-      const json: {
-        data?: AnimeEntry[]
-        anime?: Anime[]
-      } = await res.json()
-      return {
-        entries: json.data || [],
-        anime: json.anime || [],
-      }
-    },
+  const { data: libraryData, isLoading: isEntriesLoading } = useQuery({
+    ...myLibraryQueryOptions(),
     initialData,
-    enabled: !!isSignedIn,
+    enabled: Boolean(isSignedIn),
   })
 
   const entries = libraryData?.entries || []
@@ -61,24 +46,16 @@ export function LibraryClient({
 
   // Quick increment mutation
   const incrementMutation = useMutation({
-    mutationFn: async (anilistId: number) => {
-      const res = await fetch(`/api/entries/${anilistId}/increment`, {
-        method: "POST",
-      })
-      if (!res.ok) {
-        throw new Error("Failed to increment")
-      }
-      const json: { data?: AnimeEntry } = await res.json()
-      return json
-    },
-    onSuccess: (data) => {
-      const entry = data.data
+    mutationFn: (anilistId: number) => incrementProgressFn({ data: anilistId }),
+    onSuccess: (entry) => {
       toast.success("Episode Watched", {
-        description: entry?.progress
+        description: entry.progress
           ? `Updated progress to Episode ${entry.progress}.`
           : "Recorded episode progress in your library.",
       })
-      queryClient.invalidateQueries({ queryKey: ["my-entries"] })
+      queryClient.invalidateQueries({
+        queryKey: myLibraryQueryOptions().queryKey,
+      })
     },
     onError: () => {
       toast.error("Failed to Update Progress", {

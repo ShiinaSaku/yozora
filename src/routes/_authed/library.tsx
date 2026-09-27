@@ -1,13 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router"
+import { useSuspenseQuery } from "@tanstack/react-query"
 import { LibraryClient } from "@/components/pages/library-client"
-import { getMyLibraryData } from "@/lib/server/library"
+import { myLibraryQueryOptions } from "@/lib/queries/library"
 import { absoluteUrl, canonicalLinks, openGraphImageUrl } from "@/lib/seo/meta"
 
 export const Route = createFileRoute("/_authed/library")({
   loader: async ({ context }) => {
-    const data = await getMyLibraryData()
-    context.queryClient.setQueryData(["my-entries"], data)
-    return data
+    await context.queryClient.query(myLibraryQueryOptions())
   },
   head: () => {
     const title = "My Anime Watchlist & Library Tracker | Yozora"
@@ -57,6 +56,6 @@ export const Route = createFileRoute("/_authed/library")({
 })
 
 function LibraryPage() {
-  const initialData = Route.useLoaderData()
-  return <LibraryClient initialData={initialData} />
+  const { data } = useSuspenseQuery(myLibraryQueryOptions())
+  return <LibraryClient data={data} />
 }

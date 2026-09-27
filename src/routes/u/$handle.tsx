@@ -1,20 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router"
+import { useSuspenseQuery } from "@tanstack/react-query"
 import { UserProfileClient } from "@/components/pages/profile-client"
-import { getPublicProfilePageData } from "@/lib/server/profile"
+import { publicProfileQueryOptions } from "@/lib/queries/profile"
 import { absoluteUrl, canonicalLinks, openGraphImageUrl } from "@/lib/seo/meta"
 
 export const Route = createFileRoute("/u/$handle")({
   loader: async ({ params, context }) => {
-    const data = await getPublicProfilePageData({ data: params.handle })
-    context.queryClient.setQueryData(["profile", params.handle], {
-      profile: data.profile,
-      stats: data.stats,
-    })
-    context.queryClient.setQueryData(["user-entries", params.handle], {
-      entries: data.entries,
-      anime: data.anime,
-    })
-    return data
+    return await context.queryClient.query(
+      publicProfileQueryOptions(params.handle)
+    )
   },
   head: ({ params, loaderData }) => {
     const handle = loaderData?.profile.handle || params.handle
@@ -59,6 +53,6 @@ export const Route = createFileRoute("/u/$handle")({
 
 function ProfilePage() {
   const { handle } = Route.useParams()
-  const initialData = Route.useLoaderData()
-  return <UserProfileClient handle={handle} initialData={initialData} />
+  const { data } = useSuspenseQuery(publicProfileQueryOptions(handle))
+  return <UserProfileClient handle={handle} initialData={data} />
 }

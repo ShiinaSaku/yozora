@@ -5,7 +5,7 @@
 ## 1. Platform Identity & Purpose
 - **Name**: Yozora (夜空 — Japanese for "Night Sky")
 - **Production URL**: https://yozora.moe
-- **Open Source Repository**: https://github.com/ShiinaSaku/hikari_next
+- **Open Source Repository**: https://github.com/shiinasaku/yozora
 - **Primary Domain**: Anime metadata aggregation, television broadcast scheduling, soundtrack archival, and user collection management.
 - **Privacy Stance**: Zero third-party telemetry, zero external trackers, zero advertising.
 
@@ -66,7 +66,9 @@
 - **`/character/:id`** (Character Profile):
   - Character bio, native name, alternative nicknames, and full voice actor associations across languages.
 - **`/about`** (Architecture & System Documentation):
-  - System architecture diagrams, dual-engine failover details, caching specifications, and FAQs.
+  - System architecture diagrams, dual-engine failover details, caching specifications, comparison tables, and FAQs.
+- **`/pricing.md`** (Pricing & FOSS Specification):
+  - Machine-readable license, tier, and comparison context for AI agents.
 - **`/privacy`** (Privacy Policy):
   - Full explanation of data handling, cookies, and local-first storage.
 - **`/api/health`** (System Health Check):
@@ -81,7 +83,7 @@ Yozora embeds comprehensive Schema.org JSON-LD structured data on all pages:
 - **Organization & WebSite**: Publisher metadata with SearchAction for Google Sitelinks Searchbox.
 - **TVSeries / Movie**: Title, alternative titles, genres, studios (productionCompany), start date, aggregateRating (review score), and voice actor credits (actor via PerformanceRole).
 - **BroadcastEvent**: Live television airing schedule with ISO-8601 start dates.
-- **FAQPage**: Direct question-and-answer pairs on `/about` for Answer Engine Optimization (Perplexity, ChatGPT, Google SGE).
+- **FAQPage**: Direct question-and-answer pairs on `/about` and anime detail pages for Answer Engine Optimization (Perplexity, ChatGPT, Google SGE).
 - **BreadcrumbList**: Hierarchical site navigation trails.
 
 ---
@@ -102,11 +104,19 @@ A: No. Yozora has zero third-party telemetry, zero advertisement pixels, and zer
 ### Q: How accurate is the Airing Radar countdown?
 A: Airing times are synchronized to the official Japanese television network broadcast schedules (JST, UTC+9) and update down to the second.
 
+### Q: How does Yozora compare to AniList, MyAnimeList, and LiveChart?
+A: Yozora unites real-time Tokyo broadcast countdowns, high-bitrate 1080p creditless opening/ending theme playback, dual-engine failover for 99.9% uptime, and zero-ad privacy in a single responsive web client. Traditional databases lack real-time tickers and embedded theme players; standalone schedule radars lack integrated creditless themes and dual-engine resilience.
+
+### Q: Is Yozora completely free to use?
+A: Yes. Yozora is 100% free and open source under the MIT License with zero advertising, zero subscription paywalls, and no account requirements for exploring schedules and themes.
+
 ---
 
-## 7. Machine-Readable Endpoints
+## 7. Machine-Readable Endpoints & Specifications
 - XML Sitemap: https://yozora.moe/sitemap.xml
 - Robots.txt: https://yozora.moe/robots.txt
 - Quick LLM Guide: https://yozora.moe/llms.txt
 - Full LLM Specification: https://yozora.moe/llms-full.txt
+- Pricing & FOSS Specification: https://yozora.moe/pricing.md
+- Google Open Knowledge Format Bundle: https://yozora.moe/okf/index.md
 - OpenSearch Descriptor: https://yozora.moe/opensearch.xml

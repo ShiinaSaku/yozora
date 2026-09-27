@@ -9,17 +9,20 @@ import { absoluteUrl, canonicalLinks, openGraphImageUrl } from "@/lib/seo/meta"
 export const Route = createFileRoute("/privacy")({
   head: () => ({
     meta: [
-      { title: "Privacy Policy | Yozora" },
+      { title: "Privacy Policy & Data Security | Yozora" },
       {
         name: "description",
         content:
-          "Yozora privacy policy, authentication safety, and data governance details.",
+          "Review the Yozora privacy policy: local-first storage, zero third-party telemetry, Clerk authentication security, and private watchlist synchronization.",
       },
-      { property: "og:title", content: "Privacy Policy | Yozora" },
+      {
+        property: "og:title",
+        content: "Privacy Policy & Data Security | Yozora",
+      },
       {
         property: "og:description",
         content:
-          "Yozora privacy policy, authentication safety, and data governance details.",
+          "Review the Yozora privacy policy: local-first storage, zero third-party telemetry, Clerk authentication security, and private watchlist synchronization.",
       },
       { property: "og:url", content: absoluteUrl("/privacy") },
       {

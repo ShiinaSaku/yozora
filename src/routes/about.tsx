@@ -10,7 +10,14 @@ import {
   Video02Icon,
 } from "@hugeicons/core-free-icons"
 import { GithubIcon } from "@/components/icons/platform-icons"
+import { Check, Minus } from "lucide-react"
 import { Card } from "@/components/ui/card"
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
 import { BrandLogo } from "@/components/layout/brand-logo"
 import Link from "@/components/ui/link"
 import { absoluteUrl, canonicalLinks, openGraphImageUrl } from "@/lib/seo/meta"
@@ -46,6 +53,21 @@ const ABOUT_FAQS = [
     question: "Is Yozora open source?",
     answer:
       "Yes. Yozora is open source and licensed under the MIT License. You can inspect the source code, contribute features, or deploy your own instance via GitHub.",
+  },
+  {
+    question: "How does Yozora compare to AniList, MyAnimeList, and LiveChart?",
+    answer:
+      "Unlike traditional databases (AniList, MyAnimeList) or standalone schedule charts (LiveChart), Yozora unifies real-time Tokyo broadcast countdowns, high-bitrate 1080p creditless opening/ending theme playback, dual-engine failover for 99.9% uptime, and zero-ad privacy in a single responsive web interface.",
+  },
+  {
+    question: "Is Yozora completely free to use?",
+    answer:
+      "Yes. Yozora is 100% free and open-source under the MIT License with zero advertising, zero subscription paywalls, and no account requirements for exploring schedules and themes. See our pricing specification at /pricing.md.",
+  },
+  {
+    question: "How can AI agents and researchers access Yozora data?",
+    answer:
+      "Yozora provides comprehensive machine-readable endpoints including quick LLM guidance at /llms.txt, full architectural schemas at /llms-full.txt, structured pricing at /pricing.md, and Google Open Knowledge Format bundles at /okf/index.md.",
   },
 ]
 
@@ -168,6 +190,42 @@ function AboutPage() {
             <span>Open Source</span>
           </a>
         </div>
+
+        {/* Factual Statistics & Verification Grid (GEO boost) */}
+        <div className="grid w-full grid-cols-2 gap-3 pt-2 sm:grid-cols-4">
+          <div className="flex flex-col gap-0.5 rounded-2xl border border-border/40 bg-card/40 p-3.5 backdrop-blur-xs">
+            <span className="font-mono text-xl font-black text-foreground">
+              1,000+
+            </span>
+            <span className="text-xs font-medium text-muted-foreground">
+              Indexed Anime Releases
+            </span>
+          </div>
+          <div className="flex flex-col gap-0.5 rounded-2xl border border-border/40 bg-card/40 p-3.5 backdrop-blur-xs">
+            <span className="font-mono text-xl font-black text-foreground">
+              JST UTC+9
+            </span>
+            <span className="text-xs font-medium text-muted-foreground">
+              Live Tokyo Broadcast Sync
+            </span>
+          </div>
+          <div className="flex flex-col gap-0.5 rounded-2xl border border-border/40 bg-card/40 p-3.5 backdrop-blur-xs">
+            <span className="font-mono text-xl font-black text-foreground">
+              1080p
+            </span>
+            <span className="text-xs font-medium text-muted-foreground">
+              Clean Creditless Themes
+            </span>
+          </div>
+          <div className="flex flex-col gap-0.5 rounded-2xl border border-border/40 bg-card/40 p-3.5 backdrop-blur-xs">
+            <span className="font-mono text-xl font-black text-foreground">
+              $0 · MIT
+            </span>
+            <span className="text-xs font-medium text-muted-foreground">
+              Ad-Free &amp; Open Source
+            </span>
+          </div>
+        </div>
       </section>
 
       <section className="flex flex-col gap-6">
@@ -275,6 +333,164 @@ function AboutPage() {
         </div>
       </section>
 
+      {/* Platform Comparison Matrix (AEO & GEO Extractable Table) */}
+      <section className="flex flex-col gap-6">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+            Yozora vs. Traditional Anime Platforms
+          </h2>
+          <p className="text-xs text-muted-foreground sm:text-sm">
+            How Yozora combines real-time broadcast schedules, creditless music,
+            and dual-engine failover compared to other services.
+          </p>
+        </div>
+
+        <div className="overflow-x-auto rounded-2xl border border-border/50 bg-card/40 backdrop-blur-md">
+          <table className="w-full min-w-150 text-left text-xs sm:text-sm">
+            <caption className="sr-only">
+              Comparison between Yozora, traditional anime databases, and
+              broadcast radars
+            </caption>
+            <thead>
+              <tr className="border-b border-border/50 bg-muted/40 font-semibold text-foreground">
+                <th scope="col" className="p-4 sm:px-6">
+                  Feature / Capability
+                </th>
+                <th scope="col" className="p-4 text-primary sm:px-6">
+                  Yozora (夜空)
+                </th>
+                <th scope="col" className="p-4 text-muted-foreground sm:px-6">
+                  AniList / MyAnimeList
+                </th>
+                <th scope="col" className="p-4 text-muted-foreground sm:px-6">
+                  LiveChart.me
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border/40 text-muted-foreground">
+              <tr>
+                <th
+                  scope="row"
+                  className="p-4 font-medium text-foreground sm:px-6"
+                >
+                  Real-Time Tokyo Airing Countdown (JST)
+                </th>
+                <td className="p-4 font-semibold text-foreground sm:px-6">
+                  <div className="flex items-center gap-1.5 text-emerald-500">
+                    <Check className="size-4 shrink-0" aria-hidden="true" />
+                    <span>Live millisecond tickers</span>
+                  </div>
+                </td>
+                <td className="p-4 sm:px-6">
+                  Episode dates only (no live tickers)
+                </td>
+                <td className="p-4 sm:px-6">Live countdown timers</td>
+              </tr>
+              <tr>
+                <th
+                  scope="row"
+                  className="p-4 font-medium text-foreground sm:px-6"
+                >
+                  1080p Creditless Theme Player (OP/ED)
+                </th>
+                <td className="p-4 font-semibold text-foreground sm:px-6">
+                  <div className="flex items-center gap-1.5 text-emerald-500">
+                    <Check className="size-4 shrink-0" aria-hidden="true" />
+                    <span>Integrated 1080p + Audio Deck</span>
+                  </div>
+                </td>
+                <td className="p-4 sm:px-6">
+                  <div className="flex items-center gap-1.5 text-zinc-500">
+                    <Minus className="size-4 shrink-0" aria-hidden="true" />
+                    <span>Text titles only</span>
+                  </div>
+                </td>
+                <td className="p-4 sm:px-6">
+                  <div className="flex items-center gap-1.5 text-zinc-500">
+                    <Minus className="size-4 shrink-0" aria-hidden="true" />
+                    <span>No theme video player</span>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <th
+                  scope="row"
+                  className="p-4 font-medium text-foreground sm:px-6"
+                >
+                  Data Reliability &amp; Failover Architecture
+                </th>
+                <td className="p-4 font-semibold text-foreground sm:px-6">
+                  <div className="flex items-center gap-1.5 text-emerald-500">
+                    <Check className="size-4 shrink-0" aria-hidden="true" />
+                    <span>Dual-Engine (AniList + Jikan)</span>
+                  </div>
+                </td>
+                <td className="p-4 sm:px-6">Single-provider dependency</td>
+                <td className="p-4 sm:px-6">Single-provider dependency</td>
+              </tr>
+              <tr>
+                <th
+                  scope="row"
+                  className="p-4 font-medium text-foreground sm:px-6"
+                >
+                  User Privacy &amp; Advertisements
+                </th>
+                <td className="p-4 font-semibold text-foreground sm:px-6">
+                  <div className="flex items-center gap-1.5 text-emerald-500">
+                    <Check className="size-4 shrink-0" aria-hidden="true" />
+                    <span>100% Ad-Free, 0 Trackers</span>
+                  </div>
+                </td>
+                <td className="p-4 sm:px-6">Commercial ads &amp; trackers</td>
+                <td className="p-4 sm:px-6">
+                  Banner ads &amp; affiliate trackers
+                </td>
+              </tr>
+              <tr>
+                <th
+                  scope="row"
+                  className="p-4 font-medium text-foreground sm:px-6"
+                >
+                  Licensing &amp; Open Access
+                </th>
+                <td className="p-4 font-semibold text-foreground sm:px-6">
+                  <div className="flex items-center gap-1.5 text-emerald-500">
+                    <Check className="size-4 shrink-0" aria-hidden="true" />
+                    <span>100% Free · MIT License</span>
+                  </div>
+                </td>
+                <td className="p-4 sm:px-6">Proprietary / Closed</td>
+                <td className="p-4 sm:px-6">Proprietary / Closed</td>
+              </tr>
+              <tr>
+                <th
+                  scope="row"
+                  className="p-4 font-medium text-foreground sm:px-6"
+                >
+                  Watchlist &amp; Profile Synchronization
+                </th>
+                <td className="p-4 font-semibold text-foreground sm:px-6">
+                  <div className="flex items-center gap-1.5 text-emerald-500">
+                    <Check className="size-4 shrink-0" aria-hidden="true" />
+                    <span>AniList OAuth + Cloud &amp; Local</span>
+                  </div>
+                </td>
+                <td className="p-4 sm:px-6">Native platform account only</td>
+                <td className="p-4 sm:px-6">Proprietary account only</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p className="rounded-xl border border-border/40 bg-background/50 p-4 text-xs leading-relaxed text-muted-foreground sm:text-sm">
+          <strong className="text-foreground">Bottom line:</strong> Yozora
+          uniquely unifies real-time Japanese television broadcast countdowns,
+          lossless 1080p creditless theme streaming, and dual-engine catalog
+          failover into a single responsive, ad-free web platform licensed under
+          the MIT License.
+        </p>
+      </section>
+
       <section className="flex flex-col gap-6">
         <div className="flex flex-col gap-1">
           <h2 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
@@ -286,18 +502,14 @@ function AboutPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          {ABOUT_FAQS.map((faq) => (
-            <Card key={faq.question} variant="subtle" size="md">
-              <h3 className="text-sm leading-snug font-bold text-foreground">
-                {faq.question}
-              </h3>
-              <p className="text-xs leading-relaxed text-pretty text-muted-foreground">
-                {faq.answer}
-              </p>
-            </Card>
+        <Accordion defaultValue={["faq-0"]}>
+          {ABOUT_FAQS.map((faq, idx) => (
+            <AccordionItem key={faq.question} value={`faq-${idx}`}>
+              <AccordionTrigger>{faq.question}</AccordionTrigger>
+              <AccordionContent>{faq.answer}</AccordionContent>
+            </AccordionItem>
           ))}
-        </div>
+        </Accordion>
       </section>
 
       <section className="flex flex-col items-center justify-between gap-6 rounded-3xl border border-border/50 bg-card/30 p-6 backdrop-blur-md sm:flex-row sm:p-8">

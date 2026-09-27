@@ -28,10 +28,9 @@ import { SITE_URL, openGraphImageUrl } from "@/lib/seo/meta"
 import appCss from "@/styles/globals.css?url"
 
 const appUrl = SITE_URL
-const defaultTitle =
-  "Yozora (夜空) — Free Anime Catalog, Live Airing Schedule & 1080p Themes"
+const defaultTitle = "Yozora (夜空) — Free Anime Catalog, Radar & 1080p Themes"
 const defaultDescription =
-  "Explore seasonal anime releases, live Tokyo broadcast countdowns, 1080p creditless anime openings and endings, and synchronize your watchlist on Yozora (夜空)."
+  "Explore seasonal anime, live Tokyo broadcast countdowns, 1080p creditless theme songs, and synced watchlists on Yozora (夜空)."
 
 /**
  * Root route definition with global metadata, SEO JSON-LD schema, stylesheets, and font links.
@@ -141,6 +140,24 @@ export const Route = createRootRouteWithContext<RouterContext>()({
         sizes: "180x180",
       },
       { rel: "mask-icon", href: "/safari-pinned-tab.svg", color: "#2563eb" },
+      {
+        rel: "alternate",
+        type: "text/markdown",
+        href: "/llms.txt",
+        title: "LLM Context (llms.txt)",
+      },
+      {
+        rel: "alternate",
+        type: "text/markdown",
+        href: "/llms-full.txt",
+        title: "Full LLM Context & Schema (llms-full.txt)",
+      },
+      {
+        rel: "alternate",
+        type: "text/markdown",
+        href: "/pricing.md",
+        title: "Pricing & Open Access Specification (pricing.md)",
+      },
       {
         rel: "search",
         type: "application/opensearchdescription+xml",

@@ -15,6 +15,8 @@ Yozora (https://yozora.moe) is a high-performance web platform built for anime v
 
 ## Machine-Readable Specifications
 - [Full LLM Context](https://yozora.moe/llms-full.txt): Comprehensive deep-context documentation and data schema for AI models.
+- [Pricing & Open Access Specification](https://yozora.moe/pricing.md): FOSS license, feature tier breakdown, and comparison context for AI agents.
+- [Google Open Knowledge Format Bundle](https://yozora.moe/okf/index.md): Agent-readable knowledge graph concepts (OKF v0.1).
 - [Dynamic XML Sitemap](https://yozora.moe/sitemap.xml): Complete URL set with Google Image metadata for all catalog titles.
 - [Crawler Directives](https://yozora.moe/robots.txt): Web crawler index permissions and AI agent guidance.
 - [OpenSearch Specification](https://yozora.moe/opensearch.xml): Browser auto-discovery search provider definition.
@@ -27,4 +29,4 @@ Yozora (https://yozora.moe) is a high-performance web platform built for anime v
 - **Caching**: L1 in-memory single-flight Map + L2 Upstash Redis via REST (fail-open design)
 - **Authentication**: Clerk with SSR middleware and neon PostgreSQL database
 - **Telemetry**: Zero third-party tracker scripts. Complete user privacy.
-- **Repository**: https://github.com/ShiinaSaku/hikari_next
+- **Repository**: https://github.com/shiinasaku/yozora

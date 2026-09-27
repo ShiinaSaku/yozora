@@ -27,6 +27,8 @@ Yozora (https://yozora.moe) is a high-performance web platform built for anime v
 
 ## Machine-Readable Specifications
 - [Full LLM Context](${SITE_URL}/llms-full.txt): Comprehensive deep-context documentation and data schema for AI models.
+- [Pricing & Open Access Specification](${SITE_URL}/pricing.md): FOSS license, feature tier breakdown, and comparison context for AI agents.
+- [Google Open Knowledge Format Bundle](${SITE_URL}/okf/index.md): Agent-readable knowledge graph concepts (OKF v0.1).
 - [Dynamic XML Sitemap](${SITE_URL}/sitemap.xml): Complete URL set with Google Image metadata for all catalog titles.
 - [Crawler Directives](${SITE_URL}/robots.txt): Web crawler index permissions and AI agent guidance.
 - [OpenSearch Specification](${SITE_URL}/opensearch.xml): Browser auto-discovery search provider definition.

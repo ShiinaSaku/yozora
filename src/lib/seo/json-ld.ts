@@ -61,6 +61,12 @@ export function generateAnimeJsonLd(
       "@type": "WebPage",
       "@id": canonicalUrl,
     },
+    inLanguage: ["ja", "en"],
+    isAccessibleForFree: true,
+    countryOfOrigin: {
+      "@type": "Country",
+      name: "Japan",
+    },
     isPartOf: { "@id": `${SITE_URL}/#website` },
     publisher: { "@id": `${SITE_URL}/#organization` },
     sameAs: [
@@ -227,14 +233,14 @@ export function generateCharacterJsonLd(char: CharacterDetail) {
 }
 
 /**
- * Generates Schema.org FAQPage JSON-LD for anime detail pages (AEO & GEO).
- * Powers Google AI Overviews, rich answer cards, and Perplexity factual citations.
+ * Extracts natural-language FAQ question/answer pairs for anime detail pages.
+ * Used for both visible DOM rendering and JSON-LD FAQPage generation.
  */
-export function generateAnimeFaqJsonLd(
+export function getAnimeFaqItems(
   anime: Anime,
   themes: AnimeTheme[] = [],
   characters: AnimeCharacter[] = []
-) {
+): { question: string; answer: string }[] {
   const faqs: { question: string; answer: string }[] = []
 
   // 1. Airing schedule & episodes
@@ -303,13 +309,28 @@ export function generateAnimeFaqJsonLd(
     })
   }
 
+  return faqs
+}
+
+/**
+ * Generates Schema.org FAQPage JSON-LD for anime detail pages (AEO & GEO).
+ * Powers Google AI Overviews, rich answer cards, and Perplexity factual citations.
+ */
+export function generateAnimeFaqJsonLd(
+  anime: Anime,
+  themes: AnimeTheme[] = [],
+  characters: AnimeCharacter[] = []
+) {
+  const faqs = getAnimeFaqItems(anime, themes, characters)
   return generateFaqJsonLd(faqs)
 }
 
 /**
- * Generates Schema.org FAQPage JSON-LD for character profiles (AEO & GEO).
+ * Extracts natural-language FAQ question/answer pairs for character profiles.
  */
-export function generateCharacterFaqJsonLd(char: CharacterDetail) {
+export function getCharacterFaqItems(
+  char: CharacterDetail
+): { question: string; answer: string }[] {
   const faqs: { question: string; answer: string }[] = []
 
   faqs.push({
@@ -337,6 +358,14 @@ export function generateCharacterFaqJsonLd(char: CharacterDetail) {
     })
   }
 
+  return faqs
+}
+
+/**
+ * Generates Schema.org FAQPage JSON-LD for character profiles (AEO & GEO).
+ */
+export function generateCharacterFaqJsonLd(char: CharacterDetail) {
+  const faqs = getCharacterFaqItems(char)
   return generateFaqJsonLd(faqs)
 }
 
@@ -378,6 +407,12 @@ export function generateOrganizationJsonLd() {
       "Voice Actors (Seiyuu)",
       "AniList",
       "MyAnimeList",
+    ],
+    sameAs: [
+      "https://github.com/shiinasaku/yozora",
+      "https://x.com/yozoramoe",
+      "https://discord.gg/qfdEPJ5hNR",
+      "https://www.youtube.com/@SakuShiina",
     ],
     logo: {
       "@type": "ImageObject",
@@ -478,8 +513,12 @@ export function generateSoftwareApplicationJsonLd() {
     description:
       "Real-time anime broadcast schedule radar, seasonal cour charts, and 1080p creditless theme player.",
     applicationCategory: "EntertainmentApplication",
+    applicationSubCategory: "Anime Database & Airing Radar",
     operatingSystem: "All modern web browsers",
     browserRequirements: "Requires JavaScript and WebM/MP4 HTML5 video support",
+    isAccessibleForFree: true,
+    license: "https://opensource.org/licenses/MIT",
+    downloadUrl: "https://github.com/shiinasaku/yozora",
     offers: {
       "@type": "Offer",
       price: "0",
@@ -493,6 +532,51 @@ export function generateSoftwareApplicationJsonLd() {
       "Two-tier caching with sub-millisecond response times",
     ],
     publisher: { "@id": `${SITE_URL}/#organization` },
+  }
+}
+
+/**
+ * Generates Schema.org ItemList JSON-LD for seasonal anime releases.
+ */
+export function generateSeasonalJsonLd(
+  items: Anime[],
+  year: number,
+  season?: string
+) {
+  const seasonTitle = season
+    ? `${season.charAt(0).toUpperCase() + season.slice(1).toLowerCase()} ${year}`
+    : `Seasonal ${year}`
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "@id": `${SITE_URL}/seasonal#list`,
+    name: `${seasonTitle} Anime Lineup & Broadcast Schedule`,
+    description: `Official ranking and broadcast schedule for ${seasonTitle} seasonal anime releases on Yozora.`,
+    numberOfItems: items.length,
+    itemListElement: items.slice(0, 30).map((anime, idx) => ({
+      "@type": "ListItem",
+      position: idx + 1,
+      item: {
+        "@type": anime.format === "MOVIE" ? "Movie" : "TVSeries",
+        name: anime.title,
+        url: `${SITE_URL}/anime/${anime.id}`,
+        image: anime.coverExtraLarge || anime.coverLarge || anime.cover,
+        ...(anime.score && anime.score > 0
+          ? {
+              aggregateRating: {
+                "@type": "AggregateRating",
+                ratingValue: anime.score.toFixed(1),
+                bestRating: "10",
+                worstRating: "0",
+                ratingCount: Math.max(
+                  anime.favourites || 0,
+                  anime.popularity || 100
+                ),
+              },
+            }
+          : {}),
+      },
+    })),
   }
 }
 

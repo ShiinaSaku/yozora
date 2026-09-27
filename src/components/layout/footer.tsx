@@ -215,16 +215,34 @@ export function FooterMeta({ className }: { className?: string }) {
         <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
           <span>Copyright © {currentYear} Yozora. All rights reserved.</span>
           <span className="hidden sm:inline">&middot;</span>
+          <Link href="/about" variant="underline">
+            About
+          </Link>
+          <span className="hidden sm:inline">&middot;</span>
+          <a
+            href="/pricing.md"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="transition-colors hover:text-foreground hover:underline"
+          >
+            Pricing &amp; FOSS
+          </a>
+          <span className="hidden sm:inline">&middot;</span>
+          <a
+            href="/llms.txt"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="transition-colors hover:text-foreground hover:underline"
+          >
+            llms.txt
+          </a>
+          <span className="hidden sm:inline">&middot;</span>
           <Link href="/privacy" variant="underline">
             Privacy Policy
           </Link>
           <span className="hidden sm:inline">&middot;</span>
           <Link href="/privacy" variant="underline">
             Terms of Service
-          </Link>
-          <span className="hidden sm:inline">&middot;</span>
-          <Link href="/about" variant="underline">
-            About
           </Link>
         </div>
       </div>

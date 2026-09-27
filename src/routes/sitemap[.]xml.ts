@@ -51,6 +51,8 @@ export const Route = createFileRoute("/sitemap.xml")({
           staticUrl("/seasonal", "daily", "0.9"),
           staticUrl("/airing", "hourly", "0.9"),
           staticUrl("/about", "monthly", "0.5"),
+          staticUrl("/pricing.md", "weekly", "0.6"),
+          staticUrl("/llms.txt", "weekly", "0.6"),
           staticUrl("/privacy", "yearly", "0.2"),
         ]
         const entries = [

@@ -1,7 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { SeasonalClient } from "@/components/pages/seasonal-client"
 import { CatalogPageSkeleton } from "@/components/ui/page-skeletons"
-import { generateBreadcrumbsJsonLd, stringifyJsonLd } from "@/lib/seo/json-ld"
+import {
+  generateBreadcrumbsJsonLd,
+  generateSeasonalJsonLd,
+  stringifyJsonLd,
+} from "@/lib/seo/json-ld"
 import { getSeasonalData } from "@/lib/server/catalog"
 import { absoluteUrl, canonicalLinks, openGraphImageUrl } from "@/lib/seo/meta"
 
@@ -33,7 +37,7 @@ export const Route = createFileRoute("/seasonal")({
     return {
       meta: [
         {
-          title: `Seasonal Anime Chart ${seasonalYear} — Lineups & Broadcast Schedules | Yozora`,
+          title: `Seasonal Anime Chart ${seasonalYear} — Schedule & Lineup | Yozora`,
         },
         {
           name: "description",
@@ -79,6 +83,16 @@ export const Route = createFileRoute("/seasonal")({
             ])
           ),
         },
+        ...(Array.isArray(loaderData) && loaderData.length > 0
+          ? [
+              {
+                type: "application/ld+json",
+                children: stringifyJsonLd(
+                  generateSeasonalJsonLd(loaderData, seasonalYear)
+                ),
+              },
+            ]
+          : []),
       ],
     }
   },

@@ -114,13 +114,21 @@ A: No. Yozora has zero third-party telemetry, zero advertisement pixels, and zer
 ### Q: How accurate is the Airing Radar countdown?
 A: Airing times are synchronized to the official Japanese television network broadcast schedules (JST, UTC+9) and update down to the second.
 
+### Q: How does Yozora compare to AniList, MyAnimeList, and LiveChart?
+A: Yozora unites real-time Tokyo broadcast countdowns, high-bitrate 1080p creditless opening/ending theme playback, dual-engine failover for 99.9% uptime, and zero-ad privacy in a single responsive web client. Traditional databases lack real-time tickers and embedded theme players; standalone schedule radars lack integrated creditless themes and dual-engine resilience.
+
+### Q: Is Yozora completely free to use?
+A: Yes. Yozora is 100% free and open source under the MIT License with zero advertising, zero subscription paywalls, and no account requirements for exploring schedules and themes.
+
 ---
 
-## 7. Machine-Readable Endpoints
+## 7. Machine-Readable Endpoints & Specifications
 - XML Sitemap: ${SITE_URL}/sitemap.xml
 - Robots.txt: ${SITE_URL}/robots.txt
 - Quick LLM Guide: ${SITE_URL}/llms.txt
 - Full LLM Specification: ${SITE_URL}/llms-full.txt
+- Pricing & FOSS Specification: ${SITE_URL}/pricing.md
+- Google Open Knowledge Format Bundle: ${SITE_URL}/okf/index.md
 - OpenSearch Descriptor: ${SITE_URL}/opensearch.xml
 `
 

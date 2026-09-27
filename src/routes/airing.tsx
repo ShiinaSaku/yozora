@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
+import { useSuspenseQuery } from "@tanstack/react-query"
 import { AiringClient } from "@/components/pages/airing-client"
 import { AiringPageSkeleton } from "@/components/ui/page-skeletons"
 import {
@@ -6,7 +7,7 @@ import {
   generateBreadcrumbsJsonLd,
   stringifyJsonLd,
 } from "@/lib/seo/json-ld"
-import { getAiringData } from "@/lib/server/catalog"
+import { airingDataQueryOptions } from "@/lib/queries/catalog"
 import { absoluteUrl, canonicalLinks, openGraphImageUrl } from "@/lib/seo/meta"
 
 /**
@@ -14,8 +15,8 @@ import { absoluteUrl, canonicalLinks, openGraphImageUrl } from "@/lib/seo/meta"
  */
 export const Route = createFileRoute("/airing")({
   pendingComponent: AiringPageSkeleton,
-  loader: async () => {
-    return await getAiringData()
+  loader: async ({ context }) => {
+    return await context.queryClient.query(airingDataQueryOptions())
   },
   head: ({ loaderData }) => {
     const ogImage = openGraphImageUrl({
@@ -30,8 +31,7 @@ export const Route = createFileRoute("/airing")({
     return {
       meta: [
         {
-          title:
-            "Anime Airing Schedule & Live Broadcast Countdown | Yozora (夜空)",
+          title: "Anime Airing Schedule & Live Countdown | Yozora (夜空)",
         },
         {
           name: "description",
@@ -97,6 +97,6 @@ export const Route = createFileRoute("/airing")({
 })
 
 function AiringPage() {
-  const { items, generatedAt } = Route.useLoaderData()
-  return <AiringClient items={items} initialNow={generatedAt} />
+  const { data } = useSuspenseQuery(airingDataQueryOptions())
+  return <AiringClient items={data.items} initialNow={data.generatedAt} />
 }

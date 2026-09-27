@@ -23,12 +23,12 @@ import { Route as SeasonalRouteImport } from './routes/seasonal'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as AuthedLibraryRouteImport } from './routes/_authed/library'
 import { Route as AnimeIdRouteImport } from './routes/anime/$id'
-import { Route as ApiSplatRouteImport } from './routes/api/$'
 import { Route as CharacterIdRouteImport } from './routes/character/$id'
 import { Route as SignInSplatRouteImport } from './routes/sign-in/$'
 import { Route as SignUpSplatRouteImport } from './routes/sign-up/$'
 import { Route as UHandleRouteImport } from './routes/u/$handle'
 import { Route as AuthedSettingsProfileRouteImport } from './routes/_authed/settings/profile'
+import { Route as ApiWebhooksClerkRouteImport } from './routes/api/webhooks/clerk'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -99,11 +99,6 @@ const AnimeIdRoute = AnimeIdRouteImport.update({
   path: '/anime/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiSplatRoute = ApiSplatRouteImport.update({
-  id: '/api/$',
-  path: '/api/$',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const CharacterIdRoute = CharacterIdRouteImport.update({
   id: '/character/$id',
   path: '/character/$id',
@@ -129,6 +124,11 @@ const AuthedSettingsProfileRoute = AuthedSettingsProfileRouteImport.update({
   path: '/settings/profile',
   getParentRoute: () => AuthedRoute,
 } as any)
+const ApiWebhooksClerkRoute = ApiWebhooksClerkRouteImport.update({
+  id: '/api/webhooks/clerk',
+  path: '/api/webhooks/clerk',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -144,12 +144,12 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/library': typeof AuthedLibraryRoute
   '/anime/$id': typeof AnimeIdRoute
-  '/api/$': typeof ApiSplatRoute
   '/character/$id': typeof CharacterIdRoute
   '/sign-in/$': typeof SignInSplatRoute
   '/sign-up/$': typeof SignUpSplatRoute
   '/u/$handle': typeof UHandleRoute
   '/settings/profile': typeof AuthedSettingsProfileRoute
+  '/api/webhooks/clerk': typeof ApiWebhooksClerkRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -165,12 +165,12 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/library': typeof AuthedLibraryRoute
   '/anime/$id': typeof AnimeIdRoute
-  '/api/$': typeof ApiSplatRoute
   '/character/$id': typeof CharacterIdRoute
   '/sign-in/$': typeof SignInSplatRoute
   '/sign-up/$': typeof SignUpSplatRoute
   '/u/$handle': typeof UHandleRoute
   '/settings/profile': typeof AuthedSettingsProfileRoute
+  '/api/webhooks/clerk': typeof ApiWebhooksClerkRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -188,12 +188,12 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authed/library': typeof AuthedLibraryRoute
   '/anime/$id': typeof AnimeIdRoute
-  '/api/$': typeof ApiSplatRoute
   '/character/$id': typeof CharacterIdRoute
   '/sign-in/$': typeof SignInSplatRoute
   '/sign-up/$': typeof SignUpSplatRoute
   '/u/$handle': typeof UHandleRoute
   '/_authed/settings/profile': typeof AuthedSettingsProfileRoute
+  '/api/webhooks/clerk': typeof ApiWebhooksClerkRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -211,12 +211,12 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/library'
     | '/anime/$id'
-    | '/api/$'
     | '/character/$id'
     | '/sign-in/$'
     | '/sign-up/$'
     | '/u/$handle'
     | '/settings/profile'
+    | '/api/webhooks/clerk'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -232,12 +232,12 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/library'
     | '/anime/$id'
-    | '/api/$'
     | '/character/$id'
     | '/sign-in/$'
     | '/sign-up/$'
     | '/u/$handle'
     | '/settings/profile'
+    | '/api/webhooks/clerk'
   id:
     | '__root__'
     | '/'
@@ -254,12 +254,12 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/_authed/library'
     | '/anime/$id'
-    | '/api/$'
     | '/character/$id'
     | '/sign-in/$'
     | '/sign-up/$'
     | '/u/$handle'
     | '/_authed/settings/profile'
+    | '/api/webhooks/clerk'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -276,11 +276,11 @@ export interface RootRouteChildren {
   SeasonalRoute: typeof SeasonalRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   AnimeIdRoute: typeof AnimeIdRoute
-  ApiSplatRoute: typeof ApiSplatRoute
   CharacterIdRoute: typeof CharacterIdRoute
   SignInSplatRoute: typeof SignInSplatRoute
   SignUpSplatRoute: typeof SignUpSplatRoute
   UHandleRoute: typeof UHandleRoute
+  ApiWebhooksClerkRoute: typeof ApiWebhooksClerkRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -383,13 +383,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AnimeIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/$': {
-      id: '/api/$'
-      path: '/api/$'
-      fullPath: '/api/$'
-      preLoaderRoute: typeof ApiSplatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/character/$id': {
       id: '/character/$id'
       path: '/character/$id'
@@ -425,6 +418,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedSettingsProfileRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/api/webhooks/clerk': {
+      id: '/api/webhooks/clerk'
+      path: '/api/webhooks/clerk'
+      fullPath: '/api/webhooks/clerk'
+      preLoaderRoute: typeof ApiWebhooksClerkRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -455,11 +455,11 @@ const rootRouteChildren: RootRouteChildren = {
   SeasonalRoute: SeasonalRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   AnimeIdRoute: AnimeIdRoute,
-  ApiSplatRoute: ApiSplatRoute,
   CharacterIdRoute: CharacterIdRoute,
   SignInSplatRoute: SignInSplatRoute,
   SignUpSplatRoute: SignUpSplatRoute,
   UHandleRoute: UHandleRoute,
+  ApiWebhooksClerkRoute: ApiWebhooksClerkRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

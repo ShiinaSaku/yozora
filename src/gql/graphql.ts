@@ -1,540 +1,165 @@
 /* eslint-disable */
 /** Internal type. DO NOT USE DIRECTLY. */
-type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] }
+type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 /** Internal type. DO NOT USE DIRECTLY. */
-export type Incremental<T> =
-  | T
-  | {
-      [P in keyof T]?: P extends " $fragmentName" | "__typename" ? T[P] : never
-    }
-import type { DocumentTypeDecoration } from "@graphql-typed-document-node/core"
+export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
+import type { DocumentTypeDecoration } from '@graphql-typed-document-node/core';
 /** The role the character plays in the media */
 export type CharacterRole =
   /** A background character in the media */
-  | "BACKGROUND"
+  | 'BACKGROUND'
   /** A primary character role in the media */
-  | "MAIN"
+  | 'MAIN'
   /** A supporting character role in the media */
-  | "SUPPORTING"
+  | 'SUPPORTING';
 
 /** The format the media was released in */
 export type MediaFormat =
   /** Professionally published manga with more than one chapter */
-  | "MANGA"
+  | 'MANGA'
   /** Anime movies with a theatrical release */
-  | "MOVIE"
+  | 'MOVIE'
   /** Short anime released as a music video */
-  | "MUSIC"
+  | 'MUSIC'
   /** Written books released as a series of light novels */
-  | "NOVEL"
+  | 'NOVEL'
   /** (Original Net Animation) Anime that have been originally released online or are only available through streaming services. */
-  | "ONA"
+  | 'ONA'
   /** Manga with just one chapter */
-  | "ONE_SHOT"
+  | 'ONE_SHOT'
   /** (Original Video Animation) Anime that have been released directly on DVD/Blu-ray without originally going through a theatrical release or television broadcast */
-  | "OVA"
+  | 'OVA'
   /** Special episodes that have been included in DVD/Blu-ray releases, picture dramas, pilots, etc */
-  | "SPECIAL"
+  | 'SPECIAL'
   /** Anime broadcast on television */
-  | "TV"
+  | 'TV'
   /** Anime which are under 15 minutes in length and broadcast on television */
-  | "TV_SHORT"
+  | 'TV_SHORT';
 
 export type MediaSeason =
   /** Predominantly started airing between October and November */
-  | "FALL"
+  | 'FALL'
   /** Predominantly started airing between April and June */
-  | "SPRING"
+  | 'SPRING'
   /** Predominantly started airing between July and September */
-  | "SUMMER"
+  | 'SUMMER'
   /** Predominantly started airing between January and March */
-  | "WINTER"
+  | 'WINTER';
 
 /** Media sort enums */
 export type MediaSort =
-  | "CHAPTERS"
-  | "CHAPTERS_DESC"
-  | "DURATION"
-  | "DURATION_DESC"
-  | "END_DATE"
-  | "END_DATE_DESC"
-  | "EPISODES"
-  | "EPISODES_DESC"
-  | "FAVOURITES"
-  | "FAVOURITES_DESC"
-  | "FORMAT"
-  | "FORMAT_DESC"
-  | "ID"
-  | "ID_DESC"
-  | "POPULARITY"
-  | "POPULARITY_DESC"
-  | "SCORE"
-  | "SCORE_DESC"
-  | "SEARCH_MATCH"
-  | "START_DATE"
-  | "START_DATE_DESC"
-  | "STATUS"
-  | "STATUS_DESC"
-  | "TITLE_ENGLISH"
-  | "TITLE_ENGLISH_DESC"
-  | "TITLE_NATIVE"
-  | "TITLE_NATIVE_DESC"
-  | "TITLE_ROMAJI"
-  | "TITLE_ROMAJI_DESC"
-  | "TRENDING"
-  | "TRENDING_DESC"
-  | "TYPE"
-  | "TYPE_DESC"
-  | "UPDATED_AT"
-  | "UPDATED_AT_DESC"
-  | "VOLUMES"
-  | "VOLUMES_DESC"
+  | 'CHAPTERS'
+  | 'CHAPTERS_DESC'
+  | 'DURATION'
+  | 'DURATION_DESC'
+  | 'END_DATE'
+  | 'END_DATE_DESC'
+  | 'EPISODES'
+  | 'EPISODES_DESC'
+  | 'FAVOURITES'
+  | 'FAVOURITES_DESC'
+  | 'FORMAT'
+  | 'FORMAT_DESC'
+  | 'ID'
+  | 'ID_DESC'
+  | 'POPULARITY'
+  | 'POPULARITY_DESC'
+  | 'SCORE'
+  | 'SCORE_DESC'
+  | 'SEARCH_MATCH'
+  | 'START_DATE'
+  | 'START_DATE_DESC'
+  | 'STATUS'
+  | 'STATUS_DESC'
+  | 'TITLE_ENGLISH'
+  | 'TITLE_ENGLISH_DESC'
+  | 'TITLE_NATIVE'
+  | 'TITLE_NATIVE_DESC'
+  | 'TITLE_ROMAJI'
+  | 'TITLE_ROMAJI_DESC'
+  | 'TRENDING'
+  | 'TRENDING_DESC'
+  | 'TYPE'
+  | 'TYPE_DESC'
+  | 'UPDATED_AT'
+  | 'UPDATED_AT_DESC'
+  | 'VOLUMES'
+  | 'VOLUMES_DESC';
 
 /** The current releasing status of the media */
 export type MediaStatus =
   /** Ended before the work could be finished */
-  | "CANCELLED"
+  | 'CANCELLED'
   /** Has completed and is no longer being released */
-  | "FINISHED"
+  | 'FINISHED'
   /** Version 2 only. Is currently paused from releasing and will resume at a later date */
-  | "HIATUS"
+  | 'HIATUS'
   /** To be released at a later date */
-  | "NOT_YET_RELEASED"
+  | 'NOT_YET_RELEASED'
   /** Currently releasing */
-  | "RELEASING"
+  | 'RELEASING';
 
 export type AnimeCatalogQueryVariables = Exact<{
-  sort?: Array<MediaSort | null | undefined> | MediaSort | null | undefined
-  season?: MediaSeason | null | undefined
-  seasonYear?: number | null | undefined
-  status?: MediaStatus | null | undefined
-}>
+  sort?: Array<MediaSort | null | undefined> | MediaSort | null | undefined;
+  season?: MediaSeason | null | undefined;
+  seasonYear?: number | null | undefined;
+  status?: MediaStatus | null | undefined;
+}>;
 
-export type AnimeCatalogQuery = {
-  Page: {
-    media: Array<{
-      id: number
-      idMal: number | null
-      bannerImage: string | null
-      averageScore: number | null
-      seasonYear: number | null
-      format: MediaFormat | null
-      status: MediaStatus | null
-      episodes: number | null
-      duration: number | null
-      popularity: number | null
-      favourites: number | null
-      genres: Array<string | null> | null
-      description: string | null
-      title: {
-        romaji: string | null
-        english: string | null
-        native: string | null
-      } | null
-      coverImage: {
-        medium: string | null
-        large: string | null
-        extraLarge: string | null
-        color: string | null
-      } | null
-      startDate: { year: number | null } | null
-      trailer: {
-        id: string | null
-        site: string | null
-        thumbnail: string | null
-      } | null
-      nextAiringEpisode: {
-        episode: number
-        airingAt: number
-        timeUntilAiring: number
-      } | null
-      studios: { nodes: Array<{ name: string } | null> | null } | null
-    } | null> | null
-  } | null
-}
+
+export type AnimeCatalogQuery = { Page: { media: Array<{ id: number, idMal: number | null, bannerImage: string | null, averageScore: number | null, seasonYear: number | null, format: MediaFormat | null, status: MediaStatus | null, episodes: number | null, duration: number | null, popularity: number | null, favourites: number | null, genres: Array<string | null> | null, description: string | null, title: { romaji: string | null, english: string | null, native: string | null } | null, coverImage: { medium: string | null, large: string | null, extraLarge: string | null, color: string | null } | null, startDate: { year: number | null } | null, trailer: { id: string | null, site: string | null, thumbnail: string | null } | null, nextAiringEpisode: { episode: number, airingAt: number, timeUntilAiring: number } | null, studios: { nodes: Array<{ name: string } | null> | null } | null } | null> | null } | null };
 
 export type AnimeSearchQueryVariables = Exact<{
-  search: string
-}>
+  search: string;
+}>;
 
-export type AnimeSearchQuery = {
-  Page: {
-    media: Array<{
-      id: number
-      idMal: number | null
-      bannerImage: string | null
-      averageScore: number | null
-      seasonYear: number | null
-      format: MediaFormat | null
-      status: MediaStatus | null
-      episodes: number | null
-      duration: number | null
-      popularity: number | null
-      favourites: number | null
-      genres: Array<string | null> | null
-      description: string | null
-      title: {
-        romaji: string | null
-        english: string | null
-        native: string | null
-      } | null
-      coverImage: {
-        medium: string | null
-        large: string | null
-        extraLarge: string | null
-        color: string | null
-      } | null
-      startDate: { year: number | null } | null
-      trailer: {
-        id: string | null
-        site: string | null
-        thumbnail: string | null
-      } | null
-      nextAiringEpisode: {
-        episode: number
-        airingAt: number
-        timeUntilAiring: number
-      } | null
-      studios: { nodes: Array<{ name: string } | null> | null } | null
-    } | null> | null
-  } | null
-}
+
+export type AnimeSearchQuery = { Page: { media: Array<{ id: number, idMal: number | null, bannerImage: string | null, averageScore: number | null, seasonYear: number | null, format: MediaFormat | null, status: MediaStatus | null, episodes: number | null, duration: number | null, popularity: number | null, favourites: number | null, genres: Array<string | null> | null, description: string | null, title: { romaji: string | null, english: string | null, native: string | null } | null, coverImage: { medium: string | null, large: string | null, extraLarge: string | null, color: string | null } | null, startDate: { year: number | null } | null, trailer: { id: string | null, site: string | null, thumbnail: string | null } | null, nextAiringEpisode: { episode: number, airingAt: number, timeUntilAiring: number } | null, studios: { nodes: Array<{ name: string } | null> | null } | null } | null> | null } | null };
 
 export type AiringScheduleQueryVariables = Exact<{
-  now: number
-}>
+  now: number;
+}>;
 
-export type AiringScheduleQuery = {
-  Page: {
-    airingSchedules: Array<{
-      id: number
-      episode: number
-      airingAt: number
-      timeUntilAiring: number
-      media: {
-        id: number
-        idMal: number | null
-        bannerImage: string | null
-        averageScore: number | null
-        seasonYear: number | null
-        format: MediaFormat | null
-        status: MediaStatus | null
-        episodes: number | null
-        duration: number | null
-        popularity: number | null
-        favourites: number | null
-        genres: Array<string | null> | null
-        description: string | null
-        title: {
-          romaji: string | null
-          english: string | null
-          native: string | null
-        } | null
-        coverImage: {
-          medium: string | null
-          large: string | null
-          extraLarge: string | null
-          color: string | null
-        } | null
-        startDate: { year: number | null } | null
-        trailer: {
-          id: string | null
-          site: string | null
-          thumbnail: string | null
-        } | null
-        nextAiringEpisode: {
-          episode: number
-          airingAt: number
-          timeUntilAiring: number
-        } | null
-        studios: { nodes: Array<{ name: string } | null> | null } | null
-      } | null
-    } | null> | null
-  } | null
-}
+
+export type AiringScheduleQuery = { Page: { airingSchedules: Array<{ id: number, episode: number, airingAt: number, timeUntilAiring: number, media: { id: number, idMal: number | null, bannerImage: string | null, averageScore: number | null, seasonYear: number | null, format: MediaFormat | null, status: MediaStatus | null, episodes: number | null, duration: number | null, popularity: number | null, favourites: number | null, genres: Array<string | null> | null, description: string | null, title: { romaji: string | null, english: string | null, native: string | null } | null, coverImage: { medium: string | null, large: string | null, extraLarge: string | null, color: string | null } | null, startDate: { year: number | null } | null, trailer: { id: string | null, site: string | null, thumbnail: string | null } | null, nextAiringEpisode: { episode: number, airingAt: number, timeUntilAiring: number } | null, studios: { nodes: Array<{ name: string } | null> | null } | null } | null } | null> | null } | null };
 
 export type AnimeDetailQueryVariables = Exact<{
-  id: number
-}>
+  id: number;
+}>;
 
-export type AnimeDetailQuery = {
-  Media: {
-    id: number
-    idMal: number | null
-    bannerImage: string | null
-    averageScore: number | null
-    seasonYear: number | null
-    format: MediaFormat | null
-    status: MediaStatus | null
-    episodes: number | null
-    duration: number | null
-    popularity: number | null
-    favourites: number | null
-    genres: Array<string | null> | null
-    description: string | null
-    title: {
-      romaji: string | null
-      english: string | null
-      native: string | null
-    } | null
-    coverImage: {
-      medium: string | null
-      large: string | null
-      extraLarge: string | null
-      color: string | null
-    } | null
-    startDate: { year: number | null } | null
-    trailer: {
-      id: string | null
-      site: string | null
-      thumbnail: string | null
-    } | null
-    nextAiringEpisode: {
-      episode: number
-      airingAt: number
-      timeUntilAiring: number
-    } | null
-    studios: { nodes: Array<{ name: string } | null> | null } | null
-    relations: {
-      edges: Array<{
-        node: {
-          id: number
-          idMal: number | null
-          bannerImage: string | null
-          averageScore: number | null
-          seasonYear: number | null
-          format: MediaFormat | null
-          status: MediaStatus | null
-          episodes: number | null
-          duration: number | null
-          popularity: number | null
-          favourites: number | null
-          genres: Array<string | null> | null
-          description: string | null
-          title: {
-            romaji: string | null
-            english: string | null
-            native: string | null
-          } | null
-          coverImage: {
-            medium: string | null
-            large: string | null
-            extraLarge: string | null
-            color: string | null
-          } | null
-          startDate: { year: number | null } | null
-          trailer: {
-            id: string | null
-            site: string | null
-            thumbnail: string | null
-          } | null
-          nextAiringEpisode: {
-            episode: number
-            airingAt: number
-            timeUntilAiring: number
-          } | null
-          studios: { nodes: Array<{ name: string } | null> | null } | null
-        } | null
-      } | null> | null
-    } | null
-    recommendations: {
-      nodes: Array<{
-        mediaRecommendation: {
-          id: number
-          idMal: number | null
-          bannerImage: string | null
-          averageScore: number | null
-          seasonYear: number | null
-          format: MediaFormat | null
-          status: MediaStatus | null
-          episodes: number | null
-          duration: number | null
-          popularity: number | null
-          favourites: number | null
-          genres: Array<string | null> | null
-          description: string | null
-          title: {
-            romaji: string | null
-            english: string | null
-            native: string | null
-          } | null
-          coverImage: {
-            medium: string | null
-            large: string | null
-            extraLarge: string | null
-            color: string | null
-          } | null
-          startDate: { year: number | null } | null
-          trailer: {
-            id: string | null
-            site: string | null
-            thumbnail: string | null
-          } | null
-          nextAiringEpisode: {
-            episode: number
-            airingAt: number
-            timeUntilAiring: number
-          } | null
-          studios: { nodes: Array<{ name: string } | null> | null } | null
-        } | null
-      } | null> | null
-    } | null
-    characters: {
-      edges: Array<{
-        role: CharacterRole | null
-        node: {
-          id: number
-          name: { full: string | null } | null
-          image: { large: string | null; medium: string | null } | null
-        } | null
-        voiceActors: Array<{
-          id: number
-          languageV2: string | null
-          name: { full: string | null; native: string | null } | null
-          image: { large: string | null; medium: string | null } | null
-        } | null> | null
-      } | null> | null
-    } | null
-    externalLinks: Array<{
-      id: number
-      site: string
-      url: string | null
-      icon: string | null
-      color: string | null
-    } | null> | null
-  } | null
-}
+
+export type AnimeDetailQuery = { Media: { id: number, idMal: number | null, bannerImage: string | null, averageScore: number | null, seasonYear: number | null, format: MediaFormat | null, status: MediaStatus | null, episodes: number | null, duration: number | null, popularity: number | null, favourites: number | null, genres: Array<string | null> | null, description: string | null, title: { romaji: string | null, english: string | null, native: string | null } | null, coverImage: { medium: string | null, large: string | null, extraLarge: string | null, color: string | null } | null, startDate: { year: number | null } | null, trailer: { id: string | null, site: string | null, thumbnail: string | null } | null, nextAiringEpisode: { episode: number, airingAt: number, timeUntilAiring: number } | null, studios: { nodes: Array<{ name: string } | null> | null } | null, relations: { edges: Array<{ node: { id: number, idMal: number | null, bannerImage: string | null, averageScore: number | null, seasonYear: number | null, format: MediaFormat | null, status: MediaStatus | null, episodes: number | null, duration: number | null, popularity: number | null, favourites: number | null, genres: Array<string | null> | null, description: string | null, title: { romaji: string | null, english: string | null, native: string | null } | null, coverImage: { medium: string | null, large: string | null, extraLarge: string | null, color: string | null } | null, startDate: { year: number | null } | null, trailer: { id: string | null, site: string | null, thumbnail: string | null } | null, nextAiringEpisode: { episode: number, airingAt: number, timeUntilAiring: number } | null, studios: { nodes: Array<{ name: string } | null> | null } | null } | null } | null> | null } | null, recommendations: { nodes: Array<{ mediaRecommendation: { id: number, idMal: number | null, bannerImage: string | null, averageScore: number | null, seasonYear: number | null, format: MediaFormat | null, status: MediaStatus | null, episodes: number | null, duration: number | null, popularity: number | null, favourites: number | null, genres: Array<string | null> | null, description: string | null, title: { romaji: string | null, english: string | null, native: string | null } | null, coverImage: { medium: string | null, large: string | null, extraLarge: string | null, color: string | null } | null, startDate: { year: number | null } | null, trailer: { id: string | null, site: string | null, thumbnail: string | null } | null, nextAiringEpisode: { episode: number, airingAt: number, timeUntilAiring: number } | null, studios: { nodes: Array<{ name: string } | null> | null } | null } | null } | null> | null } | null, characters: { edges: Array<{ role: CharacterRole | null, node: { id: number, name: { full: string | null } | null, image: { large: string | null, medium: string | null } | null } | null, voiceActors: Array<{ id: number, languageV2: string | null, name: { full: string | null, native: string | null } | null, image: { large: string | null, medium: string | null } | null } | null> | null } | null> | null } | null, externalLinks: Array<{ id: number, site: string, url: string | null, icon: string | null, color: string | null } | null> | null } | null };
 
 export type CharacterDetailQueryVariables = Exact<{
-  id: number
-}>
+  id: number;
+}>;
 
-export type CharacterDetailQuery = {
-  Character: {
-    id: number
-    description: string | null
-    gender: string | null
-    age: string | null
-    favourites: number | null
-    name: {
-      full: string | null
-      native: string | null
-      alternative: Array<string | null> | null
-    } | null
-    image: { large: string | null; medium: string | null } | null
-    dateOfBirth: {
-      year: number | null
-      month: number | null
-      day: number | null
-    } | null
-    media: {
-      nodes: Array<{
-        id: number
-        idMal: number | null
-        bannerImage: string | null
-        averageScore: number | null
-        seasonYear: number | null
-        format: MediaFormat | null
-        status: MediaStatus | null
-        episodes: number | null
-        duration: number | null
-        popularity: number | null
-        favourites: number | null
-        genres: Array<string | null> | null
-        description: string | null
-        title: {
-          romaji: string | null
-          english: string | null
-          native: string | null
-        } | null
-        coverImage: {
-          medium: string | null
-          large: string | null
-          extraLarge: string | null
-          color: string | null
-        } | null
-        startDate: { year: number | null } | null
-        trailer: {
-          id: string | null
-          site: string | null
-          thumbnail: string | null
-        } | null
-        nextAiringEpisode: {
-          episode: number
-          airingAt: number
-          timeUntilAiring: number
-        } | null
-        studios: { nodes: Array<{ name: string } | null> | null } | null
-      } | null> | null
-    } | null
-  } | null
-}
+
+export type CharacterDetailQuery = { Character: { id: number, description: string | null, gender: string | null, age: string | null, favourites: number | null, name: { full: string | null, native: string | null, alternative: Array<string | null> | null } | null, image: { large: string | null, medium: string | null } | null, dateOfBirth: { year: number | null, month: number | null, day: number | null } | null, media: { nodes: Array<{ id: number, idMal: number | null, bannerImage: string | null, averageScore: number | null, seasonYear: number | null, format: MediaFormat | null, status: MediaStatus | null, episodes: number | null, duration: number | null, popularity: number | null, favourites: number | null, genres: Array<string | null> | null, description: string | null, title: { romaji: string | null, english: string | null, native: string | null } | null, coverImage: { medium: string | null, large: string | null, extraLarge: string | null, color: string | null } | null, startDate: { year: number | null } | null, trailer: { id: string | null, site: string | null, thumbnail: string | null } | null, nextAiringEpisode: { episode: number, airingAt: number, timeUntilAiring: number } | null, studios: { nodes: Array<{ name: string } | null> | null } | null } | null> | null } | null } | null };
 
 export type BatchAnimeQueryVariables = Exact<{
-  ids?: Array<number | null | undefined> | number | null | undefined
-}>
+  ids?: Array<number | null | undefined> | number | null | undefined;
+}>;
 
-export type BatchAnimeQuery = {
-  Page: {
-    media: Array<{
-      id: number
-      idMal: number | null
-      bannerImage: string | null
-      averageScore: number | null
-      seasonYear: number | null
-      format: MediaFormat | null
-      status: MediaStatus | null
-      episodes: number | null
-      duration: number | null
-      popularity: number | null
-      favourites: number | null
-      genres: Array<string | null> | null
-      description: string | null
-      title: {
-        romaji: string | null
-        english: string | null
-        native: string | null
-      } | null
-      coverImage: {
-        medium: string | null
-        large: string | null
-        extraLarge: string | null
-        color: string | null
-      } | null
-      startDate: { year: number | null } | null
-      trailer: {
-        id: string | null
-        site: string | null
-        thumbnail: string | null
-      } | null
-      nextAiringEpisode: {
-        episode: number
-        airingAt: number
-        timeUntilAiring: number
-      } | null
-      studios: { nodes: Array<{ name: string } | null> | null } | null
-    } | null> | null
-  } | null
-}
+
+export type BatchAnimeQuery = { Page: { media: Array<{ id: number, idMal: number | null, bannerImage: string | null, averageScore: number | null, seasonYear: number | null, format: MediaFormat | null, status: MediaStatus | null, episodes: number | null, duration: number | null, popularity: number | null, favourites: number | null, genres: Array<string | null> | null, description: string | null, title: { romaji: string | null, english: string | null, native: string | null } | null, coverImage: { medium: string | null, large: string | null, extraLarge: string | null, color: string | null } | null, startDate: { year: number | null } | null, trailer: { id: string | null, site: string | null, thumbnail: string | null } | null, nextAiringEpisode: { episode: number, airingAt: number, timeUntilAiring: number } | null, studios: { nodes: Array<{ name: string } | null> | null } | null } | null> | null } | null };
 
 export class TypedDocumentString<TResult, TVariables>
   extends String
   implements DocumentTypeDecoration<TResult, TVariables>
 {
-  __apiType?: NonNullable<
-    DocumentTypeDecoration<TResult, TVariables>["__apiType"]
-  >
-  private value: string
-  public __meta__?: Record<string, any> | undefined
+  __apiType?: NonNullable<DocumentTypeDecoration<TResult, TVariables>['__apiType']>;
+  private value: string;
+  public __meta__?: Record<string, any> | undefined;
 
   constructor(value: string, __meta__?: Record<string, any> | undefined) {
-    super(value)
-    this.value = value
-    this.__meta__ = __meta__
+    super(value);
+    this.value = value;
+    this.__meta__ = __meta__;
   }
 
   override toString(): string & DocumentTypeDecoration<TResult, TVariables> {
-    return this.value
+    return this.value;
   }
 }
 
@@ -594,10 +219,7 @@ export const AnimeCatalogDocument = new TypedDocumentString(`
     }
   }
 }
-    `) as unknown as TypedDocumentString<
-  AnimeCatalogQuery,
-  AnimeCatalogQueryVariables
->
+    `) as unknown as TypedDocumentString<AnimeCatalogQuery, AnimeCatalogQueryVariables>;
 export const AnimeSearchDocument = new TypedDocumentString(`
     query AnimeSearch($search: String!) {
   Page(page: 1, perPage: 16) {
@@ -652,10 +274,7 @@ export const AnimeSearchDocument = new TypedDocumentString(`
     }
   }
 }
-    `) as unknown as TypedDocumentString<
-  AnimeSearchQuery,
-  AnimeSearchQueryVariables
->
+    `) as unknown as TypedDocumentString<AnimeSearchQuery, AnimeSearchQueryVariables>;
 export const AiringScheduleDocument = new TypedDocumentString(`
     query AiringSchedule($now: Int!) {
   Page(page: 1, perPage: 12) {
@@ -711,10 +330,7 @@ export const AiringScheduleDocument = new TypedDocumentString(`
     }
   }
 }
-    `) as unknown as TypedDocumentString<
-  AiringScheduleQuery,
-  AiringScheduleQueryVariables
->
+    `) as unknown as TypedDocumentString<AiringScheduleQuery, AiringScheduleQueryVariables>;
 export const AnimeDetailDocument = new TypedDocumentString(`
     query AnimeDetail($id: Int!) {
   Media(id: $id, type: ANIME) {
@@ -892,10 +508,7 @@ export const AnimeDetailDocument = new TypedDocumentString(`
     }
   }
 }
-    `) as unknown as TypedDocumentString<
-  AnimeDetailQuery,
-  AnimeDetailQueryVariables
->
+    `) as unknown as TypedDocumentString<AnimeDetailQuery, AnimeDetailQueryVariables>;
 export const CharacterDetailDocument = new TypedDocumentString(`
     query CharacterDetail($id: Int!) {
   Character(id: $id) {
@@ -966,10 +579,7 @@ export const CharacterDetailDocument = new TypedDocumentString(`
     }
   }
 }
-    `) as unknown as TypedDocumentString<
-  CharacterDetailQuery,
-  CharacterDetailQueryVariables
->
+    `) as unknown as TypedDocumentString<CharacterDetailQuery, CharacterDetailQueryVariables>;
 export const BatchAnimeDocument = new TypedDocumentString(`
     query BatchAnime($ids: [Int]) {
   Page(page: 1, perPage: 50) {
@@ -1019,7 +629,4 @@ export const BatchAnimeDocument = new TypedDocumentString(`
     }
   }
 }
-    `) as unknown as TypedDocumentString<
-  BatchAnimeQuery,
-  BatchAnimeQueryVariables
->
+    `) as unknown as TypedDocumentString<BatchAnimeQuery, BatchAnimeQueryVariables>;

@@ -130,6 +130,8 @@ function useAppleCarousel() {
 type AppleCarouselItemState = {
   /** Position of the item among the items passed to `AppleCarouselContent`. */
   index: number
+  /** Total count of slides in the carousel. */
+  count: number
   /** Whether the item is the one being shown. */
   isCurrent: boolean
   /** Whether this copy is a clone rendered to keep the loop seamless. */
@@ -183,6 +185,10 @@ function AppleCarouselRoot({
   duration = 5000,
   paused = false,
   className,
+  onFocusCapture,
+  onBlurCapture,
+  onPointerEnter,
+  onPointerLeave,
   ...props
 }: AppleCarouselRootProps) {
   const id = useId()
@@ -191,10 +197,14 @@ function AppleCarouselRoot({
 
   const [index, setIndex] = useState(0)
   const [playback, setPlayback] = useState<Playback>("auto")
+  const [isFocusWithin, setIsFocusWithin] = useState(false)
+  const [isHovered, setIsHovered] = useState(false)
   const isInView = useInView(viewportRef, { amount: 0.25 })
   const prefersReducedMotion = usePrefersReducedMotion()
   const isPlaying =
     !paused &&
+    !isFocusWithin &&
+    (!isHovered || playback === "playing") &&
     isInView &&
     (playback === "playing" || (playback === "auto" && !prefersReducedMotion))
 
@@ -397,6 +407,24 @@ function AppleCarouselRoot({
       <div
         data-slot="apple-carousel"
         data-playing={isPlaying ? "" : undefined}
+        onFocusCapture={(e) => {
+          setIsFocusWithin(true)
+          onFocusCapture?.(e)
+        }}
+        onBlurCapture={(e) => {
+          if (!e.currentTarget.contains(e.relatedTarget)) {
+            setIsFocusWithin(false)
+          }
+          onBlurCapture?.(e)
+        }}
+        onPointerEnter={(e) => {
+          setIsHovered(true)
+          onPointerEnter?.(e)
+        }}
+        onPointerLeave={(e) => {
+          setIsHovered(false)
+          onPointerLeave?.(e)
+        }}
         className={cn("@container relative w-full", className)}
         {...props}
       />
@@ -409,7 +437,7 @@ function AppleCarouselContent({
   children,
   ...props
 }: ComponentProps<"div">) {
-  const { index, viewportRef } = useAppleCarousel()
+  const { index, viewportRef, isPlaying } = useAppleCarousel()
   const isHydrated = useIsHydrated()
 
   const items = Children.toArray(children).filter(isValidElement)
@@ -432,6 +460,8 @@ function AppleCarouselContent({
     <div
       ref={viewportRef}
       data-slot="apple-carousel-content"
+      aria-live={isPlaying ? "off" : "polite"}
+      aria-atomic="false"
       className={cn(
         "apple-carousel-viewport relative no-scrollbar snap-x snap-mandatory overflow-x-auto overflow-y-hidden data-animating:snap-none",
         "@max-3xl:scroll-ps-(--apple-carousel-padding)",
@@ -440,13 +470,13 @@ function AppleCarouselContent({
       {...props}
     >
       <ul
-        role="list"
+        role="presentation"
         className="mx-auto grid w-fit grid-flow-col gap-5 px-(--apple-carousel-padding)"
       >
         {items.slice(count - cloneCount).map((item, i) => (
           <AppleCarouselItemContext
             key={`${item.key}-leading`}
-            value={{ index: count - cloneCount + i, isClone: true }}
+            value={{ index: count - cloneCount + i, count, isClone: true }}
           >
             {item}
           </AppleCarouselItemContext>
@@ -454,7 +484,7 @@ function AppleCarouselContent({
         {items.map((item, i) => (
           <AppleCarouselItemContext
             key={item.key}
-            value={{ index: i, isClone: false }}
+            value={{ index: i, count, isClone: false }}
           >
             {item}
           </AppleCarouselItemContext>
@@ -462,7 +492,7 @@ function AppleCarouselContent({
         {items.slice(0, cloneCount).map((item, i) => (
           <AppleCarouselItemContext
             key={`${item.key}-trailing`}
-            value={{ index: i, isClone: true }}
+            value={{ index: i, count, isClone: true }}
           >
             {item}
           </AppleCarouselItemContext>
@@ -476,22 +506,27 @@ function AppleCarouselItem({
   className,
   children,
   onClick,
+  tabIndex: propTabIndex,
   ...props
 }: ComponentProps<"li">) {
   const { id, goTo } = useAppleCarousel()
-  const { index, isCurrent, isClone } = useAppleCarouselItem()
+  const { index, count, isCurrent, isClone } = useAppleCarouselItem()
 
   return (
     <li
       id={isClone ? undefined : `${id}-item-${index}`}
-      role={isClone ? undefined : "tabpanel"}
+      role={isClone ? "presentation" : "tabpanel"}
+      aria-roledescription={isClone ? undefined : "slide"}
+      aria-label={isClone ? undefined : `${index + 1} of ${count}`}
       aria-labelledby={isClone ? undefined : `${id}-tab-${index}`}
-      tabIndex={isCurrent && !isClone ? 0 : -1}
+      aria-hidden={isClone || !isCurrent ? true : undefined}
+      tabIndex={isClone ? -1 : (propTabIndex ?? (isCurrent ? 0 : -1))}
       data-slot="apple-carousel-item"
       data-index={index}
       data-clone={isClone ? "" : undefined}
       data-current={isCurrent ? "" : undefined}
       onClick={(event) => {
+        if (isClone) return
         onClick?.(event)
         if (!isCurrent && !event.defaultPrevented) {
           goTo(index)
@@ -499,7 +534,7 @@ function AppleCarouselItem({
       }}
       className={cn(
         "group relative h-152 w-(--apple-carousel-item-width) snap-center overflow-hidden rounded-4xl bg-muted data-clone:snap-always",
-        !isCurrent && "cursor-pointer",
+        !isCurrent && !isClone && "cursor-pointer",
         "@max-5xl:h-140 @max-3xl:h-152 @max-3xl:snap-start",
         "focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring",
         className
@@ -608,7 +643,7 @@ function AppleCarouselTab({
     event.currentTarget
       .closest('[role="tablist"]')
       ?.querySelectorAll<HTMLElement>('[role="tab"]')
-      [next]?.focus()
+      [next]?.focus({ preventScroll: true })
   }
 
   return (

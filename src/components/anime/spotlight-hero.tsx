@@ -44,7 +44,10 @@ function SpotlightArtwork({
   const hasBanner = Boolean(anime.banner)
 
   return (
-    <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
+    >
       {hasBanner ? (
         <picture>
           <source media="(min-width: 640px)" srcSet={anime.banner} />
@@ -314,7 +317,12 @@ export function SpotlightHero({ items, onSaveClick }: SpotlightHeroProps) {
   }
 
   return (
-    <section aria-label="Spotlight Trending Anime" className="relative w-full">
+    <section
+      role="region"
+      aria-roledescription="carousel"
+      aria-label="Spotlight Trending Anime"
+      className="relative w-full"
+    >
       <AppleCarouselRoot
         duration={6000}
         paused={trailerOpen}
@@ -324,7 +332,6 @@ export function SpotlightHero({ items, onSaveClick }: SpotlightHeroProps) {
           {items.map((anime, index) => (
             <AppleCarouselItem
               key={anime.id}
-              tabIndex={-1}
               className="dark relative h-120 w-(--apple-carousel-item-width) snap-center overflow-hidden rounded-3xl border border-black/10 bg-zinc-950 text-white shadow-xl transition-all duration-500 select-none hover:border-black/20 sm:rounded-4xl lg:h-135 xl:h-145 @max-3xl:h-120 sm:@max-3xl:h-125 dark:border-white/10 dark:hover:border-white/20"
             >
               <SpotlightSlideCard

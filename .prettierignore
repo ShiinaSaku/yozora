@@ -1,2 +1,3 @@
-bun.lock
+pnpm*.yaml
 src/routeTree.gen.ts
+src/gql

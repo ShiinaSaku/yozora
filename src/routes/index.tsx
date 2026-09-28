@@ -24,8 +24,7 @@ export const Route = createFileRoute("/")({
   head: ({ loaderData }) => {
     const hero = loaderData?.trending[0]
     const heroBanner = hero?.banner
-    const heroCover =
-      hero?.coverExtraLarge || hero?.coverLarge || hero?.cover
+    const heroCover = hero?.coverExtraLarge || hero?.coverLarge || hero?.cover
 
     const links: React.ComponentProps<"link">[] = [...canonicalLinks("/")]
     if (heroBanner) {

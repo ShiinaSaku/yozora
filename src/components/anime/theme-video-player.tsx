@@ -65,7 +65,9 @@ export function ThemeVideoPlayer({
   const containerRef = React.useRef<HTMLDivElement | null>(null)
   const mediaRef = React.useRef<HTMLVideoElement | null>(null)
   const progressBarRef = React.useRef<HTMLDivElement | null>(null)
-  const controlsTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
+  const controlsTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  )
 
   const [mode, setMode] = React.useState<"video" | "audio">("video")
   const [isPlaying, setIsPlaying] = React.useState(true)
@@ -269,8 +271,9 @@ export function ThemeVideoPlayer({
       onMouseEnter={() => setShowControls(true)}
       onMouseLeave={() => isPlaying && setShowControls(false)}
       className={cn(
-        "group/player relative flex w-full flex-col overflow-hidden rounded-3xl border border-white/10 bg-zinc-950 shadow-2xl ring-1 ring-white/5 outline-none select-none transition-all duration-300",
-        isFullscreen && "fixed inset-0 z-50 h-screen w-screen rounded-none border-0"
+        "group/player relative flex w-full flex-col overflow-hidden rounded-3xl border border-white/10 bg-zinc-950 shadow-2xl ring-1 ring-white/5 transition-all duration-300 outline-none select-none",
+        isFullscreen &&
+          "fixed inset-0 z-50 h-screen w-screen rounded-none border-0"
       )}
     >
       {/* Dynamic Ambient Cinema Backdrop Glow */}
@@ -305,7 +308,8 @@ export function ThemeVideoPlayer({
           <div className="flex min-w-0 flex-col gap-0.5">
             <div className="flex items-center gap-2">
               <span className="max-w-44 truncate text-sm font-bold tracking-tight text-white drop-shadow-xs sm:max-w-md">
-                {activeTheme.title || `${activeTheme.type} ${activeTheme.sequence || 1}`}
+                {activeTheme.title ||
+                  `${activeTheme.type} ${activeTheme.sequence || 1}`}
               </span>
               <Badge variant="tag">
                 {activeTheme.type}
@@ -313,7 +317,9 @@ export function ThemeVideoPlayer({
               </Badge>
             </div>
             <span className="max-w-44 truncate text-xs font-medium text-zinc-400 sm:max-w-md">
-              {activeTheme.artists.length > 0 ? activeTheme.artists.join(", ") : animeTitle}
+              {activeTheme.artists.length > 0
+                ? activeTheme.artists.join(", ")
+                : animeTitle}
             </span>
           </div>
         </div>
@@ -357,7 +363,9 @@ export function ThemeVideoPlayer({
                 ? "border border-emerald-500/30 bg-emerald-500/15 text-emerald-300 shadow-xs hover:bg-emerald-500/25"
                 : "border border-white/10 bg-white/5 text-zinc-200 hover:border-white/20 hover:bg-white/15 hover:text-white"
             )}
-            title={mode === "video" ? "Switch to Audio Mode" : "Switch to Video Mode"}
+            title={
+              mode === "video" ? "Switch to Audio Mode" : "Switch to Video Mode"
+            }
           >
             <HugeiconsIcon
               icon={mode === "video" ? HeadphonesIcon : Video01Icon}
@@ -422,7 +430,7 @@ export function ThemeVideoPlayer({
           onError={() => setHasError(true)}
           onClick={togglePlay}
           className={cn(
-            "w-full cursor-pointer bg-black object-contain outline-none transition-all duration-500",
+            "w-full cursor-pointer bg-black object-contain transition-all duration-500 outline-none",
             mode === "video"
               ? isFullscreen
                 ? "h-full max-h-screen"
@@ -492,11 +500,14 @@ export function ThemeVideoPlayer({
                     {activeTheme.sequence || 1}
                   </Badge>
                   <span className="max-w-xs truncate text-base font-bold tracking-tight text-white drop-shadow-sm sm:max-w-md sm:text-lg">
-                    {activeTheme.title || `${activeTheme.type} ${activeTheme.sequence || 1}`}
+                    {activeTheme.title ||
+                      `${activeTheme.type} ${activeTheme.sequence || 1}`}
                   </span>
                 </div>
                 <span className="text-xs font-medium text-zinc-400">
-                  {activeTheme.artists.length > 0 ? activeTheme.artists.join(", ") : animeTitle}
+                  {activeTheme.artists.length > 0
+                    ? activeTheme.artists.join(", ")
+                    : animeTitle}
                 </span>
               </div>
             </div>
@@ -506,7 +517,9 @@ export function ThemeVideoPlayer({
         {/* Playback Error Overlay */}
         {hasError && (
           <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-3 bg-zinc-950/95 p-6 text-center backdrop-blur-md">
-            <p className="text-sm font-semibold text-white">Theme Stream Unavailable</p>
+            <p className="text-sm font-semibold text-white">
+              Theme Stream Unavailable
+            </p>
             <p className="max-w-xs text-xs text-zinc-400">
               The media could not be streamed directly from the mirror.
             </p>
@@ -645,7 +658,9 @@ export function ThemeVideoPlayer({
                 max={1}
                 step={0.05}
                 value={isMuted ? 0 : volume}
-                onChange={(e) => handleVolumeChange(Number.parseFloat(e.target.value))}
+                onChange={(e) =>
+                  handleVolumeChange(Number.parseFloat(e.target.value))
+                }
                 aria-label="Volume slider"
                 className="h-1.5 w-14 cursor-pointer appearance-none rounded-full bg-white/20 accent-primary sm:w-20"
               />

@@ -11,7 +11,7 @@ const CACHE_CONTROL =
 
 const DISPLAY_FONT = "Inter, sans-serif"
 const JP_FONT = "'Zen Maru Gothic', sans-serif"
-/** Font loader for OG canvas rendering. */
+const MONO_FONT = "monospace"
 
 type OgFont = {
   name: string
@@ -27,7 +27,6 @@ async function loadFontBuffer(
   remoteUrl: string,
   timeoutMs = 4500
 ): Promise<ArrayBuffer | null> {
-  // 1. Attempt fast local filesystem read
   try {
     const fullPath = path.resolve(process.cwd(), localRelativePath)
     if (fs.existsSync(fullPath)) {
@@ -38,7 +37,6 @@ async function loadFontBuffer(
     // Filesystem read failed, fall through to remote fetch
   }
 
-  // 2. Fallback to remote CDN fetch
   try {
     const res = await fetch(remoteUrl, {
       signal: AbortSignal.timeout(timeoutMs),
@@ -141,19 +139,26 @@ async function fetchSafeImageDataUri(url: string | null): Promise<string> {
   }
 }
 
-function safeAccent(value: string, fallback = "#38bdf8"): string {
-  return /^#[\da-f]{6}$/i.test(value) ? value : fallback
-}
-
 function titleFontSize(title: string, base = 56): number {
   const len = title.length
   if (len > 80) return Math.round(base * 0.65)
-  if (len > 50) return Math.round(base * 0.76)
+  if (len > 50) return Math.round(base * 0.78)
   if (len > 32) return Math.round(base * 0.88)
   return base
 }
 
-function BrandHeader({ tag, live = false }: { tag: string; live?: boolean }) {
+/**
+ * Clean Vercel / shadcn neutral brand header with breadcrumb and status pill.
+ */
+function VercelBrandHeader({
+  section = "RADAR",
+  badgeText,
+  live = false,
+}: {
+  section?: string
+  badgeText?: string
+  live?: boolean
+}) {
   return (
     <div
       style={{
@@ -164,20 +169,34 @@ function BrandHeader({ tag, live = false }: { tag: string; live?: boolean }) {
         zIndex: 10,
       }}
     >
-      {/* Brand logo + wordmark */}
-      <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-        <img
-          src={YOZORA_EYE_LOGO_BASE64}
-          alt="Yozora"
-          width={40}
-          height={40}
-          style={{ objectFit: "contain" }}
-        />
+      {/* Brand logo + wordmark + breadcrumb */}
+      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: 36,
+            height: 36,
+            borderRadius: 10,
+            backgroundColor: "#000000",
+            border: "1px solid rgba(255, 255, 255, 0.16)",
+            overflow: "hidden",
+          }}
+        >
+          <img
+            src={YOZORA_EYE_LOGO_BASE64}
+            alt="Yozora"
+            width={30}
+            height={30}
+            style={{ objectFit: "contain" }}
+          />
+        </div>
         <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
           <span
             style={{
               fontFamily: DISPLAY_FONT,
-              fontSize: 23,
+              fontSize: 20,
               fontWeight: 700,
               letterSpacing: "-0.03em",
               color: "#ffffff",
@@ -188,32 +207,53 @@ function BrandHeader({ tag, live = false }: { tag: string; live?: boolean }) {
           <span
             style={{
               fontFamily: JP_FONT,
-              fontSize: 15,
+              fontSize: 14,
               fontWeight: 700,
-              color: "rgba(255,255,255,0.45)",
+              color: "#71717a",
             }}
           >
             夜空
           </span>
+          <span
+            style={{
+              fontSize: 16,
+              color: "#3f3f46",
+              margin: "0 2px",
+            }}
+          >
+            /
+          </span>
+          <span
+            style={{
+              fontFamily: MONO_FONT,
+              fontSize: 11,
+              fontWeight: 600,
+              color: "#a1a1aa",
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+            }}
+          >
+            {section}
+          </span>
         </div>
       </div>
 
-      {/* Tag badge */}
-      {tag ? (
+      {/* Right status badge */}
+      {badgeText ? (
         <div
           style={{
             display: "flex",
             alignItems: "center",
             gap: 8,
-            padding: "6px 16px",
-            borderRadius: 999,
-            backgroundColor: "rgba(255,255,255,0.06)",
-            border: "1px solid rgba(255,255,255,0.12)",
-            color: "#e2e8f0",
-            fontFamily: DISPLAY_FONT,
-            fontSize: 12,
-            fontWeight: 700,
-            letterSpacing: "0.08em",
+            padding: "6px 14px",
+            borderRadius: 9999,
+            backgroundColor: "rgba(255, 255, 255, 0.04)",
+            border: "1px solid rgba(255, 255, 255, 0.12)",
+            color: "#e4e4e7",
+            fontFamily: MONO_FONT,
+            fontSize: 11,
+            fontWeight: 600,
+            letterSpacing: "0.06em",
             textTransform: "uppercase",
           }}
         >
@@ -222,14 +262,193 @@ function BrandHeader({ tag, live = false }: { tag: string; live?: boolean }) {
               style={{
                 width: 7,
                 height: 7,
-                borderRadius: 99,
-                backgroundColor: "#10b981",
+                borderRadius: 9999,
+                backgroundColor: "#22c55e",
               }}
             />
           ) : null}
-          {tag}
+          {badgeText}
         </div>
       ) : null}
+    </div>
+  )
+}
+
+/**
+ * Standard Vercel footer with domain, tag and minimalist arrow button.
+ */
+function VercelFooter() {
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        borderTop: "1px solid rgba(255, 255, 255, 0.08)",
+        paddingTop: 18,
+        width: "100%",
+        zIndex: 10,
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          color: "#71717a",
+          fontFamily: MONO_FONT,
+          fontSize: 12,
+          letterSpacing: "0.06em",
+        }}
+      >
+        <span style={{ color: "#a1a1aa", fontWeight: 600 }}>yozora.moe</span>
+        <span style={{ color: "#3f3f46" }}>•</span>
+        <span>Open Anime Intelligence & 1080p Themes</span>
+      </div>
+
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+          padding: "5px 14px",
+          borderRadius: 8,
+          backgroundColor: "rgba(255, 255, 255, 0.04)",
+          border: "1px solid rgba(255, 255, 255, 0.12)",
+          color: "#ffffff",
+          fontFamily: MONO_FONT,
+          fontSize: 12,
+          fontWeight: 600,
+        }}
+      >
+        <span>yozora.moe</span>
+        <span style={{ color: "#a1a1aa" }}>↗</span>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * Shared Vercel shell container with precision hairline grid and inset framed workspace.
+ */
+function VercelCardShell({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+        width: CARD_WIDTH,
+        height: CARD_HEIGHT,
+        backgroundColor: "#000000",
+        color: "#ffffff",
+        fontFamily: DISPLAY_FONT,
+        position: "relative",
+        padding: 28,
+        overflow: "hidden",
+      }}
+    >
+      {/* Precision hairline architectural grid */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          backgroundImage:
+            "linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px)",
+          backgroundSize: "48px 48px",
+        }}
+      />
+
+      {/* Top ambient spotlight flare */}
+      <div
+        style={{
+          position: "absolute",
+          top: -40,
+          left: 200,
+          width: 800,
+          height: 360,
+          borderRadius: 9999,
+          backgroundImage:
+            "radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.08) 0%, transparent 75%)",
+        }}
+      />
+
+      {/* Inset framed container */}
+      <div
+        style={{
+          position: "relative",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          width: "100%",
+          height: "100%",
+          backgroundColor: "rgba(9, 9, 11, 0.85)",
+          border: "1px solid rgba(255, 255, 255, 0.12)",
+          borderRadius: 20,
+          padding: "36px 44px",
+          overflow: "hidden",
+        }}
+      >
+        {/* Corner registration crosshairs */}
+        <span
+          style={{
+            position: "absolute",
+            top: 10,
+            left: 14,
+            color: "#52525b",
+            fontFamily: MONO_FONT,
+            fontSize: 13,
+            lineHeight: 1,
+            userSelect: "none",
+          }}
+        >
+          +
+        </span>
+        <span
+          style={{
+            position: "absolute",
+            top: 10,
+            right: 14,
+            color: "#52525b",
+            fontFamily: MONO_FONT,
+            fontSize: 13,
+            lineHeight: 1,
+            userSelect: "none",
+          }}
+        >
+          +
+        </span>
+        <span
+          style={{
+            position: "absolute",
+            bottom: 10,
+            left: 14,
+            color: "#52525b",
+            fontFamily: MONO_FONT,
+            fontSize: 13,
+            lineHeight: 1,
+            userSelect: "none",
+          }}
+        >
+          +
+        </span>
+        <span
+          style={{
+            position: "absolute",
+            bottom: 10,
+            right: 14,
+            color: "#52525b",
+            fontFamily: MONO_FONT,
+            fontSize: 13,
+            lineHeight: 1,
+            userSelect: "none",
+          }}
+        >
+          +
+        </span>
+
+        {children}
+      </div>
     </div>
   )
 }
@@ -240,7 +459,6 @@ function EditorialCard({
   subtitle,
   description,
   tag,
-  accent,
   pills = [],
 }: {
   type: string
@@ -248,63 +466,27 @@ function EditorialCard({
   subtitle?: string
   description: string
   tag: string
-  accent: string
   pills?: string[]
 }) {
   const isAiring = type === "airing"
   const isHome = type === "home"
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
-        width: CARD_WIDTH,
-        height: CARD_HEIGHT,
-        backgroundColor: "#07080e",
-        color: "#ffffff",
-        fontFamily: DISPLAY_FONT,
-        padding: "54px 68px",
-        position: "relative",
-        overflow: "hidden",
-      }}
-    >
-      {/* Background ambient lighting */}
-      <div
-        style={{
-          position: "absolute",
-          top: -120,
-          right: -100,
-          width: 650,
-          height: 650,
-          borderRadius: 999,
-          backgroundImage: `radial-gradient(circle, ${accent}22 0%, transparent 68%)`,
-        }}
-      />
-      <div
-        style={{
-          position: "absolute",
-          bottom: -120,
-          left: -100,
-          width: 550,
-          height: 550,
-          borderRadius: 999,
-          backgroundImage:
-            "radial-gradient(circle, rgba(99,102,241,0.12) 0%, transparent 70%)",
-        }}
-      />
-
+    <VercelCardShell>
       {/* Top Header */}
-      <BrandHeader tag={tag} live={isAiring || isHome} />
+      <VercelBrandHeader
+        section={type.toUpperCase()}
+        badgeText={tag || (isAiring ? "LIVE BROADCASTS" : "OPEN PLATFORM")}
+        live={isAiring || isHome}
+      />
 
-      {/* Hero content */}
+      {/* Main Hero Content */}
       <div
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: 18,
-          maxWidth: 960,
+          gap: 16,
+          maxWidth: 920,
           zIndex: 10,
         }}
       >
@@ -312,34 +494,28 @@ function EditorialCard({
           style={{
             display: "flex",
             alignItems: "center",
-            gap: 10,
-            color: accent,
-            fontSize: 13,
-            fontWeight: 700,
-            letterSpacing: "0.18em",
+            gap: 8,
+            color: "#a1a1aa",
+            fontFamily: MONO_FONT,
+            fontSize: 12,
+            fontWeight: 600,
+            letterSpacing: "0.15em",
             textTransform: "uppercase",
           }}
         >
-          <span
-            style={{
-              width: 24,
-              height: 3,
-              borderRadius: 99,
-              backgroundColor: accent,
-            }}
-          />
-          {subtitle || "The Modern Anime Discovery Platform"}
+          <span>//</span>
+          <span>{subtitle || "THE MODERN ANIME DISCOVERY PLATFORM"}</span>
         </div>
 
         <div
           style={{
             fontSize: titleFontSize(title, 56),
-            fontWeight: 700,
-            letterSpacing: "-0.03em",
-            lineHeight: 1.08,
+            fontWeight: 800,
+            letterSpacing: "-0.04em",
+            lineHeight: 1.06,
             color: "#ffffff",
             overflow: "hidden",
-            maxHeight: 180,
+            maxHeight: 140,
           }}
         >
           {title}
@@ -347,12 +523,12 @@ function EditorialCard({
 
         <div
           style={{
-            fontSize: 20,
-            color: "#94a3b8",
-            lineHeight: 1.45,
+            fontSize: 18,
+            color: "#a1a1aa",
+            lineHeight: 1.5,
             fontWeight: 400,
             overflow: "hidden",
-            maxHeight: 62,
+            maxHeight: 56,
           }}
         >
           {description}
@@ -368,20 +544,38 @@ function EditorialCard({
               marginTop: 6,
             }}
           >
-            {pills.map((pill) => (
+            {pills.map((pill, idx) => (
               <div
                 key={pill}
                 style={{
-                  padding: "7px 15px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "8px 16px",
                   borderRadius: 10,
-                  backgroundColor: "rgba(255,255,255,0.05)",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  color: "#cbd5e1",
-                  fontSize: 13,
-                  fontWeight: 600,
+                  backgroundColor: "rgba(255, 255, 255, 0.03)",
+                  border: "1px solid rgba(255, 255, 255, 0.08)",
                 }}
               >
-                {pill}
+                <span
+                  style={{
+                    fontFamily: MONO_FONT,
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: "#71717a",
+                  }}
+                >
+                  {String(idx + 1).padStart(2, "0")}
+                </span>
+                <span
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 500,
+                    color: "#e4e4e7",
+                  }}
+                >
+                  {pill}
+                </span>
               </div>
             ))}
           </div>
@@ -389,48 +583,8 @@ function EditorialCard({
       </div>
 
       {/* Footer */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          paddingTop: 20,
-          borderTop: "1px solid rgba(255,255,255,0.08)",
-          width: "100%",
-          zIndex: 10,
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            color: "#64748b",
-            fontSize: 13,
-            fontWeight: 600,
-            letterSpacing: "0.08em",
-            textTransform: "uppercase",
-          }}
-        >
-          <span>yozora.moe</span>
-          <span>•</span>
-          <span>seasonal anime intelligence</span>
-        </div>
-
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-            color: accent,
-            fontSize: 14,
-            fontWeight: 700,
-          }}
-        >
-          yozora.moe →
-        </div>
-      </div>
-    </div>
+      <VercelFooter />
+    </VercelCardShell>
   )
 }
 
@@ -446,7 +600,6 @@ function AnimeCard({
   year,
   format,
   episodes,
-  accent,
 }: {
   title: string
   subtitle: string
@@ -459,7 +612,6 @@ function AnimeCard({
   year: string
   format: string
   episodes: string
-  accent: string
 }) {
   const genreList = genres
     .split(",")
@@ -467,112 +619,93 @@ function AnimeCard({
     .filter(Boolean)
     .slice(0, 3)
 
-  const size = titleFontSize(title, 52)
+  const size = titleFontSize(title, 48)
 
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        width: CARD_WIDTH,
-        height: CARD_HEIGHT,
-        backgroundColor: "#07080e",
-        color: "#ffffff",
-        fontFamily: DISPLAY_FONT,
-        position: "relative",
-        overflow: "hidden",
-        padding: "52px 64px",
-      }}
-    >
-      {/* Ambient background cover blur */}
+    <VercelCardShell>
+      {/* Background Poster Ambience (subtle & monochrome) */}
       {imageDataUri ? (
         <img
           src={imageDataUri}
           alt=""
           style={{
             position: "absolute",
-            inset: 0,
-            width: "100%",
-            height: "100%",
+            top: -40,
+            right: -40,
+            width: 600,
+            height: 600,
             objectFit: "cover",
-            opacity: 0.12,
+            opacity: 0.08,
+            zIndex: 0,
           }}
         />
       ) : null}
 
-      {/* Deep gradient scrim */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          backgroundImage:
-            "linear-gradient(90deg, rgba(7,8,14,0.98) 0%, rgba(7,8,14,0.92) 58%, rgba(7,8,14,0.65) 100%)",
-        }}
-      />
-
-      {/* Ambient color wash */}
-      <div
-        style={{
-          position: "absolute",
-          top: -100,
-          right: -100,
-          width: 600,
-          height: 600,
-          borderRadius: 999,
-          backgroundImage: `radial-gradient(circle, ${accent}25 0%, transparent 68%)`,
-        }}
-      />
-
-      {/* Left Column: Metadata & Typography */}
+      {/* Main Two-Column Row */}
       <div
         style={{
           display: "flex",
-          flexDirection: "column",
+          alignItems: "center",
           justifyContent: "space-between",
           height: "100%",
-          flex: 1,
-          paddingRight: 48,
+          width: "100%",
           zIndex: 10,
         }}
       >
-        {/* Top: Brand mark + Format / Year / Episodes */}
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <img
-            src={YOZORA_EYE_LOGO_BASE64}
-            alt="Yozora"
-            width={38}
-            height={38}
-            style={{ objectFit: "contain" }}
-          />
-          <span
-            style={{
-              fontSize: 22,
-              fontWeight: 700,
-              letterSpacing: "-0.02em",
-              color: "#ffffff",
-            }}
-          >
-            YOZORA
-          </span>
-          <span
-            style={{
-              color: "rgba(255,255,255,0.2)",
-              fontSize: 18,
-              margin: "0 4px",
-            }}
-          >
-            /
-          </span>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        {/* Left Column: Metadata & Typography */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            height: "100%",
+            flex: 1,
+            paddingRight: 40,
+          }}
+        >
+          {/* Top: Brand mark + chips */}
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: 32,
+                height: 32,
+                borderRadius: 8,
+                backgroundColor: "#000000",
+                border: "1px solid rgba(255, 255, 255, 0.16)",
+                overflow: "hidden",
+              }}
+            >
+              <img
+                src={YOZORA_EYE_LOGO_BASE64}
+                alt="Yozora"
+                width={26}
+                height={26}
+                style={{ objectFit: "contain" }}
+              />
+            </div>
+            <span
+              style={{
+                fontSize: 18,
+                fontWeight: 700,
+                letterSpacing: "-0.02em",
+                color: "#ffffff",
+              }}
+            >
+              YOZORA
+            </span>
+            <span style={{ color: "#3f3f46", fontSize: 16 }}>/</span>
+
             {format ? (
               <div
                 style={{
-                  padding: "4px 10px",
+                  padding: "3px 10px",
                   borderRadius: 6,
-                  backgroundColor: "rgba(56,189,248,0.14)",
-                  border: "1px solid rgba(56,189,248,0.3)",
-                  color: "#7dd3fc",
+                  backgroundColor: "#ffffff",
+                  color: "#09090b",
+                  fontFamily: MONO_FONT,
                   fontSize: 11,
                   fontWeight: 700,
                   letterSpacing: "0.06em",
@@ -585,14 +718,14 @@ function AnimeCard({
             {year ? (
               <div
                 style={{
-                  padding: "4px 10px",
+                  padding: "3px 10px",
                   borderRadius: 6,
-                  backgroundColor: "rgba(255,255,255,0.06)",
-                  border: "1px solid rgba(255,255,255,0.12)",
-                  color: "#cbd5e1",
+                  backgroundColor: "rgba(255, 255, 255, 0.05)",
+                  border: "1px solid rgba(255, 255, 255, 0.12)",
+                  color: "#e4e4e7",
+                  fontFamily: MONO_FONT,
                   fontSize: 11,
-                  fontWeight: 700,
-                  letterSpacing: "0.06em",
+                  fontWeight: 600,
                 }}
               >
                 {year}
@@ -601,109 +734,133 @@ function AnimeCard({
             {episodes ? (
               <div
                 style={{
-                  padding: "4px 10px",
+                  padding: "3px 10px",
                   borderRadius: 6,
-                  backgroundColor: "rgba(255,255,255,0.06)",
-                  border: "1px solid rgba(255,255,255,0.12)",
-                  color: "#cbd5e1",
+                  backgroundColor: "rgba(255, 255, 255, 0.05)",
+                  border: "1px solid rgba(255, 255, 255, 0.12)",
+                  color: "#e4e4e7",
+                  fontFamily: MONO_FONT,
                   fontSize: 11,
-                  fontWeight: 700,
-                  letterSpacing: "0.06em",
+                  fontWeight: 600,
                 }}
               >
                 {episodes} EP
               </div>
             ) : null}
           </div>
-        </div>
 
-        {/* Center: Eyebrow + Titles + Synopsis + Genres */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          <div
-            style={{
-              color: accent,
-              fontSize: 12,
-              fontWeight: 700,
-              letterSpacing: "0.18em",
-              textTransform: "uppercase",
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-            }}
-          >
-            <span
-              style={{
-                width: 18,
-                height: 2.5,
-                backgroundColor: accent,
-                borderRadius: 99,
-              }}
-            />
-            {tag || "Anime Showcase"}
-          </div>
-
-          <div
-            style={{
-              fontSize: size,
-              fontWeight: 700,
-              letterSpacing: "-0.025em",
-              lineHeight: 1.1,
-              color: "#ffffff",
-              overflow: "hidden",
-              maxHeight: 155,
-            }}
-          >
-            {title}
-          </div>
-
-          {nativeTitle || subtitle ? (
+          {/* Center Info */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <div
               style={{
-                fontFamily: JP_FONT,
-                fontSize: 18,
-                fontWeight: 700,
-                color: "#94a3b8",
-                overflow: "hidden",
-                maxHeight: 28,
+                color: "#a1a1aa",
+                fontFamily: MONO_FONT,
+                fontSize: 11,
+                fontWeight: 600,
+                letterSpacing: "0.14em",
+                textTransform: "uppercase",
               }}
             >
-              {nativeTitle || subtitle}
+              {`// ${tag || "ANIME SHOWCASE & OST"}`}
             </div>
-          ) : null}
 
-          {description ? (
             <div
               style={{
-                fontSize: 16,
-                color: "#94a3b8",
-                lineHeight: 1.45,
-                fontWeight: 400,
+                fontSize: size,
+                fontWeight: 800,
+                letterSpacing: "-0.035em",
+                lineHeight: 1.08,
+                color: "#ffffff",
                 overflow: "hidden",
-                maxHeight: 50,
+                maxHeight: 110,
               }}
             >
-              {description}
+              {title}
             </div>
-          ) : null}
 
-          {genreList.length > 0 ? (
+            {nativeTitle || subtitle ? (
+              <div
+                style={{
+                  fontFamily: JP_FONT,
+                  fontSize: 18,
+                  fontWeight: 700,
+                  color: "#71717a",
+                  overflow: "hidden",
+                  maxHeight: 28,
+                }}
+              >
+                {nativeTitle || subtitle}
+              </div>
+            ) : null}
+
+            {description ? (
+              <div
+                style={{
+                  fontSize: 15,
+                  color: "#a1a1aa",
+                  lineHeight: 1.45,
+                  fontWeight: 400,
+                  overflow: "hidden",
+                  maxHeight: 46,
+                }}
+              >
+                {description}
+              </div>
+            ) : null}
+
+            {/* Score & Genres */}
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: 8,
+                gap: 10,
                 marginTop: 4,
               }}
             >
+              {score ? (
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    padding: "4px 12px",
+                    borderRadius: 6,
+                    backgroundColor: "rgba(255, 255, 255, 0.05)",
+                    border: "1px solid rgba(255, 255, 255, 0.15)",
+                  }}
+                >
+                  <span style={{ color: "#ffffff", fontSize: 13 }}>★</span>
+                  <span
+                    style={{
+                      color: "#ffffff",
+                      fontFamily: MONO_FONT,
+                      fontSize: 14,
+                      fontWeight: 700,
+                    }}
+                  >
+                    {score}
+                  </span>
+                  <span
+                    style={{
+                      color: "#71717a",
+                      fontFamily: MONO_FONT,
+                      fontSize: 11,
+                    }}
+                  >
+                    /10
+                  </span>
+                </div>
+              ) : null}
+
               {genreList.map((g) => (
                 <div
                   key={g}
                   style={{
-                    padding: "4px 12px",
-                    borderRadius: 999,
-                    backgroundColor: "rgba(255,255,255,0.05)",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    color: "#cbd5e1",
+                    padding: "4px 10px",
+                    borderRadius: 6,
+                    backgroundColor: "rgba(255, 255, 255, 0.03)",
+                    border: "1px solid rgba(255, 255, 255, 0.08)",
+                    color: "#d4d4d8",
                     fontSize: 12,
                     fontWeight: 500,
                   }}
@@ -712,105 +869,86 @@ function AnimeCard({
                 </div>
               ))}
             </div>
-          ) : null}
-        </div>
+          </div>
 
-        {/* Bottom: Score pill + Domain link */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            paddingTop: 18,
-            borderTop: "1px solid rgba(255,255,255,0.08)",
-          }}
-        >
-          {score ? (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 7,
-                padding: "6px 14px",
-                borderRadius: 8,
-                backgroundColor: "rgba(251,191,36,0.12)",
-                border: "1px solid rgba(251,191,36,0.25)",
-              }}
-            >
-              <span style={{ color: "#fbbf24", fontSize: 16 }}>★</span>
-              <span
-                style={{
-                  color: "#ffffff",
-                  fontSize: 15,
-                  fontWeight: 700,
-                }}
-              >
-                {score}
-              </span>
-              <span style={{ color: "rgba(251,191,36,0.7)", fontSize: 11 }}>
-                /10
-              </span>
-            </div>
-          ) : (
-            <div />
-          )}
-
+          {/* Bottom Footer Inside Left Column */}
           <div
             style={{
               display: "flex",
               alignItems: "center",
-              gap: 6,
-              color: accent,
-              fontSize: 14,
-              fontWeight: 700,
+              justifyContent: "space-between",
+              borderTop: "1px solid rgba(255, 255, 255, 0.08)",
+              paddingTop: 14,
             }}
           >
-            yozora.moe →
-          </div>
-        </div>
-      </div>
-
-      {/* Right Column: Clean Poster Artwork Card */}
-      {imageDataUri ? (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-            zIndex: 10,
-          }}
-        >
-          <div
-            style={{
-              width: 320,
-              height: 470,
-              borderRadius: 20,
-              overflow: "hidden",
-              border: "1px solid rgba(255,255,255,0.15)",
-              boxShadow: "0 25px 50px -12px rgba(0,0,0,0.85)",
-              position: "relative",
-              display: "flex",
-            }}
-          >
-            <img
-              src={imageDataUri}
-              alt={title}
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
-            />
-            {/* Subtle bottom gradient sheen */}
             <div
               style={{
-                position: "absolute",
-                inset: 0,
-                backgroundImage:
-                  "linear-gradient(180deg, transparent 72%, rgba(7,8,14,0.7) 100%)",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                color: "#71717a",
+                fontFamily: MONO_FONT,
+                fontSize: 11,
               }}
-            />
+            >
+              <span>yozora.moe</span>
+              <span style={{ color: "#3f3f46" }}>•</span>
+              <span>1080p Lossless Themes</span>
+            </div>
+
+            <div
+              style={{
+                fontFamily: MONO_FONT,
+                fontSize: 11,
+                fontWeight: 600,
+                color: "#ffffff",
+              }}
+            >
+              yozora.moe ↗
+            </div>
           </div>
         </div>
-      ) : null}
-    </div>
+
+        {/* Right Column: Framed Poster Artwork */}
+        {imageDataUri ? (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >
+            <div
+              style={{
+                width: 280,
+                height: 410,
+                borderRadius: 14,
+                overflow: "hidden",
+                border: "1px solid rgba(255, 255, 255, 0.18)",
+                boxShadow: "0 25px 60px -10px rgba(0, 0, 0, 0.95)",
+                position: "relative",
+                display: "flex",
+              }}
+            >
+              <img
+                src={imageDataUri}
+                alt={title}
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              />
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  backgroundImage:
+                    "linear-gradient(180deg, transparent 75%, rgba(0, 0, 0, 0.8) 100%)",
+                }}
+              />
+            </div>
+          </div>
+        ) : null}
+      </div>
+    </VercelCardShell>
   )
 }
 
@@ -820,290 +958,270 @@ function CharacterCard({
   description,
   tag,
   imageDataUri,
-  accent,
 }: {
   title: string
   nativeTitle: string
   description: string
   tag: string
   imageDataUri: string
-  accent: string
 }) {
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        width: CARD_WIDTH,
-        height: CARD_HEIGHT,
-        backgroundColor: "#07080e",
-        color: "#ffffff",
-        fontFamily: DISPLAY_FONT,
-        position: "relative",
-        overflow: "hidden",
-        padding: "52px 64px",
-      }}
-    >
-      {/* Background ambient lighting */}
-      <div
-        style={{
-          position: "absolute",
-          top: -100,
-          right: -100,
-          width: 600,
-          height: 600,
-          borderRadius: 999,
-          backgroundImage: `radial-gradient(circle, ${accent}25 0%, transparent 68%)`,
-        }}
-      />
-      <div
-        style={{
-          position: "absolute",
-          bottom: -100,
-          left: -100,
-          width: 500,
-          height: 500,
-          borderRadius: 999,
-          backgroundImage:
-            "radial-gradient(circle, rgba(99,102,241,0.12) 0%, transparent 70%)",
-        }}
-      />
+    <VercelCardShell>
+      {/* Background Ambience */}
+      {imageDataUri ? (
+        <img
+          src={imageDataUri}
+          alt=""
+          style={{
+            position: "absolute",
+            top: -40,
+            right: -40,
+            width: 600,
+            height: 600,
+            objectFit: "cover",
+            opacity: 0.08,
+            zIndex: 0,
+          }}
+        />
+      ) : null}
 
-      {/* Left Column: Character Lore & Name */}
       <div
         style={{
           display: "flex",
-          flexDirection: "column",
+          alignItems: "center",
           justifyContent: "space-between",
           height: "100%",
-          flex: 1,
-          paddingRight: 48,
+          width: "100%",
           zIndex: 10,
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <img
-            src={YOZORA_EYE_LOGO_BASE64}
-            alt="Yozora"
-            width={38}
-            height={38}
-            style={{ objectFit: "contain" }}
-          />
-          <span
-            style={{
-              fontSize: 22,
-              fontWeight: 700,
-              letterSpacing: "-0.02em",
-              color: "#ffffff",
-            }}
-          >
-            YOZORA
-          </span>
-          <span
-            style={{
-              color: "rgba(255,255,255,0.2)",
-              fontSize: 18,
-              margin: "0 4px",
-            }}
-          >
-            /
-          </span>
-          <div
-            style={{
-              padding: "4px 12px",
-              borderRadius: 6,
-              backgroundColor: "rgba(168,85,247,0.15)",
-              border: "1px solid rgba(168,85,247,0.3)",
-              color: "#d8b4fe",
-              fontSize: 11,
-              fontWeight: 700,
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
-            }}
-          >
-            {tag || "Character Dossier"}
-          </div>
-        </div>
-
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          <div
-            style={{
-              color: accent,
-              fontSize: 12,
-              fontWeight: 700,
-              letterSpacing: "0.18em",
-              textTransform: "uppercase",
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-            }}
-          >
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            height: "100%",
+            flex: 1,
+            paddingRight: 40,
+          }}
+        >
+          {/* Header */}
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: 32,
+                height: 32,
+                borderRadius: 8,
+                backgroundColor: "#000000",
+                border: "1px solid rgba(255, 255, 255, 0.16)",
+                overflow: "hidden",
+              }}
+            >
+              <img
+                src={YOZORA_EYE_LOGO_BASE64}
+                alt="Yozora"
+                width={26}
+                height={26}
+                style={{ objectFit: "contain" }}
+              />
+            </div>
             <span
               style={{
-                width: 18,
-                height: 2.5,
-                backgroundColor: accent,
-                borderRadius: 99,
-              }}
-            />
-            Anime Character Profile
-          </div>
-
-          <div
-            style={{
-              fontSize: titleFontSize(title, 56),
-              fontWeight: 700,
-              letterSpacing: "-0.03em",
-              lineHeight: 1.08,
-              color: "#ffffff",
-              overflow: "hidden",
-              maxHeight: 155,
-            }}
-          >
-            {title}
-          </div>
-
-          {nativeTitle ? (
-            <div
-              style={{
-                fontFamily: JP_FONT,
-                fontSize: 22,
+                fontSize: 18,
                 fontWeight: 700,
-                color: "#94a3b8",
+                letterSpacing: "-0.02em",
+                color: "#ffffff",
               }}
             >
-              {nativeTitle}
-            </div>
-          ) : null}
-
-          {description ? (
+              YOZORA
+            </span>
+            <span style={{ color: "#3f3f46", fontSize: 16 }}>/</span>
             <div
               style={{
-                fontSize: 17,
-                color: "#94a3b8",
-                lineHeight: 1.45,
-                fontWeight: 400,
-                overflow: "hidden",
-                maxHeight: 76,
+                padding: "3px 10px",
+                borderRadius: 6,
+                backgroundColor: "#ffffff",
+                color: "#09090b",
+                fontFamily: MONO_FONT,
+                fontSize: 11,
+                fontWeight: 700,
+                letterSpacing: "0.06em",
+                textTransform: "uppercase",
               }}
             >
-              {description}
+              {tag || "CHARACTER DOSSIER"}
             </div>
-          ) : null}
-        </div>
-
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            paddingTop: 18,
-            borderTop: "1px solid rgba(255,255,255,0.08)",
-          }}
-        >
-          <div
-            style={{
-              color: "#64748b",
-              fontSize: 13,
-              fontWeight: 600,
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
-            }}
-          >
-            Voice Actors • Roles • Lore
           </div>
 
+          {/* Details */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <div
+              style={{
+                color: "#a1a1aa",
+                fontFamily: MONO_FONT,
+                fontSize: 11,
+                fontWeight: 600,
+                letterSpacing: "0.14em",
+                textTransform: "uppercase",
+              }}
+            >
+              // ANIME CHARACTER PROFILE
+            </div>
+
+            <div
+              style={{
+                fontSize: titleFontSize(title, 52),
+                fontWeight: 800,
+                letterSpacing: "-0.035em",
+                lineHeight: 1.08,
+                color: "#ffffff",
+                overflow: "hidden",
+                maxHeight: 110,
+              }}
+            >
+              {title}
+            </div>
+
+            {nativeTitle ? (
+              <div
+                style={{
+                  fontFamily: JP_FONT,
+                  fontSize: 20,
+                  fontWeight: 700,
+                  color: "#71717a",
+                }}
+              >
+                {nativeTitle}
+              </div>
+            ) : null}
+
+            {description ? (
+              <div
+                style={{
+                  fontSize: 16,
+                  color: "#a1a1aa",
+                  lineHeight: 1.45,
+                  fontWeight: 400,
+                  overflow: "hidden",
+                  maxHeight: 64,
+                }}
+              >
+                {description}
+              </div>
+            ) : null}
+          </div>
+
+          {/* Bottom */}
           <div
             style={{
               display: "flex",
               alignItems: "center",
-              gap: 6,
-              color: accent,
-              fontSize: 14,
-              fontWeight: 700,
+              justifyContent: "space-between",
+              borderTop: "1px solid rgba(255, 255, 255, 0.08)",
+              paddingTop: 14,
             }}
           >
-            yozora.moe →
-          </div>
-        </div>
-      </div>
-
-      {/* Right Column: Character Portrait */}
-      {imageDataUri ? (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-            zIndex: 10,
-          }}
-        >
-          <div
-            style={{
-              width: 320,
-              height: 470,
-              borderRadius: 20,
-              overflow: "hidden",
-              border: "1px solid rgba(255,255,255,0.15)",
-              boxShadow: "0 25px 50px -12px rgba(0,0,0,0.85)",
-              position: "relative",
-              display: "flex",
-            }}
-          >
-            <img
-              src={imageDataUri}
-              alt={title}
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
-            />
             <div
               style={{
-                position: "absolute",
-                inset: 0,
-                backgroundImage:
-                  "linear-gradient(180deg, transparent 72%, rgba(7,8,14,0.7) 100%)",
+                color: "#71717a",
+                fontFamily: MONO_FONT,
+                fontSize: 11,
               }}
-            />
+            >
+              Voice Actors • Roles • Lore
+            </div>
+            <div
+              style={{
+                fontFamily: MONO_FONT,
+                fontSize: 11,
+                fontWeight: 600,
+                color: "#ffffff",
+              }}
+            >
+              yozora.moe ↗
+            </div>
           </div>
         </div>
-      ) : null}
-    </div>
+
+        {/* Right Portrait */}
+        {imageDataUri ? (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >
+            <div
+              style={{
+                width: 280,
+                height: 410,
+                borderRadius: 14,
+                overflow: "hidden",
+                border: "1px solid rgba(255, 255, 255, 0.18)",
+                boxShadow: "0 25px 60px -10px rgba(0, 0, 0, 0.95)",
+                position: "relative",
+                display: "flex",
+              }}
+            >
+              <img
+                src={imageDataUri}
+                alt={title}
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              />
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  backgroundImage:
+                    "linear-gradient(180deg, transparent 75%, rgba(0, 0, 0, 0.8) 100%)",
+                }}
+              />
+            </div>
+          </div>
+        ) : null}
+      </div>
+    </VercelCardShell>
   )
 }
 
-function generateSvgFallback(
-  title: string,
-  description: string,
-  accent = "#38bdf8"
-) {
+function generateSvgFallback(title: string, description: string) {
   const esc = (s: string) =>
     s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
   <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#07080e"/>
-      <stop offset="100%" stop-color="#0b0d18"/>
-    </linearGradient>
-    <radialGradient id="glow" cx="85%" cy="15%" r="60%">
-      <stop offset="0%" stop-color="${accent}" stop-opacity="0.2"/>
-      <stop offset="100%" stop-color="${accent}" stop-opacity="0"/>
+    <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M 48 0 L 0 0 0 48" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+    </pattern>
+    <radialGradient id="spotlight" cx="50%" cy="0%" r="60%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
     </radialGradient>
   </defs>
-  <rect width="1200" height="630" fill="url(#bg)"/>
-  <rect width="1200" height="630" fill="url(#glow)"/>
-  <text x="68" y="90" font-family="sans-serif" font-weight="700" font-size="24" fill="#ffffff" letter-spacing="-0.5">YOZORA</text>
-  <text x="175" y="90" font-family="sans-serif" font-weight="700" font-size="16" fill="rgba(255,255,255,0.45)">夜空</text>
-  <rect x="68" y="240" width="24" height="3" fill="${accent}"/>
-  <text x="68" y="320" font-family="sans-serif" font-weight="700" font-size="52" fill="#ffffff">${esc(title)}</text>
-  <text x="68" y="380" font-family="sans-serif" font-size="20" fill="#94a3b8">${esc(description)}</text>
-  <line x1="68" y1="540" x2="1132" y2="540" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
-  <text x="68" y="580" font-family="sans-serif" font-weight="600" font-size="13" fill="#64748b" letter-spacing="1">YOZORA.MOE • SEASONAL ANIME INTELLIGENCE</text>
-  <text x="1040" y="580" font-family="sans-serif" font-weight="700" font-size="14" fill="${accent}">yozora.moe →</text>
+  <rect width="1200" height="630" fill="#000000"/>
+  <rect width="1200" height="630" fill="url(#grid)"/>
+  <rect width="1200" height="630" fill="url(#spotlight)"/>
+  <rect x="28" y="28" width="1144" height="574" rx="20" fill="#09090b" fill-opacity="0.85" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+  <text x="44" y="48" font-family="monospace" font-size="13" fill="#52525b">+</text>
+  <text x="1156" y="48" font-family="monospace" font-size="13" fill="#52525b">+</text>
+  <text x="44" y="586" font-family="monospace" font-size="13" fill="#52525b">+</text>
+  <text x="1156" y="586" font-family="monospace" font-size="13" fill="#52525b">+</text>
+  <text x="74" y="86" font-family="sans-serif" font-weight="700" font-size="20" fill="#ffffff" letter-spacing="-0.5">YOZORA</text>
+  <text x="168" y="86" font-family="sans-serif" font-weight="700" font-size="14" fill="#71717a">夜空</text>
+  <text x="74" y="220" font-family="monospace" font-size="12" font-weight="600" fill="#a1a1aa" letter-spacing="1.5">// OPEN ANIME INTELLIGENCE</text>
+  <text x="74" y="295" font-family="sans-serif" font-weight="800" font-size="52" fill="#ffffff" letter-spacing="-1">${esc(title)}</text>
+  <text x="74" y="360" font-family="sans-serif" font-size="18" fill="#a1a1aa">${esc(description)}</text>
+  <line x1="74" y1="520" x2="1126" y2="520" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+  <text x="74" y="555" font-family="monospace" font-size="12" fill="#71717a" letter-spacing="0.5">yozora.moe • Open Anime Intelligence &amp; 1080p Themes</text>
+  <text x="1050" y="555" font-family="monospace" font-weight="600" font-size="12" fill="#ffffff">yozora.moe ↗</text>
 </svg>`
 }
 
-/** Handles dynamic OpenGraph social card image generation. */
+/** Handles dynamic OpenGraph social card image generation in Vercel / shadcn neutral design. */
 export async function handleOgImageRequest({ request }: { request: Request }) {
   try {
     const url = new URL(request.url)
@@ -1122,22 +1240,6 @@ export async function handleOgImageRequest({ request }: { request: Request }) {
     )
     const rawImageUrl = searchParams.get("image")
 
-    // Dynamic accent color by category
-    const defaultAccent =
-      type === "airing"
-        ? "#10b981"
-        : type === "seasonal"
-          ? "#ec4899"
-          : type === "character"
-            ? "#c084fc"
-            : type === "search"
-              ? "#a855f7"
-              : "#38bdf8"
-    const accent = safeAccent(
-      searchParams.get("accent") || defaultAccent,
-      defaultAccent
-    )
-
     let imageDataUri = ""
     if ((type === "anime" || type === "character") && rawImageUrl) {
       imageDataUri = await fetchSafeImageDataUri(rawImageUrl)
@@ -1145,14 +1247,14 @@ export async function handleOgImageRequest({ request }: { request: Request }) {
 
     const fonts = await loadOgFonts()
 
-    // Determine feature pills for editorial cards
+    // Determine Vercel-style feature pills for editorial cards
     let pills: string[] = []
     if (type === "home") {
       pills = [
         "Real-Time Airing Grid",
         "Lossless Theme Archives",
         "AniList & MAL Sync",
-        "Ad-Free & Open-Source",
+        "Zero Ads & Open Source",
       ]
     } else if (type === "seasonal") {
       pills = [
@@ -1166,7 +1268,7 @@ export async function handleOgImageRequest({ request }: { request: Request }) {
         "7-Day Airing Grid",
         "Live Episode Countdowns",
         "JST Network Sync",
-        "Lossless Themes",
+        "Lossless Audio",
       ]
     } else if (type === "library" || type === "user") {
       pills = [
@@ -1199,7 +1301,6 @@ export async function handleOgImageRequest({ request }: { request: Request }) {
           year={textParam(searchParams, "year", "", 16)}
           format={textParam(searchParams, "format", "", 24)}
           episodes={textParam(searchParams, "episodes", "", 16)}
-          accent={accent}
         />
       )
     } else if (type === "character") {
@@ -1210,7 +1311,6 @@ export async function handleOgImageRequest({ request }: { request: Request }) {
           description={description}
           tag={tag}
           imageDataUri={imageDataUri}
-          accent={accent}
         />
       )
     } else {
@@ -1221,7 +1321,6 @@ export async function handleOgImageRequest({ request }: { request: Request }) {
           subtitle={subtitle}
           description={description}
           tag={tag}
-          accent={accent}
           pills={pills}
         />
       )

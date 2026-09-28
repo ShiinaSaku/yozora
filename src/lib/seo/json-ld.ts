@@ -373,7 +373,7 @@ export function generateCharacterFaqJsonLd(char: CharacterDetail) {
  * Generates Yozora publisher identity and logo markup for search engines and LLMs.
  */
 export function generateOrganizationJsonLd() {
-  const logoUrl = `${SITE_URL}/yozora-icon-512.png`
+  const logoUrl = `${SITE_URL}/favicon-512.png`
 
   return {
     "@context": "https://schema.org",

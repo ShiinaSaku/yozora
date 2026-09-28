@@ -160,7 +160,7 @@ ThemeTrackRow.displayName = "ThemeTrackRow"
 export function ThemePlayer({
   themes,
   animeTitle = "Anime",
-  animeCover = "/yozora-icon-512.png",
+  animeCover = "/favicon-512.png",
 }: ThemePlayerProps) {
   const [activeTab, setActiveTab] = React.useState<"OP" | "ED">("OP")
   const [activeTheme, setActiveTheme] = React.useState<AnimeTheme | null>(null)

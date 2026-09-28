@@ -14,7 +14,7 @@ export function BrandLogo({
       {...props}
     >
       <img
-        src="/logo.png"
+        src="/logo.svg"
         alt="Yozora"
         className="size-full object-contain select-none"
         loading="eager"

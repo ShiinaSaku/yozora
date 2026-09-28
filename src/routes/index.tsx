@@ -21,70 +21,97 @@ export const Route = createFileRoute("/")({
       airing: defer(getHomeAiring()),
     }
   },
-  head: () => ({
-    meta: [
-      {
-        title: "Yozora (夜空) — Free Anime Catalog, Radar & 1080p Themes",
-      },
-      {
-        name: "description",
-        content:
-          "Explore seasonal anime, live Tokyo broadcast countdowns, 1080p creditless theme songs, and synced watchlists on Yozora (夜空).",
-      },
-      {
-        name: "keywords",
-        content:
-          "Yozora, Yozora anime, yozora.moe, anime, anime catalog, seasonal anime 2026, anime schedule, anime countdown, anime airing countdown, anime themes, opening songs, ending songs, seiyuu, voice actors, 夜空, アニメ, 放送予定, 今期アニメ, 新番, 追番, 主題歌",
-      },
-      {
-        property: "og:title",
-        content: "Yozora (夜空) — Free Anime Catalog, Radar & 1080p Themes",
-      },
-      {
-        property: "og:description",
-        content:
-          "Explore seasonal anime, live Tokyo broadcast countdowns, 1080p creditless theme songs, and synced watchlists on Yozora (夜空).",
-      },
-      { property: "og:url", content: absoluteUrl("/") },
-      {
-        property: "og:image",
-        content: openGraphImageUrl({
-          type: "home",
-          title: "Track broadcasts, discover seasons & play lossless themes.",
-          subtitle: "The Modern Anime Discovery Platform",
-          tag: "Live Anime Radar",
-          description:
-            "Real-time countdowns across Japanese networks, lossless opening and ending themes, AniList sync, and zero ads.",
-        }),
-      },
-      { property: "og:image:type", content: "image/png" },
-      { property: "og:image:width", content: "1200" },
-      { property: "og:image:height", content: "630" },
-      { name: "twitter:card", content: "summary_large_image" },
-      {
-        name: "twitter:title",
-        content:
-          "Yozora (夜空) — Seasonal Anime Catalog, Airing Radar & Themes",
-      },
-      {
-        name: "twitter:description",
-        content:
-          "Explore current broadcast seasons, countdown upcoming episode releases across Japanese TV networks, and stream creditless opening and ending theme songs.",
-      },
-      {
-        name: "twitter:image",
-        content: openGraphImageUrl({
-          type: "home",
-          title: "Track broadcasts, discover seasons & play lossless themes.",
-          subtitle: "The Modern Anime Discovery Platform",
-          tag: "Live Anime Radar",
-          description:
-            "Real-time countdowns across Japanese networks, lossless opening and ending themes, AniList sync, and zero ads.",
-        }),
-      },
-    ],
-    links: canonicalLinks("/"),
-  }),
+  head: ({ loaderData }) => {
+    const hero = loaderData?.trending[0]
+    const heroBanner = hero?.banner
+    const heroCover =
+      hero?.coverExtraLarge || hero?.coverLarge || hero?.cover
+
+    const links: React.ComponentProps<"link">[] = [...canonicalLinks("/")]
+    if (heroBanner) {
+      links.push({
+        rel: "preload",
+        as: "image",
+        href: heroBanner,
+        media: "(min-width: 640px)",
+        fetchPriority: "high",
+      })
+    }
+    if (heroCover) {
+      links.push({
+        rel: "preload",
+        as: "image",
+        href: heroCover,
+        media: heroBanner ? "(max-width: 639px)" : undefined,
+        fetchPriority: "high",
+      })
+    }
+
+    return {
+      meta: [
+        {
+          title: "Yozora (夜空) — Free Anime Catalog, Radar & 1080p Themes",
+        },
+        {
+          name: "description",
+          content:
+            "Explore seasonal anime, live Tokyo broadcast countdowns, 1080p creditless theme songs, and synced watchlists on Yozora (夜空).",
+        },
+        {
+          name: "keywords",
+          content:
+            "Yozora, Yozora anime, yozora.moe, anime, anime catalog, seasonal anime 2026, anime schedule, anime countdown, anime airing countdown, anime themes, opening songs, ending songs, seiyuu, voice actors, 夜空, アニメ, 放送予定, 今期アニメ, 新番, 追番, 主題歌",
+        },
+        {
+          property: "og:title",
+          content: "Yozora (夜空) — Free Anime Catalog, Radar & 1080p Themes",
+        },
+        {
+          property: "og:description",
+          content:
+            "Explore seasonal anime, live Tokyo broadcast countdowns, 1080p creditless theme songs, and synced watchlists on Yozora (夜空).",
+        },
+        { property: "og:url", content: absoluteUrl("/") },
+        {
+          property: "og:image",
+          content: openGraphImageUrl({
+            type: "home",
+            title: "Track broadcasts, discover seasons & play lossless themes.",
+            subtitle: "The Modern Anime Discovery Platform",
+            tag: "Live Anime Radar",
+            description:
+              "Real-time countdowns across Japanese networks, lossless opening and ending themes, AniList sync, and zero ads.",
+          }),
+        },
+        { property: "og:image:type", content: "image/png" },
+        { property: "og:image:width", content: "1200" },
+        { property: "og:image:height", content: "630" },
+        { name: "twitter:card", content: "summary_large_image" },
+        {
+          name: "twitter:title",
+          content:
+            "Yozora (夜空) — Seasonal Anime Catalog, Airing Radar & Themes",
+        },
+        {
+          name: "twitter:description",
+          content:
+            "Explore current broadcast seasons, countdown upcoming episode releases across Japanese TV networks, and stream creditless opening and ending theme songs.",
+        },
+        {
+          name: "twitter:image",
+          content: openGraphImageUrl({
+            type: "home",
+            title: "Track broadcasts, discover seasons & play lossless themes.",
+            subtitle: "The Modern Anime Discovery Platform",
+            tag: "Live Anime Radar",
+            description:
+              "Real-time countdowns across Japanese networks, lossless opening and ending themes, AniList sync, and zero ads.",
+          }),
+        },
+      ],
+      links,
+    }
+  },
   component: HomePage,
 })
 

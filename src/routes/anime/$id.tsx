@@ -154,7 +154,29 @@ export const Route = createFileRoute("/anime/$id")({
           content: `${anime.title} anime details on Yozora`,
         },
       ],
-      links: canonicalLinks(canonicalPath),
+      links: [
+        ...canonicalLinks(canonicalPath),
+        ...(anime.banner
+          ? [
+              {
+                rel: "preload",
+                as: "image",
+                href: anime.banner,
+                fetchPriority: "high" as const,
+              },
+            ]
+          : anime.coverExtraLarge || anime.coverLarge || anime.cover
+            ? [
+                {
+                  rel: "preload",
+                  as: "image",
+                  href:
+                    anime.coverExtraLarge || anime.coverLarge || anime.cover,
+                  fetchPriority: "high" as const,
+                },
+              ]
+            : []),
+      ],
       scripts: [
         {
           type: "application/ld+json",

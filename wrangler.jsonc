@@ -1,7 +1,7 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "yozora",
-	"compatibility_date": "2026-09-19",
+	"compatibility_date": "2026-09-28",
 	"workers_dev": false,
 	"compatibility_flags": [
 		"nodejs_compat"

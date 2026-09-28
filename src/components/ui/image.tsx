@@ -38,6 +38,7 @@ export function Image({
   priority,
   quality: _quality,
   unoptimized: _unoptimized,
+  decoding,
   loading,
   style,
   className,
@@ -52,7 +53,7 @@ export function Image({
   return (
     <img
       alt={alt}
-      decoding="async"
+      decoding={decoding ?? (priority ? "sync" : "async")}
       draggable={false}
       fetchPriority={priority ? "high" : undefined}
       loading={loading ?? (priority ? "eager" : "lazy")}

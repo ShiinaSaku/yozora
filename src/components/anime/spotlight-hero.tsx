@@ -51,7 +51,7 @@ function SpotlightArtwork({
           <img
             src={cover}
             alt={anime.title}
-            decoding="async"
+            decoding={!isClone && index === 0 ? "sync" : "async"}
             draggable={false}
             fetchPriority={!isClone && index === 0 ? "high" : "low"}
             loading={!isClone && index < 2 ? "eager" : "lazy"}
@@ -66,7 +66,7 @@ function SpotlightArtwork({
           <img
             src={cover}
             alt={anime.title}
-            decoding="async"
+            decoding={!isClone && index === 0 ? "sync" : "async"}
             draggable={false}
             fetchPriority={!isClone && index === 0 ? "high" : "low"}
             loading={!isClone && index < 2 ? "eager" : "lazy"}

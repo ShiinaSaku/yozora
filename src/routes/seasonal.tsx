@@ -72,7 +72,19 @@ export const Route = createFileRoute("/seasonal")({
         },
         { name: "twitter:image", content: ogImage },
       ],
-      links: canonicalLinks("/seasonal"),
+      links: [
+        ...canonicalLinks("/seasonal"),
+        ...(topAnime?.coverLarge || topAnime?.cover
+          ? [
+              {
+                rel: "preload",
+                as: "image",
+                href: topAnime.coverLarge || topAnime.cover,
+                fetchPriority: "high" as const,
+              },
+            ]
+          : []),
+      ],
       scripts: [
         {
           type: "application/ld+json",

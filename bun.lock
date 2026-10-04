@@ -12,7 +12,7 @@
         "@hugeicons/react": "^1.1.10",
         "@neondatabase/serverless": "^1.2.0",
         "@tanstack/highlight": "^0.1.0",
-        "@tanstack/markdown": "^0.0.15",
+        "@tanstack/markdown": "^0.0.16",
         "@tanstack/react-query": "^5.104.0",
         "@tanstack/react-router": "^1.170.41",
         "@tanstack/react-router-ssr-query": "^1.167.3",
@@ -694,7 +694,7 @@
 
     "@tanstack/history": ["@tanstack/history@1.162.4", "", {}, "sha512-utTS5L2OkeYUzXGohL1Z8sefu1GLNOJcxe8Hd6iIdc/Xo1K1nDB2JEp4iSFhvYh33xKC9V91TxrS8qfrpoKobQ=="],
 
-    "@tanstack/markdown": ["@tanstack/markdown@0.0.15", "", { "peerDependencies": { "octane": ">=0.1.12", "react": ">=18" }, "optionalPeers": ["octane", "react"] }, "sha512-8hZFgCxGzYcBogffndvOm/prhdDt8nATQ4jzd9b0ziU0j4ofW/5guC1sknO2JyBNSXPgeLrrdXlJA8sbb1zw8w=="],
+    "@tanstack/markdown": ["@tanstack/markdown@0.0.16", "", { "peerDependencies": { "octane": ">=0.1.12", "react": ">=18" }, "optionalPeers": ["octane", "react"] }, "sha512-2fGZd4VMBwV85lH5AA+Iad9DXU4/Cz+sb/P3honzrh/zqqoSYV/rXuJrG4cC7XJcpofhjbOWBL74AHf4WZrqTw=="],
 
     "@tanstack/query-core": ["@tanstack/query-core@5.104.0", "", {}, "sha512-JrC2r/JQlXt7khBSdUpsgxNvybzOg+aITa+ARRMlP2AFo93Y8vIqz077rp+e61mJetSZ0T6AJbwW1JHer1vrPQ=="],
 

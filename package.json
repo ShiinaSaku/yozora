@@ -52,9 +52,9 @@
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.62.4",
-    "@graphql-codegen/cli": "^7.4.3",
-    "@graphql-codegen/client-preset": "^6.2.0",
-    "@graphql-codegen/schema-ast": "^6.1.0",
+    "@graphql-codegen/cli": "^8.0.0",
+    "@graphql-codegen/client-preset": "^7.0.0",
+    "@graphql-codegen/schema-ast": "^7.0.0",
     "@graphql-typed-document-node/core": "^3.2.0",
     "@shadcn/lint": "^0.2.0",
     "@tailwindcss/vite": "4.3.5",

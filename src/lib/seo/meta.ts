@@ -1,3 +1,5 @@
+import { ogImageUrl } from "@/lib/og/params"
+
 const rawSiteUrl = import.meta.env.VITE_APP_URL || "https://yozora.moe"
 const sanitizedSiteUrl = rawSiteUrl.includes("hikari.shiina.xyz")
   ? "https://yozora.moe"
@@ -19,11 +21,5 @@ export function canonicalLinks(path: string) {
 export function openGraphImageUrl(
   params: Record<string, string | number | undefined>
 ) {
-  const search = new URLSearchParams()
-  for (const [key, value] of Object.entries(params)) {
-    if (value !== undefined && value !== "") {
-      search.set(key, String(value))
-    }
-  }
-  return absoluteUrl(`/og-image?${search.toString()}`)
+  return absoluteUrl(ogImageUrl(params))
 }

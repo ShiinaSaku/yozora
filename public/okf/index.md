@@ -16,7 +16,7 @@ Welcome to the agent-readable knowledge bundle for [Yozora](https://yozora.moe).
 - [Platform Overview](overview.md) — Core mission, identity, and architectural tenets.
 - [Live Airing Radar](airing-radar.md) — Millisecond-synchronized Tokyo television broadcast countdowns.
 - [Creditless Theme Player](theme-player.md) — 1080p clean anime openings and endings via AnimeThemes.moe.
-- [Dual-Engine Failover Architecture](dual-engine-failover.md) — High-availability GraphQL + REST failover engine.
+- [Layered Caching & Catalog Resilience](dual-engine-failover.md) — Three-layer cache over AniList GraphQL with automatic retries.
 - [Pricing & Open Source Specification](pricing.md) — 100% Free MIT licensing and comparison metrics.
 
 ## Related Machine-Readable Endpoints

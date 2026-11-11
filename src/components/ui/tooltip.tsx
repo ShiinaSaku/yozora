@@ -29,15 +29,20 @@ function TooltipContent({
   sideOffset = 4,
   align = "center",
   alignOffset = 0,
+  portalProps,
   children,
   ...props
 }: TooltipPrimitive.Popup.Props &
   Pick<
     TooltipPrimitive.Positioner.Props,
     "align" | "alignOffset" | "side" | "sideOffset"
-  >) {
+  > & {
+    /** Extra portal props, e.g. `{ container }` to keep the popup inside the
+     * player when it goes fullscreen. */
+    portalProps?: TooltipPrimitive.Portal.Props
+  }) {
   return (
-    <TooltipPrimitive.Portal>
+    <TooltipPrimitive.Portal {...portalProps}>
       <TooltipPrimitive.Positioner
         align={align}
         alignOffset={alignOffset}

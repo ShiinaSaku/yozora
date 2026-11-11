@@ -30,6 +30,24 @@ export default [
     },
   },
   {
+    files: [
+      "src/components/ui/carousel.tsx",
+      "src/components/ui/video-player.tsx",
+    ],
+    // Vendored HextaUI components: their design tokens (CSS custom properties,
+    // snap/dot math, container queries) are arbitrary values by design and
+    // mirror upstream source.
+    rules: {
+      "shadcn/no-arbitrary-values": "off",
+      // Mirror upstream HextaUI source: its defensive checks and styles trip
+      // these rules, and diverging from upstream would complicate updates.
+      "@typescript-eslint/no-unnecessary-condition": "off",
+      "@typescript-eslint/no-unnecessary-type-assertion": "off",
+      "@typescript-eslint/prefer-for-of": "off",
+      "shadcn/no-restyle": "off",
+    },
+  },
+  {
     ignores: [
       "eslint.config.js",
       ".prettierrc",

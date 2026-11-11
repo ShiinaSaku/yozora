@@ -1,7 +1,21 @@
 import "@tanstack/react-start/server-only"
-import { Redis } from "@upstash/redis"
+
+/**
+ * Two-tier cache with zero paid-service dependencies:
+ *
+ * - L1: per-isolate in-process memory (via the `cached()` memory hooks that
+ *   callers own, e.g. the AniList/themes modules).
+ * - L2: the Cloudflare Workers Cache API (`caches.default`). It is part of the
+ *   normal CDN cache, is free on every plan, and has no command quota — unlike
+ *   a hosted Redis, which previously breached its 500k commands/month limit.
+ *
+ * Keys are mapped onto a synthetic URL namespace so the platform cache treats
+ * them as first-class cacheable responses. When the Cache API is unavailable
+ * (plain Node SSR / `bun run dev`), L2 is skipped and only L1 applies.
+ */
 
 const KEY_PREFIX = "yozora:v1"
+const CACHE_ORIGIN = "cache.yozora.internal"
 const DEFAULT_TTL_SECONDS = 60 * 60
 
 /** Standard cache TTL configurations in seconds. */
@@ -42,196 +56,125 @@ export function getAnimeCacheTtl(
   return CACHE_TTL.LIFETIME_FINISHED
 }
 
-let redisInstance: Redis | null | undefined
+type EdgeCacheStorage = CacheStorage & { default?: Cache }
 
-function getRedis(): Redis | null {
-  if (redisInstance !== undefined) return redisInstance
-
-  const url = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL
-  const token =
-    process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN
-
-  redisInstance = url && token ? new Redis({ url, token }) : null
-  return redisInstance
+function getEdgeCache(): Cache | null {
+  const storage = (globalThis as { caches?: EdgeCacheStorage }).caches
+  return storage?.default ?? null
 }
 
-/** Returns true if a Redis connection is configured. */
-export function isRedisConfigured(): boolean {
-  return getRedis() !== null
-}
-
-/** Pings Redis to check connectivity. Returns true if responsive. */
-export async function cachePing(): Promise<boolean> {
-  const redis = getRedis()
-  if (!redis) return false
-  try {
-    const res = await redis.ping()
-    return res === "PONG" || res === "OK"
-  } catch {
-    return false
-  }
+/** Returns true if the platform edge cache is usable in this runtime. */
+export function isEdgeCacheConfigured(): boolean {
+  return getEdgeCache() !== null
 }
 
 function resolveKey(
   key: string,
   ttlSeconds: number = DEFAULT_TTL_SECONDS
-): { key: string; ttl: number } {
+): { request: Request; ttl: number } {
   const prefixed = key.startsWith(`${KEY_PREFIX}:`)
     ? key
     : `${KEY_PREFIX}:${key}`
   return {
-    key: prefixed,
+    request: new Request(`https://${CACHE_ORIGIN}/${prefixed}`),
     ttl: Math.max(1, Math.round(ttlSeconds)),
   }
 }
 
-/** Retrieves a deserialized value from Redis. Returns null on miss or error. */
+/** Retrieves a deserialized value from the edge cache. Returns null on miss or error. */
 export async function cacheGet<T>(key: string): Promise<T | null> {
-  const redis = getRedis()
-  if (!redis) return null
+  const cache = getEdgeCache()
+  if (!cache) return null
 
   try {
-    const { key: fullKey } = resolveKey(key)
-    const value = await redis.get<T>(fullKey)
-    return value ?? null
+    const { request } = resolveKey(key)
+    const response = await cache.match(request)
+    if (!response) return null
+    return (await response.json()) as T
   } catch (error) {
     console.warn(
-      "[Cache] Redis read failed:",
+      "[Cache] Edge cache read failed:",
       error instanceof Error ? error.message : error
     )
     return null
   }
 }
 
-/** Sets a value in Redis with an expiration in seconds. */
+/** Sets a value in the edge cache with an expiration in seconds. */
 export async function cacheSet<T>(
   key: string,
   value: T,
   ttlSeconds = DEFAULT_TTL_SECONDS
 ): Promise<void> {
-  const redis = getRedis()
-  if (!redis) return
+  const cache = getEdgeCache()
+  if (!cache) return
 
   try {
-    const { key: fullKey, ttl } = resolveKey(key, ttlSeconds)
-    await redis.set(fullKey, value, { ex: ttl })
+    const { request, ttl } = resolveKey(key, ttlSeconds)
+    await cache.put(
+      request,
+      new Response(JSON.stringify(value), {
+        headers: {
+          "content-type": "application/json; charset=utf-8",
+          "cache-control": `public, max-age=${ttl}`,
+        },
+      })
+    )
   } catch (error) {
     console.warn(
-      "[Cache] Redis write failed:",
+      "[Cache] Edge cache write failed:",
       error instanceof Error ? error.message : error
     )
   }
 }
 
-/** Deletes a single key from Redis. */
+/** Deletes a single key from the edge cache. */
 export async function cacheDelete(key: string): Promise<void> {
-  const redis = getRedis()
-  if (!redis) return
+  const cache = getEdgeCache()
+  if (!cache) return
 
   try {
-    const { key: fullKey } = resolveKey(key)
-    await redis.del(fullKey)
+    const { request } = resolveKey(key)
+    await cache.delete(request)
   } catch (error) {
     console.warn(
-      "[Cache] Redis delete failed:",
+      "[Cache] Edge cache delete failed:",
       error instanceof Error ? error.message : error
     )
   }
 }
 
-/** Deletes multiple keys from Redis in a single call. */
+/** Deletes multiple keys from the edge cache. */
 export async function cacheDeleteMany(keys: string[]): Promise<void> {
   if (keys.length === 0) return
-  const redis = getRedis()
-  if (!redis) return
-
-  try {
-    const fullKeys = keys.map((k) => resolveKey(k).key)
-    await redis.del(...fullKeys)
-  } catch (error) {
-    console.warn(
-      "[Cache] Redis deleteMany failed:",
-      error instanceof Error ? error.message : error
-    )
-  }
+  await Promise.all(keys.map((key) => cacheDelete(key)))
 }
 
-/** Reads multiple values from Redis in a single batch roundtrip. */
+/** Reads multiple values in parallel. Each key is one free cache lookup. */
 export async function cacheMGet<T>(keys: string[]): Promise<(T | null)[]> {
   if (keys.length === 0) return []
-  const redis = getRedis()
-  if (!redis) return keys.map(() => null)
-
-  try {
-    const fullKeys = keys.map((k) => resolveKey(k).key)
-    const values = await redis.mget<T[]>(...fullKeys)
-    return values.map((v) => (v !== undefined ? v : null))
-  } catch (error) {
-    console.warn(
-      "[Cache] Redis mget failed:",
-      error instanceof Error ? error.message : error
-    )
-    return keys.map(() => null)
-  }
+  return Promise.all(keys.map((key) => cacheGet<T>(key)))
 }
 
-/** Writes multiple items to Redis with individual TTLs using a single pipeline. */
+/** Writes multiple items in parallel with individual TTLs. */
 export async function cacheMSet<T>(
   items: Array<{ key: string; value: T; ttlSeconds?: number }>
 ): Promise<void> {
   if (items.length === 0) return
-  const redis = getRedis()
-  if (!redis) return
-
-  try {
-    const pipeline = redis.pipeline()
-    for (const item of items) {
-      const { key: fullKey, ttl } = resolveKey(
-        item.key,
-        item.ttlSeconds ?? DEFAULT_TTL_SECONDS
-      )
-      pipeline.set(fullKey, item.value, { ex: ttl })
-    }
-    await pipeline.exec()
-  } catch (error) {
-    console.warn(
-      "[Cache] Redis mset pipeline failed:",
-      error instanceof Error ? error.message : error
+  await Promise.all(
+    items.map((item) =>
+      cacheSet(item.key, item.value, item.ttlSeconds ?? DEFAULT_TTL_SECONDS)
     )
-  }
-}
-
-/** Atomically increments a counter with a TTL. Returns null on failure (fail-open). */
-export async function cacheIncrement(
-  key: string,
-  ttlSeconds: number
-): Promise<number | null> {
-  const redis = getRedis()
-  if (!redis) return null
-
-  try {
-    const { key: fullKey, ttl } = resolveKey(key, ttlSeconds)
-    const count = await redis.incr(fullKey)
-    if (count === 1) {
-      await redis.expire(fullKey, ttl)
-    }
-    return count
-  } catch (error) {
-    console.warn(
-      "[Cache] Redis increment failed:",
-      error instanceof Error ? error.message : error
-    )
-    return null
-  }
+  )
 }
 
 const inFlightRequests = new Map<string, Promise<unknown>>()
 
 /**
  * Read-through cache with single-flight deduplication:
- * 1. Checks memory cache (L1 hook)
+ * 1. Checks the caller-owned memory cache (L1 hook)
  * 2. Deduplicates concurrent in-flight fetches for the same key
- * 3. Reads from Redis (L2)
+ * 3. Reads from the platform edge cache (L2)
  * 4. Invokes fetcher on miss and populates both tiers
  */
 export async function cached<T>(options: {
@@ -257,10 +200,10 @@ export async function cached<T>(options: {
 
   const requestPromise = (async () => {
     try {
-      const redisHit = await cacheGet<T>(key)
-      if (redisHit !== null && redisHit !== undefined) {
-        memorySet?.(redisHit)
-        return redisHit
+      const edgeHit = await cacheGet<T>(key)
+      if (edgeHit !== null && edgeHit !== undefined) {
+        memorySet?.(edgeHit)
+        return edgeHit
       }
 
       const value = await fetcher()

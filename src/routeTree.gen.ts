@@ -23,6 +23,7 @@ import { Route as SeasonalRouteImport } from './routes/seasonal'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as AuthedLibraryRouteImport } from './routes/_authed/library'
 import { Route as AnimeIdRouteImport } from './routes/anime/$id'
+import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as CharacterIdRouteImport } from './routes/character/$id'
 import { Route as SignInSplatRouteImport } from './routes/sign-in/$'
 import { Route as SignUpSplatRouteImport } from './routes/sign-up/$'
@@ -99,6 +100,11 @@ const AnimeIdRoute = AnimeIdRouteImport.update({
   path: '/anime/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiHealthRoute = ApiHealthRouteImport.update({
+  id: '/api/health',
+  path: '/api/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CharacterIdRoute = CharacterIdRouteImport.update({
   id: '/character/$id',
   path: '/character/$id',
@@ -144,6 +150,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/library': typeof AuthedLibraryRoute
   '/anime/$id': typeof AnimeIdRoute
+  '/api/health': typeof ApiHealthRoute
   '/character/$id': typeof CharacterIdRoute
   '/sign-in/$': typeof SignInSplatRoute
   '/sign-up/$': typeof SignUpSplatRoute
@@ -165,6 +172,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/library': typeof AuthedLibraryRoute
   '/anime/$id': typeof AnimeIdRoute
+  '/api/health': typeof ApiHealthRoute
   '/character/$id': typeof CharacterIdRoute
   '/sign-in/$': typeof SignInSplatRoute
   '/sign-up/$': typeof SignUpSplatRoute
@@ -188,6 +196,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authed/library': typeof AuthedLibraryRoute
   '/anime/$id': typeof AnimeIdRoute
+  '/api/health': typeof ApiHealthRoute
   '/character/$id': typeof CharacterIdRoute
   '/sign-in/$': typeof SignInSplatRoute
   '/sign-up/$': typeof SignUpSplatRoute
@@ -211,6 +220,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/library'
     | '/anime/$id'
+    | '/api/health'
     | '/character/$id'
     | '/sign-in/$'
     | '/sign-up/$'
@@ -232,6 +242,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/library'
     | '/anime/$id'
+    | '/api/health'
     | '/character/$id'
     | '/sign-in/$'
     | '/sign-up/$'
@@ -254,6 +265,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/_authed/library'
     | '/anime/$id'
+    | '/api/health'
     | '/character/$id'
     | '/sign-in/$'
     | '/sign-up/$'
@@ -276,6 +288,7 @@ export interface RootRouteChildren {
   SeasonalRoute: typeof SeasonalRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   AnimeIdRoute: typeof AnimeIdRoute
+  ApiHealthRoute: typeof ApiHealthRoute
   CharacterIdRoute: typeof CharacterIdRoute
   SignInSplatRoute: typeof SignInSplatRoute
   SignUpSplatRoute: typeof SignUpSplatRoute
@@ -383,6 +396,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AnimeIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/health': {
+      id: '/api/health'
+      path: '/api/health'
+      fullPath: '/api/health'
+      preLoaderRoute: typeof ApiHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/character/$id': {
       id: '/character/$id'
       path: '/character/$id'
@@ -455,6 +475,7 @@ const rootRouteChildren: RootRouteChildren = {
   SeasonalRoute: SeasonalRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   AnimeIdRoute: AnimeIdRoute,
+  ApiHealthRoute: ApiHealthRoute,
   CharacterIdRoute: CharacterIdRoute,
   SignInSplatRoute: SignInSplatRoute,
   SignUpSplatRoute: SignUpSplatRoute,

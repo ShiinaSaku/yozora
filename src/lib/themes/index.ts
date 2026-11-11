@@ -1,10 +1,21 @@
 import { createIsomorphicFn } from "@tanstack/react-start"
+import { GraphQLClient } from "graphql-request"
 import type {
   AnimeTheme,
   AnimeThemeEntry,
-  AnimeThemesResponse,
   AnimeThemeVideo,
+  AnimeThemesResponse,
 } from "@/lib/types/anime"
+import {
+  AnimeThemesDocument,
+} from "./operations"
+import type { AnimeThemesQuery } from "@/gql/themes/graphql"
+
+const DEFAULT_ANIMETHEMES_ENDPOINT = "https://rs.animethemes.moe/graphql"
+
+function getAnimeThemesEndpoint(): string {
+  return process.env.ANIMETHEMES_GRAPHQL_URL || DEFAULT_ANIMETHEMES_ENDPOINT
+}
 
 const inFlightThemes = new Map<number, Promise<AnimeThemesResponse>>()
 const themesCache = new Map<
@@ -41,83 +52,93 @@ function cacheThemes(
   themesCache.set(animeId, { data, expiresAt: Date.now() + ttlMs })
 }
 
-interface AnimeThemesRestVideo {
+/**
+ * Picks the highest-fidelity stream for an entry version.
+ * Prefers creditless (NC) 1080p — the player's core promise — then any 1080p,
+ * then the first available video.
+ */
+function pickBestVideo(videos: GqlVideo[]): GqlVideo | null {
+  const valid = videos.filter((v) => Boolean(v.link))
+  if (valid.length === 0) return null
+
+  return (
+    valid.find((v) => v.nc && v.resolution === 1080) ??
+    valid.find((v) => v.resolution === 1080) ??
+    valid[0]
+  )
+}
+
+interface GqlVideo {
   id: number
   link: string
   resolution: number | null
   size: number | null
-  tags: string | null
+  tags: string
   nc: boolean
   subbed: boolean
   lyrics: boolean
+  overlap: string
   source: string | null
-  audio?: { link: string; mimetype: string | null; size: number | null } | null
+  mimetype: string
+  audio: { link: string; mimetype: string; size: number } | null
 }
 
-interface AnimeThemesRestEntry {
-  id: number
-  version: number
-  episodes?: string | null
-  notes?: string | null
-  nsfw: boolean
-  spoiler: boolean
-  videos?: AnimeThemesRestVideo[]
-}
-
-interface AnimeThemesRestTheme {
-  id: number
-  type: "OP" | "ED"
-  sequence: number | null
-  slug: string
-  song?: {
-    id: number
-    // Legacy: plain string. New API: SongTitle object — use `title.romaji`.
-    title?: string | { romaji?: string | null } | null
-    artists?: Array<{
-      id: number
-      name: string | { main?: string | null } | null
-    }> | null
-  } | null
-  animethemeentries?: AnimeThemesRestEntry[]
-}
-
-interface AnimeThemesRestAnime {
-  id: number
-  // Legacy: plain string. New API: deprecated in favor of `title.romaji`.
-  name?: string | null
-  title?: { romaji?: string | null } | null
-  slug: string
-  animethemes?: AnimeThemesRestTheme[]
+function toThemeVideo(v: GqlVideo): AnimeThemeVideo {
+  return {
+    id: v.id,
+    link: v.link,
+    resolution: v.resolution,
+    size: v.size,
+    tags: v.tags || null,
+    nc: v.nc,
+    subbed: v.subbed,
+    lyrics: v.lyrics,
+    source: v.source,
+    audio: v.audio
+      ? { link: v.audio.link, mimetype: v.audio.mimetype, size: v.audio.size }
+      : undefined,
+  }
 }
 
 /**
- * Song.title now returns a SongTitle object (use `.romaji`); older payloads
- * still return a plain string. Handle both during the API transition.
+ * Normalizes a GraphQL theme into the app-facing shape.
+ * Performance-role staff become the artist list; null slots collapse away.
  */
-function songTitle(value: unknown): string | null {
-  if (typeof value === "string") return value || null
-  if (value && typeof value === "object" && "romaji" in value) {
-    const romaji = (value as { romaji?: string | null }).romaji
-    return romaji || null
-  }
-  return null
-}
+function toTheme(
+  theme: NonNullable<
+    AnimeThemesQuery["filterAnimeByExternalSite"][number]["themes"][number]
+  >
+): AnimeTheme {
+  const entries: AnimeThemeEntry[] = theme.entries.map((entry) => {
+    const videoNodes = entry.videos.nodes
+    const bestVideo = pickBestVideo(videoNodes)
+    const videos = videoNodes.map(toThemeVideo)
 
-/**
- * Artist.name now returns an ArtistName object (use `.main`); older payloads
- * still return a plain string. Handle both during the API transition.
- */
-function artistName(value: unknown): string | null {
-  if (typeof value === "string") return value || null
-  if (value && typeof value === "object" && "main" in value) {
-    const main = (value as { main?: string | null }).main
-    return main || null
-  }
-  return null
-}
+    return {
+      version: entry.version,
+      episodes: entry.episodes || undefined,
+      notes: entry.notes || undefined,
+      nsfw: entry.nsfw,
+      spoiler: entry.spoiler,
+      video: bestVideo ? toThemeVideo(bestVideo) : undefined,
+      videos,
+    }
+  })
 
-interface AnimeThemesRestResponse {
-  anime?: AnimeThemesRestAnime[]
+  const artists = (theme.song?.staff || [])
+    .filter((staff) => /performance/i.test(staff.role) || !staff.role)
+    .map((staff) => staff.as || staff.artist.name.main)
+    .filter((name, index, all) => Boolean(name) && all.indexOf(name) === index)
+
+  return {
+    id: theme.id,
+    type: theme.type,
+    sequence: theme.sequence,
+    slug: theme.slug,
+    title: theme.song?.title.romaji || theme.song?.title.native || theme.slug,
+    artists,
+    entries,
+  }
 }
 
 export async function getAnimeThemes(
@@ -143,29 +164,20 @@ export async function getAnimeThemes(
     }
 
     try {
-      const url = `https://api.animethemes.moe/anime?filter[has]=resources&filter[site]=AniList&filter[external_id]=${animeId}&include=animethemes.animethemeentries.videos.audio,animethemes.song.artists`
-
-      const res = await fetch(url, {
+      const client = new GraphQLClient(getAnimeThemesEndpoint(), {
         headers: {
           accept: "application/json",
           "user-agent": "Yozora/1.0 (https://yozora.moe)",
         },
       })
 
-      if (!res.ok) {
-        const result = { animeId, themes: [] }
-        cacheThemes(animeId, result, THEMES_NEGATIVE_TTL_MS)
-        void redisSet(
-          cacheKey,
-          result,
-          Math.round(THEMES_NEGATIVE_TTL_MS / 1000)
-        )
-        return result
-      }
+      const data = await client.request(AnimeThemesDocument, {
+        anilistId: animeId,
+      })
 
-      const payload: AnimeThemesRestResponse = await res.json()
-      const match = payload.anime?.[0]
-      if (!match || !match.animethemes) {
+      const matches = data.filterAnimeByExternalSite
+      if (matches.length === 0) {
+        // Not in the AnimeThemes archive: negative-cache for 6h.
         const result: AnimeThemesResponse = { animeId, themes: [] }
         cacheThemes(animeId, result, THEMES_NEGATIVE_TTL_MS)
         void redisSet(
@@ -175,72 +187,26 @@ export async function getAnimeThemes(
         )
         return result
       }
-
-      const themes: AnimeTheme[] = match.animethemes.map((theme) => {
-        const entries: AnimeThemeEntry[] = (theme.animethemeentries || []).map(
-          (entry) => {
-            const videos: AnimeThemeVideo[] = (entry.videos || []).map((v) => ({
-              id: v.id,
-              link: v.link,
-              resolution: v.resolution,
-              size: v.size,
-              tags: v.tags,
-              nc: v.nc,
-              subbed: v.subbed,
-              lyrics: v.lyrics,
-              source: v.source,
-              audio: v.audio
-                ? {
-                    link: v.audio.link,
-                    mimetype: v.audio.mimetype,
-                    size: v.audio.size,
-                  }
-                : undefined,
-            }))
-
-            // Pick best video (prefer 1080p NCBD over 720p)
-            const bestVideo =
-              videos.find((v) => v.resolution === 1080) || videos[0]
-
-            return {
-              version: entry.version,
-              episodes: entry.episodes || undefined,
-              notes: entry.notes || undefined,
-              nsfw: entry.nsfw,
-              spoiler: entry.spoiler,
-              video: bestVideo,
-              videos,
-            }
-          }
-        )
-
-        const artists = (theme.song?.artists || [])
-          .map((a) => artistName(a.name))
-          .filter((name): name is string => Boolean(name))
-
-        return {
-          id: theme.id,
-          type: theme.type,
-          sequence: theme.sequence,
-          slug: theme.slug,
-          title: songTitle(theme.song?.title) || theme.slug,
-          artists,
-          entries,
-        }
-      })
+      const match = matches[0]
 
       const result: AnimeThemesResponse = {
         animeId,
-        slug: match.title?.romaji || match.name || match.slug,
-        themes,
+        slug: match.title.romaji || match.slug,
+        themes: match.themes.map(toTheme),
       }
 
       cacheThemes(animeId, result, THEMES_TTL_MS)
       void redisSet(cacheKey, result, Math.round(THEMES_TTL_MS / 1000))
 
       return result
-    } catch {
-      // Network/parse errors: don't cache so the next request can retry.
+    } catch (error) {
+      // GraphQL/transport errors: don't cache so the next request can retry.
+      // Bare HTTP failures from AnimeThemes' Cloudflare edge are treated as a
+      // temporary outage rather than an empty archive.
+      console.warn(
+        `[Themes] GraphQL fetch for AniList #${animeId} failed:`,
+        error instanceof Error ? error.message : error
+      )
       return { animeId, themes: [] }
     } finally {
       inFlightThemes.delete(animeId)

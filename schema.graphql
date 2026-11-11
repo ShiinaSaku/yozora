@@ -202,7 +202,7 @@ type AiringProgression {
   The episode the stats were recorded at. .5 is the mid point between 2 episodes airing dates.
   """
   episode: Float
-  """The average score for the media"""
+  """The weighted average score for the media"""
   score: Float
   """The amount of users watching the anime"""
   watching: Int
@@ -894,6 +894,14 @@ type InternalPage {
     volumes_greater: Int
     """Filter by the media's volume count"""
     volumes_lesser: Int
+    """Filter by the media's average score"""
+    weightedScore: Int
+    """Filter by the media's average score"""
+    weightedScore_greater: Int
+    """Filter by the media's average score"""
+    weightedScore_lesser: Int
+    """Filter by the media's average score"""
+    weightedScore_not: Int
   ): [Media]
   mediaList(
     """
@@ -1013,6 +1021,14 @@ type InternalPage {
     trending_lesser: Int
     """Filter by trending amount"""
     trending_not: Int
+    """Filter by weighted scores"""
+    weightedScore: Int
+    """Filter by weighted scores"""
+    weightedScore_greater: Int
+    """Filter by weighted scores"""
+    weightedScore_lesser: Int
+    """Filter by weighted scores"""
+    weightedScore_not: Int
   ): [MediaTrend]
   modActions(
     modId: Int
@@ -1023,6 +1039,12 @@ type InternalPage {
     modId_not_in: [Int]
     userId: Int
   ): [ModAction]
+  mutualFollowers(
+    """The order the results will be returned in"""
+    sort: [UserSort]
+    """User id to fetch mutual followers for"""
+    userId: Int!
+  ): [User]
   notifications(
     """Reset the unread notification count to 0 on load"""
     resetNotificationCount: Boolean
@@ -1033,6 +1055,10 @@ type InternalPage {
   ): [NotificationUnion]
   """The pagination information"""
   pageInfo: PageInfo
+  recentlyRepliedActivities(
+    """Filter by the owner user id"""
+    userId: Int
+  ): [ActivityUnion]
   recommendations(
     """Filter by recommendation id"""
     id: Int
@@ -1248,8 +1274,8 @@ type Media {
   If the media should have forum thread automatically created for it on airing episode release
   """
   autoCreateForumThread: Boolean
-  """A weighted average score of all the user's scores of the media"""
-  averageScore: Int
+  """A weighted average score of all the users' scores of the media"""
+  averageScore: Int @deprecated(reason: "Use weightedScore")
   """The banner image of the media"""
   bannerImage: String
   """The amount of chapters the manga has when complete"""
@@ -1400,6 +1426,8 @@ type Media {
   updatedAt: Int
   """The amount of volumes the manga has when complete"""
   volumes: Int
+  """A weighted average score of all the users' scores of the media"""
+  weightedScore: Int
 }
 
 """Internal - Media characters separated"""
@@ -1744,7 +1772,7 @@ type MediaListTypeOptions {
   """If the completed sections of the list should be separated by format"""
   splitCompletedSectionByFormat: Boolean
   """The list theme options"""
-  theme: Json @deprecated(reason: "This field has not yet been fully implemented and may change without warning")
+  theme: Json @deprecated(reason: "No longer used")
 }
 
 """
@@ -2094,7 +2122,7 @@ type MediaTrailer {
 """Daily media statistics"""
 type MediaTrend {
   """A weighted average score of all the user's scores of the media"""
-  averageScore: Int
+  averageScore: Int @deprecated(reason: "Use weightedScore")
   """The day the data was recorded (timestamp)"""
   date: Int!
   """The episode number of the anime released on this day"""
@@ -2111,6 +2139,8 @@ type MediaTrend {
   releasing: Boolean!
   """The amount of media activity on the day"""
   trending: Int!
+  """A weighted average score of all the user's scores of the media"""
+  weightedScore: Int
 }
 
 type MediaTrendConnection {
@@ -2271,6 +2301,11 @@ type Mutation {
     """The media list type of the custom list"""
     type: MediaType
   ): Deleted
+  """Removes a follower"""
+  DeleteFollower(
+    """The id of the user to remove the follower status of"""
+    userId: Int
+  ): User
   """Delete a media list entry"""
   DeleteMediaListEntry(
     """The id of the media list entry to delete"""
@@ -2405,7 +2440,7 @@ type Mutation {
   ): TextActivity
   """Create or update a forum thread"""
   SaveThread(
-    """The main text body of the thread (Max: 30000)"""
+    """The main text body of the thread (Min: 10, Max: 30000)"""
     body: String
     """Forum categories the thread should be within"""
     categories: [Int]
@@ -2565,10 +2600,18 @@ type Mutation {
     """The user's anime list options"""
     animeListOptions: MediaListOptionsInput
     disabledListActivity: [ListActivityOptionInput]
+    """If the user should see others' activities for media marked as adult"""
+    displayAdultActivities: Boolean
     """If the user should see media marked as adult-only"""
     displayAdultContent: Boolean
-    """Profile highlight color (Max: 24)"""
+    """User's donator badge, only displayed for donators (Max: 24)"""
     donatorBadge: String
+    """
+    If the user should see media marked as adult-only in quick search results
+    """
+    includeAdultContentInQuickSearch: Boolean
+    """If the user should see media marked as adult-only in search results"""
+    includeAdultContentInSearch: Boolean
     """The user's anime list options"""
     mangaListOptions: MediaListOptionsInput
     """Notification options"""
@@ -2956,6 +2999,14 @@ type Page {
     volumes_greater: Int
     """Filter by the media's volume count"""
     volumes_lesser: Int
+    """Filter by the media's average score"""
+    weightedScore: Int
+    """Filter by the media's average score"""
+    weightedScore_greater: Int
+    """Filter by the media's average score"""
+    weightedScore_lesser: Int
+    """Filter by the media's average score"""
+    weightedScore_not: Int
   ): [Media]
   mediaList(
     """
@@ -3064,7 +3115,21 @@ type Page {
     trending_lesser: Int
     """Filter by trending amount"""
     trending_not: Int
+    """Filter by weighted scores"""
+    weightedScore: Int
+    """Filter by weighted scores"""
+    weightedScore_greater: Int
+    """Filter by weighted scores"""
+    weightedScore_lesser: Int
+    """Filter by weighted scores"""
+    weightedScore_not: Int
   ): [MediaTrend]
+  mutualFollowers(
+    """The order the results will be returned in"""
+    sort: [UserSort]
+    """User id to fetch mutual followers for"""
+    userId: Int!
+  ): [User]
   notifications(
     """Reset the unread notification count to 0 on load"""
     resetNotificationCount: Boolean
@@ -3515,6 +3580,14 @@ type Query {
     volumes_greater: Int
     """Filter by the media's volume count"""
     volumes_lesser: Int
+    """Filter by the media's average score"""
+    weightedScore: Int
+    """Filter by the media's average score"""
+    weightedScore_greater: Int
+    """Filter by the media's average score"""
+    weightedScore_lesser: Int
+    """Filter by the media's average score"""
+    weightedScore_not: Int
   ): Media
   """Media list query"""
   MediaList(
@@ -3679,7 +3752,22 @@ type Query {
     trending_lesser: Int
     """Filter by trending amount"""
     trending_not: Int
+    """Filter by weighted scores"""
+    weightedScore: Int
+    """Filter by weighted scores"""
+    weightedScore_greater: Int
+    """Filter by weighted scores"""
+    weightedScore_lesser: Int
+    """Filter by weighted scores"""
+    weightedScore_not: Int
   ): MediaTrend
+  """Mutual follower query"""
+  MutualFollower(
+    """The order the results will be returned in"""
+    sort: [UserSort]
+    """User id to fetch mutual followers for"""
+    userId: Int!
+  ): User
   """Notification query"""
   Notification(
     """Reset the unread notification count to 0 on load"""
@@ -3872,6 +3960,7 @@ type RelatedMediaAdditionNotification {
 }
 
 type Report {
+  assignee: User
   cleared: Boolean
   """When the entry data was created"""
   createdAt: Int
@@ -4763,6 +4852,8 @@ type User {
   options: UserOptions
   """The user's previously used names."""
   previousNames: [UserPreviousName]
+  """The user's account privacy setting"""
+  privacy: UserPrivacy
   """The url for the user page on the AniList website"""
   siteUrl: String
   """The users anime & manga list statistics"""
@@ -4833,12 +4924,12 @@ type UserLengthStatistic {
 
 """User data for moderators"""
 type UserModData {
-  alts: [User]
   bans: Json
+  browserAlts: [User]
   counts: Json
   email: String
   ip: Json
-  privacy: Int
+  ipAlts: [User]
 }
 
 """A user's general options"""
@@ -4855,8 +4946,20 @@ type UserOptions {
   The list activity types the user has disabled from being created from list updates
   """
   disabledListActivity: [ListActivityOption]
+  """
+  Whether the user wants to see others' activities for adult media. Sub-option of displayAdultContent
+  """
+  displayAdultActivities: Boolean
   """Whether the user has enabled viewing of 18+ content"""
   displayAdultContent: Boolean
+  """
+  Whether the user wants to see adult media in quick search results by default. Sub-option of displayAdultContent
+  """
+  includeAdultContentInQuickSearch: Boolean
+  """
+  Whether the user wants to see adult media in search results by default. Sub-option of displayAdultContent
+  """
+  includeAdultContentInSearch: Boolean
   """Notification options"""
   notificationOptions: [NotificationOption]
   """Profile highlight color (blue, purple, pink, orange, red, green, gray)"""
@@ -4879,6 +4982,16 @@ type UserPreviousName {
   name: String
   """When the user most recently changed from this name."""
   updatedAt: Int
+}
+
+"""User's account privacy setting"""
+enum UserPrivacy {
+  """Private user"""
+  PRIVATE
+  """Public user"""
+  PUBLIC
+  """Semi-Public user"""
+  SEMI_PUBLIC
 }
 
 type UserReleaseYearStatistic {

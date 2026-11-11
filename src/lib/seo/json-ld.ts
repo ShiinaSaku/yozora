@@ -526,10 +526,10 @@ export function generateSoftwareApplicationJsonLd() {
     },
     featureList: [
       "Millisecond-accurate Tokyo broadcast countdowns",
-      "Dual-engine AniList and Jikan failover architecture",
+      "Layered memory, Redis, and CDN caching for sub-millisecond responses",
       "1080p clean opening and ending music playback via AnimeThemes.moe",
       "Personal watchlist and episode progress synchronization",
-      "Two-tier caching with sub-millisecond response times",
+      "Keyboard-driven command palette navigation",
     ],
     publisher: { "@id": `${SITE_URL}/#organization` },
   }
@@ -603,7 +603,7 @@ export function generateDatasetJsonLd() {
       "openings",
       "endings",
       "AniList",
-      "Jikan",
+      "AnimeThemes",
     ],
   }
 }

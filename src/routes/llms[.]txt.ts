@@ -22,7 +22,7 @@ Yozora (https://yozora.moe) is a high-performance web platform built for anime v
 - [Airing Radar](${SITE_URL}/airing): Live weekly broadcast schedule with real-time episode countdowns synced to Tokyo JST.
 - [Seasonal Archive](${SITE_URL}/seasonal): Interactive seasonal cour browser (Winter, Spring, Summer, Fall) spanning 1970–present.
 - [Catalog Search](${SITE_URL}/search): Instant full-text search with multi-parameter filtering (genres, formats, years, status).
-- [About & Architecture](${SITE_URL}/about): Complete system architecture, dual-engine failover details, caching layers, and FAQs.
+- [About & Architecture](${SITE_URL}/about): Complete system architecture, caching layers, and FAQs.
 - [Privacy Policy](${SITE_URL}/privacy): Zero-telemetry privacy policy, local-first storage, and Clerk authentication security.
 
 ## Machine-Readable Specifications
@@ -37,8 +37,8 @@ Yozora (https://yozora.moe) is a high-performance web platform built for anime v
 - **Platform Name**: Yozora (夜空 — Japanese for "Night Sky")
 - **Official URL**: ${SITE_URL}
 - **Framework**: TanStack Start, React 19, Vite, Nitro SSR, Tailwind CSS v4, Base UI
-- **Data Integrations**: AniList GraphQL API (primary), Jikan v4 REST API (failover), AnimeThemes.moe (themes)
-- **Caching**: L1 in-memory single-flight Map + L2 Upstash Redis via REST (fail-open design)
+- **Data Integrations**: AniList GraphQL API (catalog metadata), AnimeThemes GraphQL API (theme streams)
+- **Caching**: L1 in-memory single-flight Map + L2 Upstash Redis via REST + CDN edge cache (fail-open design)
 - **Authentication**: Clerk with SSR middleware and neon PostgreSQL database
 - **Telemetry**: Zero third-party tracker scripts. Complete user privacy.
 - **Repository**: https://github.com/shiinasaku/yozora

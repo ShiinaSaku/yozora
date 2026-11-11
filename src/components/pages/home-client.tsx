@@ -221,10 +221,10 @@ export function HomePageClient({
           </div>
           <div className="flex flex-col gap-0.5 rounded-xl border border-border/40 bg-background/50 p-3">
             <span className="font-mono text-base font-bold text-foreground">
-              Dual-Engine
+              Layered Cache
             </span>
             <span className="text-xs text-muted-foreground">
-              AniList + Jikan Failover
+              Memory + Redis + CDN
             </span>
           </div>
           <div className="flex flex-col gap-0.5 rounded-xl border border-border/40 bg-background/50 p-3">

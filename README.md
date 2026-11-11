@@ -21,24 +21,24 @@ Yozora is a fast, modern anime web platform designed for discovering seasonal re
 ## Features
 
 - **Live Airing Radar**: Real-time episode countdowns synchronized with Japanese television broadcast schedules.
-- **Theme Player**: 1080p creditless anime openings and endings with audio visualizer, playback rate controls, and picture-in-picture mode.
+- **Theme Player**: 1080p creditless anime openings and endings with scrubbable seeking, playback speed, picture-in-picture, fullscreen, keyboard shortcuts, and an audio-only vinyl mode.
 - **Seasonal Catalog**: Browse current and upcoming anime seasons with instant genre, score, and format filters.
 - **Personal Watchlist**: Track watching progress, organize status shelves, and curate your profile.
 - **Command Palette**: Instant keyboard-driven navigation and media search with `Cmd + K`.
 
 ## Tech Stack
 
-- TanStack Start & React 19
+- TanStack Start (React 19, Vite, Cloudflare Workers)
 - Tailwind CSS v4
 - Base UI / shadcn
-- Node.js & pnpm
+- AniList GraphQL + AnimeThemes GraphQL
+- Bun
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js (v20 or higher)
-- pnpm (v9 or higher)
+- Bun (v1.4 or higher)
 
 ### Setup
 
@@ -52,7 +52,7 @@ cd yozora
 2. Install dependencies:
 
 ```bash
-pnpm install
+bun install
 ```
 
 3. Configure environment variables:
@@ -64,17 +64,18 @@ cp .env.example .env.local
 4. Start the development server:
 
 ```bash
-pnpm dev
+bun run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 ## Scripts
 
-- `pnpm dev` — Start local development server
-- `pnpm build` — Build production bundles
-- `pnpm preview` — Preview production build locally
-- `pnpm typecheck` — Run TypeScript type checking
+- `bun run dev` — Start local development server
+- `bun run build` — Build production bundles
+- `bun run preview` — Preview production build locally
+- `bun run typecheck` — Run TypeScript type checking
+- `bun run codegen` — Regenerate GraphQL clients (AnimeThemes schema snapshot is refreshed via `curl` with a User-Agent header; see `schemas/animethemes-introspection.json`)
 
 ## License
 

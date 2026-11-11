@@ -48,7 +48,7 @@ function applyTheme(theme: Theme): "dark" | "light" {
  */
 export function ThemeProvider({
   children,
-  defaultTheme = "dark",
+  defaultTheme = "light",
   storageKey = "theme",
 }: ThemeProviderProps) {
   const [theme, setTheme] = React.useState<Theme>(() => {

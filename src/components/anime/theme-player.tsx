@@ -194,11 +194,8 @@ export function ThemePlayer({
   }, [hasPrev, currentIndex, currentList])
 
   const handleSelectTheme = (theme: AnimeTheme) => {
-    if (activeTheme?.id === theme.id) {
-      setIsPlaying((prev) => !prev)
-    } else {
+    if (activeTheme?.id !== theme.id) {
       setActiveTheme(theme)
-      setIsPlaying(true)
     }
   }
 

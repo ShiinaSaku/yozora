@@ -137,7 +137,7 @@ export interface AnimeThemeEntry {
 
 export interface AnimeTheme {
   id: number
-  type: "OP" | "ED"
+  type: "OP" | "ED" | "IN"
   sequence: number | null
   slug: string
   title: string

@@ -1,17 +1,21 @@
 ---
 type: Concept
-title: Dual-Engine Catalog Failover
-description: Resilient data aggregation combining AniList GraphQL with Jikan v4 REST for 99.9% uptime.
+title: Layered Caching & Catalog Resilience
+description: Three-layer caching (memory, Redis, CDN edge) over the AniList GraphQL catalog with automatic upstream retries.
 resource: https://yozora.moe/about
-tags: [resilience, failover, anilist, jikan, myanimelist, api]
-timestamp: 2026-09-27T00:00:00Z
+tags: [resilience, caching, anilist, redis, cdn, api]
+timestamp: 2026-11-11T00:00:00Z
 ---
 
-# Dual-Engine Catalog Failover
+# Layered Caching & Catalog Resilience
 
-Yozora employs a dual-provider data architecture to prevent third-party rate limits or upstream outages from interrupting user service.
+Yozora keeps catalog responses fast and available through a layered cache and defensive upstream handling, rather than a secondary metadata provider.
 
 ## Architecture
-1. **Primary Provider (AniList GraphQL)**: High-fidelity GraphQL queries for seasonal cour rosters, character casts, and voice actors.
-2. **Failover Provider (Jikan REST API v4)**: Open-source MyAnimeList proxy that engages automatically if AniList returns HTTP 429 (rate-limit) or 5xx server errors.
-3. **Data Normalization Layer**: Automatically harmonizes differing ID schemes, score distributions, and title formats into Yozora's type-safe schema.
+1. **Catalog Provider (AniList GraphQL)**: High-fidelity GraphQL queries for seasonal cour rosters, character casts, and voice actors. Requests retry automatically on HTTP 429 (rate-limit) and 5xx errors.
+2. **Theme Provider (AnimeThemes GraphQL)**: Creditless OP/ED streams and song credits, matched to AniList IDs via `filterAnimeByExternalSite`.
+3. **Layered Cache**:
+   - **L1 In-Memory**: Per-isolate map with single-flight promise deduplication to prevent cache stampedes.
+   - **L2 Distributed**: Upstash Redis over HTTP REST, with smart per-status TTLs (finished anime cached ~30 days, airing anime until the next episode).
+   - **L3 CDN Edge**: `Cache-Control` / `CDN-Cache-Control` headers with stale-while-revalidate on every server function response.
+4. **Fail-Open Design**: If Redis or memory errors occur, requests gracefully fetch upstream data without crashing.

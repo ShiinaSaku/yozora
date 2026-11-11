@@ -10,7 +10,7 @@ import {
 import { animeDetailQueryOptions } from "@/lib/queries/catalog"
 import { DetailPageSkeleton } from "@/components/ui/page-skeletons"
 import { parseAnimeId } from "@/lib/utils/slug"
-import { absoluteUrl, canonicalLinks } from "@/lib/seo/meta"
+import { absoluteUrl, canonicalLinks, openGraphImageUrl } from "@/lib/seo/meta"
 
 /**
  * Route definition for anime detail pages, relations, voice actors, and soundtrack player.
@@ -92,7 +92,7 @@ export const Route = createFileRoute("/anime/$id")({
       .filter(Boolean)
       .join(", ")
 
-    const ogParams = new URLSearchParams({
+    const ogImage = openGraphImageUrl({
       type: "anime",
       title: anime.title,
       subtitle: anime.titles?.romaji || anime.subtitle || "",
@@ -112,7 +112,6 @@ export const Route = createFileRoute("/anime/$id")({
       genres: anime.tags.slice(0, 3).join(", "),
       episodes: anime.episodes ? String(anime.episodes) : "",
     })
-    const ogImage = absoluteUrl(`/og-image?${ogParams.toString()}`)
     const canonicalPath = `/anime/${anime.id}`
 
     const animeJsonLd = generateAnimeJsonLd(anime, themes, characters)

@@ -109,6 +109,25 @@
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
   --color-destructive-foreground: var(--destructive-foreground);
+  --ease-out-quint: cubic-bezier(0.23, 1, 0.32, 1);
+  --animate-video-player-flash: video-player-flash 650ms
+    cubic-bezier(0.23, 1, 0.32, 1) both;
+
+  @keyframes video-player-flash {
+    from {
+      opacity: 0;
+      scale: var(--video-player-flash-from, 0.9);
+    }
+    20%,
+    55% {
+      opacity: 1;
+      scale: 1;
+    }
+    to {
+      opacity: 0;
+      scale: var(--video-player-flash-to, 1.08);
+    }
+  }
 }
 
 :root {
@@ -239,16 +258,18 @@
     linear-gradient(135deg, rgba(17, 25, 54, 0.96), rgba(60, 40, 84, 0.92));
 }
 
-.apple-carousel-viewport {
-  --apple-carousel-item-width: min(max(87.5cqw, 16rem), 72rem);
-  --apple-carousel-padding: max(6.25cqw, (100cqw - 72rem) / 2);
+@utility no-scrollbar {
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
-@container (max-width: 48rem) {
-  .apple-carousel-viewport {
-    --apple-carousel-item-width: calc(max(87.5cqw, 16rem) - 1.25rem);
-    scroll-padding-inline-start: var(--apple-carousel-padding);
-  }
+/* Spotlight hero slide width: near-full-width card that stays centered with
+   a peek of its neighbors once the container is wider than 72rem. */
+@utility spotlight-slide-basis {
+  flex-basis: min(max(87.5cqw, 16rem), 72rem);
 }
 
 .interactive-press {

@@ -35,14 +35,14 @@ const ABOUT_FAQS = [
       "The radar synchronizes with official Japanese television broadcast timetables (JST UTC+9), calculating millisecond-precise countdowns to exact airing windows across Tokyo television networks.",
   },
   {
-    question: "How does the Dual-Engine Failover work?",
+    question: "How does Yozora stay fast and reliable?",
     answer:
-      "Yozora uses an intelligent dual-provider catalog combining AniList (GraphQL) and Jikan (MyAnimeList REST v4). If one provider experiences rate limits, IP blocks, or outages, requests transparently fail over to the secondary engine with zero downtime.",
+      "Catalog data comes from the AniList GraphQL API with automatic retries on rate limits, backed by a three-layer cache: per-isolate memory with single-flight deduplication, distributed Upstash Redis, and CDN edge caching. Fail-open design means third-party downtime never interrupts the viewer.",
   },
   {
     question: "How are opening and ending themes sourced?",
     answer:
-      "Themes and video sequences are provided through integration with the open AnimeThemes archive, pairing creditless 1080p visual sequences with original artist credits and lossless audio playback.",
+      "Themes and video sequences are provided through integration with the open AnimeThemes GraphQL archive, pairing creditless 1080p visual sequences with original artist credits and lossless audio playback.",
   },
   {
     question: "How does Yozora cache data for speed?",
@@ -243,8 +243,8 @@ function AboutPage() {
           <FeatureCard
             icon={CpuIcon}
             color="text-indigo-500 bg-indigo-500/10"
-            title="Dual-Engine Catalog Failover"
-            description="Combines AniList GraphQL and Jikan v4 (MyAnimeList) with transparent automatic failover. If one API experiences rate-limiting or blocks, the backup provider takes over with zero downtime."
+            title="Layered Caching & Resilience"
+            description="Per-isolate memory with single-flight deduplication, distributed Upstash Redis, and CDN edge caching over the AniList GraphQL catalog — with automatic retries on rate limits and a fail-open design."
           />
           <FeatureCard
             icon={FlashIcon}
@@ -417,12 +417,12 @@ function AboutPage() {
                   scope="row"
                   className="p-4 font-medium text-foreground sm:px-6"
                 >
-                  Data Reliability &amp; Failover Architecture
+                  Data Reliability &amp; Caching
                 </th>
                 <td className="p-4 font-semibold text-foreground sm:px-6">
                   <div className="flex items-center gap-1.5 text-emerald-500">
                     <Check className="size-4 shrink-0" aria-hidden="true" />
-                    <span>Dual-Engine (AniList + Jikan)</span>
+                    <span>Memory + Redis + CDN Layers</span>
                   </div>
                 </td>
                 <td className="p-4 sm:px-6">Single-provider dependency</td>

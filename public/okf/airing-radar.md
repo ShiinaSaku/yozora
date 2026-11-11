@@ -15,5 +15,5 @@ The [Live Airing Radar](https://yozora.moe/airing) on Yozora tracks television b
 - **Tokyo JST Synchronization**: Timetables are anchored to Japanese Standard Time (JST, UTC+9).
 - **Millisecond Precision**: Real-time reactive countdown tickers indicate exact premiere windows.
 - **Weekly Schedule Layout**: Broadcast events organized Monday through Sunday.
-- **Failover Safe**: Backed by Yozora's [Dual-Engine Failover](dual-engine-failover.md) to ensure continuous timetable availability.
+- **Failover Safe**: Backed by Yozora's [layered caching](dual-engine-failover.md) to ensure continuous timetable availability.
 - **Schema.org Integration**: Structured `BroadcastEvent` and `ItemList` JSON-LD markup for Answer Engine Optimization.

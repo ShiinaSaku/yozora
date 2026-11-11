@@ -1,15 +1,14 @@
 import * as React from "react"
 import Link from "@/components/ui/link"
 import {
-  AppleCarouselContent,
-  AppleCarouselControls,
-  AppleCarouselItem,
-  AppleCarouselPlayButton,
-  AppleCarouselRoot,
-  AppleCarouselTab,
-  AppleCarouselTabList,
-  useAppleCarouselItem,
-} from "@/components/apple-carousel"
+  Carousel,
+  CarouselAutoplayToggle,
+  CarouselContent,
+  CarouselDots,
+  CarouselItem,
+  useCarousel,
+} from "@/components/ui/carousel"
+import type { CarouselApi } from "@/components/ui/carousel"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { Play } from "lucide-react"
 import { Add01Icon, StarIcon, Video02Icon } from "@hugeicons/core-free-icons"
@@ -17,6 +16,7 @@ import { Button } from "@/components/ui/button"
 import { TrailerDialog } from "./trailer-dialog"
 import type { Anime } from "@/lib/types/anime"
 import { cn } from "@/lib/utils"
+import { prefersReducedMotion } from "@/lib/motion"
 import { getAnimeUrl } from "@/lib/utils/slug"
 
 interface SpotlightHeroProps {
@@ -33,15 +33,14 @@ function SpotlightArtwork({
   anime,
   isActive,
   index,
-  isClone,
 }: {
   anime: Anime
   isActive: boolean
   index: number
-  isClone: boolean
 }) {
   const cover = anime.coverExtraLarge || anime.coverLarge || anime.cover
   const hasBanner = Boolean(anime.banner)
+  const isFirst = index === 0
 
   return (
     <div
@@ -54,10 +53,10 @@ function SpotlightArtwork({
           <img
             src={cover}
             alt={anime.title}
-            decoding={!isClone && index === 0 ? "sync" : "async"}
+            decoding={isFirst ? "sync" : "async"}
             draggable={false}
-            fetchPriority={!isClone && index === 0 ? "high" : "low"}
-            loading={!isClone && index < 2 ? "eager" : "lazy"}
+            fetchPriority={isFirst ? "high" : "low"}
+            loading={index < 2 ? "eager" : "lazy"}
             className={cn(
               "absolute inset-0 size-full transform-gpu object-cover object-center transition-transform duration-700 ease-out select-none",
               isActive ? "scale-100" : "scale-105"
@@ -69,10 +68,10 @@ function SpotlightArtwork({
           <img
             src={cover}
             alt={anime.title}
-            decoding={!isClone && index === 0 ? "sync" : "async"}
+            decoding={isFirst ? "sync" : "async"}
             draggable={false}
-            fetchPriority={!isClone && index === 0 ? "high" : "low"}
-            loading={!isClone && index < 2 ? "eager" : "lazy"}
+            fetchPriority={isFirst ? "high" : "low"}
+            loading={index < 2 ? "eager" : "lazy"}
             className={cn(
               "absolute inset-0 size-full scale-110 object-cover object-center opacity-40 blur-2xl transition-transform duration-700 ease-out select-none",
               isActive ? "scale-110" : "scale-120"
@@ -129,16 +128,18 @@ function SpotlightSlideCard({
   onSaveClick?: (anime: Anime) => void
   onOpenTrailer: (anime: Anime) => void
 }) {
-  const { isCurrent, isClone } = useAppleCarouselItem()
+  const { selectedIndex } = useCarousel()
+  const isActive = selectedIndex === index
 
   return (
-    <div className="relative size-full">
-      <SpotlightArtwork
-        anime={anime}
-        index={index}
-        isActive={isCurrent}
-        isClone={isClone}
-      />
+    <div
+      className={cn(
+        "relative size-full",
+        !isActive && "pointer-events-none"
+      )}
+      aria-hidden={!isActive || undefined}
+    >
+      <SpotlightArtwork anime={anime} index={index} isActive={isActive} />
 
       {/* Rating badge */}
       {anime.score > 0 && (
@@ -146,7 +147,7 @@ function SpotlightSlideCard({
           <span
             className={cn(
               "inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-black/60 px-3 py-1 font-mono text-xs font-semibold text-amber-400 shadow-sm backdrop-blur-md transition-opacity duration-300",
-              isCurrent ? "opacity-100" : "opacity-0"
+              isActive ? "opacity-100" : "opacity-0"
             )}
             aria-label={`Rating: ${anime.score.toFixed(1)} out of 10`}
           >
@@ -167,7 +168,7 @@ function SpotlightSlideCard({
         className={cn(
           "absolute inset-x-0 bottom-0 z-10 flex max-w-2xl flex-col items-start gap-2.5 p-5 sm:gap-3.5 sm:p-8 lg:p-10",
           "transition-opacity duration-300 ease-out",
-          isCurrent
+          isActive
             ? "opacity-100 duration-500"
             : "pointer-events-none opacity-0"
         )}
@@ -199,7 +200,7 @@ function SpotlightSlideCard({
         <h2 className="line-clamp-2 text-2xl leading-tight font-black tracking-tight text-white drop-shadow-md sm:text-4xl lg:text-5xl">
           <Link
             href={getAnimeUrl(anime)}
-            tabIndex={isCurrent ? 0 : -1}
+            tabIndex={isActive ? 0 : -1}
             variant="title"
           >
             {anime.title}
@@ -234,10 +235,10 @@ function SpotlightSlideCard({
         <div className="flex flex-wrap items-center gap-2 pt-1.5 sm:gap-3">
           <Link
             href={getAnimeUrl(anime)}
-            tabIndex={isCurrent ? 0 : -1}
+            tabIndex={isActive ? 0 : -1}
             aria-label={`Watch overview for ${anime.title}`}
             variant="button-white"
-            className={cn(!isCurrent && "pointer-events-none")}
+            className={cn(!isActive && "pointer-events-none")}
           >
             <Play
               className="size-3.5 shrink-0 fill-current"
@@ -253,7 +254,7 @@ function SpotlightSlideCard({
               <Button
                 variant="glass"
                 size="lg"
-                tabIndex={isCurrent ? 0 : -1}
+                tabIndex={isActive ? 0 : -1}
                 aria-label={`Add to Watchlist: ${anime.title}`}
                 onClick={(e) => {
                   e.stopPropagation()
@@ -278,7 +279,7 @@ function SpotlightSlideCard({
                 type="button"
                 variant="glass-dark"
                 size="lg"
-                tabIndex={isCurrent ? 0 : -1}
+                tabIndex={isActive ? 0 : -1}
                 aria-label={`Watch trailer: ${anime.title}`}
                 onClick={(e) => {
                   e.stopPropagation()
@@ -306,6 +307,19 @@ export function SpotlightHero({ items, onSaveClick }: SpotlightHeroProps) {
   const [trailerOpen, setTrailerOpen] = React.useState(false)
   const [selectedTrailerAnime, setSelectedTrailerAnime] =
     React.useState<Anime | null>(null)
+  const [api, setApi] = React.useState<CarouselApi | null>(null)
+
+  // Hold autoplay while the trailer dialog is up, resume on close.
+  React.useEffect(() => {
+    if (!api || items.length < 2) {
+      return
+    }
+    if (trailerOpen) {
+      api.stop()
+    } else if (!prefersReducedMotion()) {
+      api.play()
+    }
+  }, [api, trailerOpen, items.length])
 
   if (items.length === 0) {
     return null
@@ -317,49 +331,40 @@ export function SpotlightHero({ items, onSaveClick }: SpotlightHeroProps) {
   }
 
   return (
-    <section
-      role="region"
-      aria-roledescription="carousel"
-      aria-label="Spotlight Trending Anime"
-      className="relative w-full"
-    >
-      <AppleCarouselRoot
-        duration={6000}
-        paused={trailerOpen}
-        className="w-full"
+    <section className="relative w-full">
+      <Carousel
+        autoplay={{ delay: 6000 }}
+        setApi={setApi}
+        spacing="lg"
+        className="@container w-full"
       >
-        <AppleCarouselContent>
+        <CarouselContent>
           {items.map((anime, index) => (
-            <AppleCarouselItem
+            <CarouselItem
               key={anime.id}
-              className="dark relative h-120 w-(--apple-carousel-item-width) snap-center overflow-hidden rounded-3xl border border-black/10 bg-zinc-950 text-white shadow-xl transition-all duration-500 select-none hover:border-black/20 sm:rounded-4xl lg:h-135 xl:h-145 @max-3xl:h-120 sm:@max-3xl:h-125 dark:border-white/10 dark:hover:border-white/20"
+              className="relative h-120 spotlight-slide-basis snap-center lg:h-135 xl:h-145 @max-3xl:h-120 sm:@max-3xl:h-125"
             >
-              <SpotlightSlideCard
-                anime={anime}
-                index={index}
-                onSaveClick={onSaveClick}
-                onOpenTrailer={openTrailer}
-              />
-            </AppleCarouselItem>
+              <div className="dark relative size-full overflow-hidden rounded-3xl bg-zinc-950 text-white select-none ring-1 ring-black/20 shadow-xl shadow-black/25 transition-all duration-500 hover:ring-white/25 sm:rounded-4xl">
+                <SpotlightSlideCard
+                  anime={anime}
+                  index={index}
+                  onSaveClick={onSaveClick}
+                  onOpenTrailer={openTrailer}
+                />
+              </div>
+            </CarouselItem>
           ))}
-        </AppleCarouselContent>
+        </CarouselContent>
 
         {items.length > 1 && (
-          <AppleCarouselControls className="pt-6">
-            <AppleCarouselTabList
-              aria-label="Spotlight featured anime slides"
-              className="border border-border/40 shadow-xs backdrop-blur-md"
-            >
-              {items.map((anime) => (
-                <AppleCarouselTab key={anime.id}>
-                  {anime.title}
-                </AppleCarouselTab>
-              ))}
-            </AppleCarouselTabList>
-            <AppleCarouselPlayButton className="border border-border/40 shadow-xs backdrop-blur-md" />
-          </AppleCarouselControls>
+          <div className="flex items-center justify-center gap-3 pt-6">
+            <div className="flex items-center rounded-full border border-border/40 bg-muted/60 px-4 py-2 shadow-xs backdrop-blur-md">
+              <CarouselDots aria-label="Spotlight featured anime slides" />
+            </div>
+            <CarouselAutoplayToggle variant="outline" size="icon-lg" />
+          </div>
         )}
-      </AppleCarouselRoot>
+      </Carousel>
 
       <TrailerDialog
         trailer={selectedTrailerAnime?.trailer}

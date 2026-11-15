@@ -1,0 +1,111 @@
+---
+/**
+ * Static anime card for server-rendered grids. Optional save buttons are
+ * handled by the containing page's interaction island.
+ */
+import { HugeiconsIcon } from "@hugeicons/react"
+import { Add01Icon, StarIcon } from "@hugeicons/core-free-icons"
+import { Image } from "astro:assets"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
+import { getAnimeUrl } from "@/lib/utils/slug"
+import type { Anime } from "@/lib/types/anime"
+
+interface Props {
+  anime: Anime
+  /** Mark above-the-fold cards so they load eagerly. */
+  priority?: boolean
+  saveable?: boolean
+}
+
+const { anime, priority = false, saveable = false } = Astro.props
+const href = getAnimeUrl(anime)
+// AniList's CDN serves pre-sized variants at distinct URLs, so the responsive
+// srcset is authored manually — astro:assets' passthrough service makes no
+// transformations and cannot derive variant URLs itself.
+const src = anime.coverLarge || anime.cover
+const srcSet = [
+  anime.coverMedium && `${anime.coverMedium} 100w`,
+  anime.coverLarge && `${anime.coverLarge} 230w`,
+  anime.coverExtraLarge && `${anime.coverExtraLarge} 460w`,
+].filter(Boolean).join(", ")
+---
+
+<Card id={`anime-card-${anime.id}`} variant="interactive" size="none">
+  <div class="relative aspect-3/4 w-full overflow-hidden bg-muted">
+    <a href={href} aria-label={anime.title} class="absolute inset-0 block size-full">
+      <Image
+        src={src}
+        srcset={srcSet || undefined}
+        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
+        alt={anime.title}
+        width={230}
+        height={345}
+        loading={priority ? "eager" : "lazy"}
+        fetchpriority={priority ? "high" : "auto"}
+        decoding="async"
+        class="size-full object-cover transition-transform duration-500 group-hover:scale-105"
+      />
+      <div class="absolute inset-0 bg-linear-to-t from-background/90 via-background/20 to-transparent opacity-60 transition-opacity group-hover:opacity-80"></div>
+    </a>
+
+    <div class="pointer-events-none absolute top-2.5 left-2.5 z-10 flex flex-wrap gap-1.5">
+      {anime.format && <Badge variant="overlay">{anime.format}</Badge>}
+    </div>
+
+    {
+      anime.score > 0 && (
+        <div class="pointer-events-none absolute top-2.5 right-2.5 z-10 flex items-center gap-1 rounded-md bg-background/90 px-2 py-0.5 text-xs font-bold text-amber-500">
+          <HugeiconsIcon
+            icon={StarIcon}
+            size={12}
+            strokeWidth={2.5}
+            className="fill-amber-500 text-amber-500"
+          />
+          <span>{anime.score.toFixed(1)}</span>
+        </div>
+      )
+    }
+    {
+      saveable && (
+        <div class="absolute right-2.5 bottom-2.5 z-10 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100 pointer-coarse:opacity-100">
+          <Button
+            type="button"
+            size="icon-sm"
+            variant="overlay"
+            data-save-anime={anime.id}
+            aria-label={`Add to Watchlist: ${anime.title}`}
+          >
+            <HugeiconsIcon icon={Add01Icon} size={15} strokeWidth={2.5} />
+          </Button>
+        </div>
+      )
+    }
+  </div>
+
+  <div class="flex flex-1 flex-col justify-between p-3">
+    <div>
+      <a href={href}>
+        <h3 class="line-clamp-2 text-sm leading-tight font-semibold text-foreground transition-colors group-hover:text-primary">
+          {anime.title}
+        </h3>
+      </a>
+      <p class="mt-1 text-xs text-muted-foreground">
+        {anime.year}{anime.episodes ? ` · ${anime.episodes} eps` : ""}
+      </p>
+    </div>
+
+    {
+      anime.tags.length > 0 && (
+        <div class="mt-2 flex flex-wrap gap-1.5">
+          {anime.tags.slice(0, 2).map((tag) => (
+            <span class="text-xs font-semibold text-foreground/85 transition-colors group-hover:text-foreground">
+              #{tag}
+            </span>
+          ))}
+        </div>
+      )
+    }
+  </div>
+</Card>

@@ -1,6 +1,6 @@
 import { ogImageUrl } from "@/lib/og/params"
 
-const rawSiteUrl = import.meta.env.VITE_APP_URL || "https://yozora.moe"
+const rawSiteUrl = import.meta.env.PUBLIC_APP_URL || "https://yozora.moe"
 const sanitizedSiteUrl = rawSiteUrl.includes("hikari.shiina.xyz")
   ? "https://yozora.moe"
   : rawSiteUrl

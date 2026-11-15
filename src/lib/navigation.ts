@@ -1,28 +1,49 @@
-import { useNavigate, useRouterState } from "@tanstack/react-router"
+import * as React from "react"
 
+/**
+ * Current pathname for React islands. With Astro's <ClientRouter /> each
+ * island hydrates fresh per page, so `window.location.pathname` at mount is
+ * correct; the astro:page-load listener covers remount edge cases.
+ */
 export function usePathname() {
-  return useRouterState({ select: (state) => state.location.pathname })
+  const [pathname, setPathname] = React.useState(() =>
+    typeof window === "undefined" ? "/" : window.location.pathname
+  )
+
+  React.useEffect(() => {
+    const update = () => setPathname(window.location.pathname)
+    update()
+    document.addEventListener("astro:page-load", update)
+    return () => document.removeEventListener("astro:page-load", update)
+  }, [])
+
+  return pathname
 }
 
-function splitHref(href: string): {
-  to: string
-  search?: Record<string, string>
-} {
-  const [pathname, queryString = ""] = href.split("?")
-  if (!queryString) {
-    return { to: pathname }
-  }
-  const search = Object.fromEntries(new URLSearchParams(queryString))
-  return { to: pathname, search }
-}
-
+/**
+ * Programmatic navigation for React islands. Uses Astro's transition router
+ * so navigations participate in view transitions and prefetching.
+ */
 export function useRouter() {
-  const navigate = useNavigate()
+  const navigateRef = React.useRef<
+    ((href: string, options?: { history?: "push" | "replace" }) => void) | null
+  >(null)
+
+  const navigate = React.useCallback(
+    async (href: string, options?: { history?: "push" | "replace" }) => {
+      if (!navigateRef.current) {
+        // Lazy-load the transition router so islands without navigation
+        // never pay for it.
+        const transitions = await import("astro:transitions/client")
+        navigateRef.current = transitions.navigate
+      }
+      navigateRef.current(href, options)
+    },
+    []
+  )
+
   return {
-    // Pass search params explicitly so TanStack does not merge the current
-    // location's search into the destination (e.g. `/search?q=a?q=b`).
-    push: (href: string) => navigate({ ...splitHref(href) } as any),
-    replace: (href: string) =>
-      navigate({ ...splitHref(href), replace: true } as any),
+    push: (href: string) => navigate(href),
+    replace: (href: string) => navigate(href, { history: "replace" }),
   }
 }

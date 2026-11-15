@@ -4,7 +4,6 @@ import * as React from "react"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { CdIcon, PauseIcon, PlayIcon } from "@hugeicons/core-free-icons"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import type { AnimeTheme } from "@/lib/types/anime"
 import { cn } from "@/lib/utils"
@@ -68,24 +67,18 @@ const ThemeTrackRow = React.memo(
     const hasVideo = Boolean(videoNode?.link)
 
     return (
-      <div
-        role="button"
-        tabIndex={hasVideo ? 0 : undefined}
+      <button
+        type="button"
+        disabled={!hasVideo}
         className={cn(
-          "group flex items-center justify-between rounded-2xl border p-3 transition-colors duration-200 select-none sm:p-3.5",
+          "group flex w-full items-center justify-between rounded-2xl border p-3 transition-colors duration-200 select-none text-left disabled:cursor-not-allowed sm:p-3.5",
           isCurrent
             ? "border-primary/60 bg-primary/10 shadow-sm ring-1 ring-primary/20"
             : hasVideo
               ? "cursor-pointer border-border/40 bg-card hover:border-primary/40 hover:bg-muted/30 hover:shadow-xs active:scale-95"
-              : "cursor-not-allowed border-border/20 bg-muted/10 opacity-50"
+              : "border-border/20 bg-muted/10 opacity-50"
         )}
         onClick={() => hasVideo && onSelect(theme)}
-        onKeyDown={(e) => {
-          if (hasVideo && (e.key === "Enter" || e.key === " ")) {
-            e.preventDefault()
-            onSelect(theme)
-          }
-        }}
       >
         <div className="flex min-w-0 items-center gap-3.5">
           <div
@@ -129,13 +122,14 @@ const ThemeTrackRow = React.memo(
 
         <div className="flex shrink-0 items-center gap-2">
           {hasVideo ? (
-            <Button
-              size="sm"
-              variant={isCurrent ? "default" : "secondary"}
-              onClick={(e) => {
-                e.stopPropagation()
-                onSelect(theme)
-              }}
+            <span
+              className={cn(
+                "inline-flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors",
+                isCurrent
+                  ? "bg-primary text-primary-foreground shadow-xs hover:bg-primary/90"
+                  : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+              )}
+              aria-hidden="true"
             >
               <HugeiconsIcon
                 icon={isCurrent && isPlaying ? PauseIcon : PlayIcon}
@@ -146,12 +140,12 @@ const ThemeTrackRow = React.memo(
               <span className="xs:inline hidden">
                 {isCurrent && isPlaying ? "Playing" : "Play"}
               </span>
-            </Button>
+            </span>
           ) : (
             <span className="text-xs text-muted-foreground">No stream</span>
           )}
         </div>
-      </div>
+      </button>
     )
   }
 )

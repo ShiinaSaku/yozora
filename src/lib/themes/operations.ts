@@ -1,4 +1,4 @@
-import { graphql } from "@/gql/themes"
+import { graphql } from "@/graphql/themes"
 
 /**
  * Fetches every theme (OP/ED/IN) for an anime matched through its AniList ID.

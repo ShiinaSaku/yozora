@@ -1,7 +1,7 @@
 ---
 type: Concept
 title: Layered Caching & Catalog Resilience
-description: Three-layer caching (memory, Redis, CDN edge) over the AniList GraphQL catalog with automatic upstream retries.
+description: Three-layer caching (memory, Workers edge cache, CDN edge) over the AniList GraphQL catalog with automatic upstream retries.
 resource: https://yozora.moe/about
 tags: [resilience, caching, anilist, redis, cdn, api]
 timestamp: 2026-11-11T00:00:00Z
@@ -16,6 +16,6 @@ Yozora keeps catalog responses fast and available through a layered cache and de
 2. **Theme Provider (AnimeThemes GraphQL)**: Creditless OP/ED streams and song credits, matched to AniList IDs via `filterAnimeByExternalSite`.
 3. **Layered Cache**:
    - **L1 In-Memory**: Per-isolate map with single-flight promise deduplication to prevent cache stampedes.
-   - **L2 Distributed**: Upstash Redis over HTTP REST, with smart per-status TTLs (finished anime cached ~30 days, airing anime until the next episode).
-   - **L3 CDN Edge**: `Cache-Control` / `CDN-Cache-Control` headers with stale-while-revalidate on every server function response.
-4. **Fail-Open Design**: If Redis or memory errors occur, requests gracefully fetch upstream data without crashing.
+   - **L2 Edge**: Cloudflare Workers Cache API, with smart per-status TTLs (finished anime cached ~30 days, airing anime until the next episode).
+   - **L3 CDN Edge**: Per-route cache rules (`maxAge` / `stale-while-revalidate`) plus `Cache-Control` headers on every API response.
+4. **Fail-Open Design**: If edge or memory cache errors occur, requests gracefully fetch upstream data without crashing.

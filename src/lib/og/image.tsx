@@ -1,10 +1,10 @@
 import fs from "node:fs"
 import path from "node:path"
-import { Buffer } from "node:buffer"
 import { ImageResponse } from "takumi-js/response"
 import * as React from "react"
 import { YOZORA_EYE_LOGO_BASE64 } from "@/lib/og/brand-asset"
 import { parseOgParams, sanitizeAccent } from "@/lib/og/params"
+import { fetchSafeImageDataUri } from "@/lib/og/safe-image"
 import type { OgParams } from "@/lib/og/params"
 
 const CARD_WIDTH = 1200
@@ -88,48 +88,6 @@ function loadOgFonts(): Promise<OgFont[]> {
     })()
   }
   return fontsPromise
-}
-
-function isAllowedImageHost(hostname: string): boolean {
-  return (
-    hostname === "s4.anilist.co" ||
-    hostname === "anilist.co" ||
-    hostname.endsWith(".anilist.co") ||
-    hostname === "cdn.myanimelist.net" ||
-    hostname.endsWith(".myanimelist.net") ||
-    hostname === "img.clerk.com" ||
-    hostname.endsWith(".clerk.com") ||
-    hostname === "animethemes.moe" ||
-    hostname.endsWith(".animethemes.moe")
-  )
-}
-
-async function fetchSafeImageDataUri(url: string | null): Promise<string> {
-  if (!url) return ""
-
-  try {
-    const parsed = new URL(url)
-    if (parsed.protocol !== "https:" || !isAllowedImageHost(parsed.hostname)) {
-      return ""
-    }
-
-    const res = await fetch(parsed.toString(), {
-      redirect: "manual",
-      headers: { "user-agent": "Mozilla/5.0 (compatible; YozoraBot/1.0)" },
-      signal: AbortSignal.timeout(3500),
-    })
-    // Edge runtimes reject `redirect: "error"`; rejects redirects manually.
-    if (!res.ok || (res.status >= 300 && res.status < 400)) {
-      return ""
-    }
-
-    const contentType = res.headers.get("content-type") || "image/jpeg"
-    const arrayBuffer = await res.arrayBuffer()
-    const base64 = Buffer.from(arrayBuffer).toString("base64")
-    return `data:${contentType};base64,${base64}`
-  } catch {
-    return ""
-  }
 }
 
 /** Brand accent color with alpha, for glows and highlights. */
@@ -303,17 +261,19 @@ function CardFooter({ color }: { color: string }) {
 function MediaImage({
   imageDataUri,
   color,
+  avatar = false,
 }: {
   imageDataUri: string
   color: string
+  avatar?: boolean
 }) {
   return (
     <div
       style={{
-        width: 300,
-        height: 450,
+        width: avatar ? 220 : 300,
+        height: avatar ? 220 : 450,
         flexShrink: 0,
-        borderRadius: 20,
+        borderRadius: avatar ? 9999 : 20,
         border: "1px solid rgba(255, 255, 255, 0.14)",
         overflow: "hidden",
         boxShadow: "0 30px 70px -20px rgba(0, 0, 0, 0.9)",
@@ -555,6 +515,7 @@ function MediaBody({ params }: { params: OgParams }) {
 /** The one card layout every OG image shares. */
 function OgCard({ params, imageDataUri }: { params: OgParams; imageDataUri: string }) {
   const isMedia = params.type === "anime" || params.type === "character"
+  const isUser = params.type === "user"
   return (
     <div
       style={{
@@ -610,7 +571,7 @@ function OgCard({ params, imageDataUri }: { params: OgParams; imageDataUri: stri
         />
       </div>
 
-      {isMedia ? (
+      {isMedia || isUser ? (
         <div
           style={{
             position: "relative",
@@ -620,8 +581,8 @@ function OgCard({ params, imageDataUri }: { params: OgParams; imageDataUri: stri
             width: "100%",
           }}
         >
-          <MediaImage imageDataUri={imageDataUri} color={params.accent} />
-          <MediaBody params={params} />
+          <MediaImage imageDataUri={imageDataUri} color={params.accent} avatar={isUser} />
+          {isUser ? <EditorialBody params={params} /> : <MediaBody params={params} />}
         </div>
       ) : (
         <div style={{ position: "relative" }}>
@@ -687,7 +648,7 @@ export async function handleOgImageRequest({ request }: { request: Request }) {
     const params = parseOgParams(url.searchParams)
 
     const imageDataUri =
-      params.type === "anime" || params.type === "character"
+      params.type === "anime" || params.type === "character" || params.type === "user"
         ? await fetchSafeImageDataUri(params.image)
         : ""
 

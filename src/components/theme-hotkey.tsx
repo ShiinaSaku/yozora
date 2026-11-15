@@ -1,9 +1,6 @@
 import * as React from "react"
-import { useTheme } from "@/components/theme-provider"
 
 export function useThemeHotkey() {
-  const { setTheme, resolvedTheme } = useTheme()
-
   React.useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement | null
@@ -27,16 +24,19 @@ export function useThemeHotkey() {
           event.shiftKey)
       ) {
         event.preventDefault()
-        setTheme(resolvedTheme === "dark" ? "light" : "dark")
+        const isDark = document.documentElement.classList.contains("dark")
+        document.documentElement.classList[isDark ? "remove" : "add"]("dark")
       }
     }
 
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [setTheme, resolvedTheme])
+  }, [])
 }
 
 export function ThemeHotkey() {
   useThemeHotkey()
   return null
 }
+
+export default ThemeHotkey

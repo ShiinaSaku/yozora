@@ -1,0 +1,41 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro"
+import { AiringClient } from "@/components/pages/airing-client"
+import {
+  generateAiringScheduleJsonLd,
+  generateBreadcrumbsJsonLd,
+  stringifyJsonLd,
+} from "@/lib/seo/json-ld"
+import { getAiringData } from "@/lib/server/catalog"
+import { canonicalLinks } from "@/lib/seo/meta"
+
+export const prerender = false
+
+const data = await getAiringData()
+
+const jsonLd = [
+  stringifyJsonLd(
+    generateBreadcrumbsJsonLd([
+      { name: "Home", url: "/" },
+      { name: "Airing Schedule", url: "/airing" },
+    ])
+  ),
+  ...(data?.items.length
+    ? [stringifyJsonLd(generateAiringScheduleJsonLd(data.items))]
+    : []),
+]
+---
+
+<BaseLayout
+  title="Anime Airing Schedule & Live Countdown | Yozora (夜空)"
+  description="Follow television broadcast schedules across Japanese networks with real-time countdowns to upcoming anime episode premieres."
+  keywords="anime schedule, airing anime, anime countdown, next episode airing, anime timetable, upcoming anime episodes, broadcast schedule, 放送スケジュール, アニメ放送予定, 新番时间表, 追番, Yozora"
+  links={canonicalLinks("/airing")}
+  jsonLd={jsonLd}
+>
+  <AiringClient
+    client:load
+    items={data.items}
+    initialNow={data.generatedAt}
+  />
+</BaseLayout>

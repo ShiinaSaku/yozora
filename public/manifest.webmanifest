@@ -1,4 +1,11 @@
 {
+  "name": "Yozora — Anime Discovery",
+  "short_name": "Yozora",
+  "description": "Discover anime, follow airing schedules, and explore themes.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#06070b",
+  "theme_color": "#06070b",
   "icons": [
     {
       "src": "/favicon-192.png",

@@ -1,0 +1,21 @@
+---
+/**
+ * Sign-up flow. Clerk's Astro <SignUp /> component mounts its UI into the
+ * placeholder div once clerk-js loads — no React island needed.
+ */
+import BaseLayout from "@/layouts/BaseLayout.astro"
+import { SignUp } from "@clerk/astro/components"
+
+export const prerender = false
+---
+
+<BaseLayout
+  title="Sign Up | Yozora"
+  description="Create your Yozora account to track anime, watchlists, and custom shelves."
+  robots="noindex, nofollow"
+  links={[{ rel: "canonical", href: new URL("/sign-up", Astro.site).href }]}
+>
+  <div class="flex min-h-140 items-center justify-center px-4 py-12">
+    <SignUp path="/sign-up" routing="path" />
+  </div>
+</BaseLayout>

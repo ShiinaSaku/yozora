@@ -22,6 +22,7 @@ export const inputVariants = cva(
         lg: "h-11 px-4 py-2 text-sm",
         search: "h-11 pr-4 pl-10 text-sm",
         icon: "h-9 pr-3 pl-9 text-sm",
+        prefixed: "h-9 pr-3 pl-7 text-sm",
         sm: "h-8 px-2.5 py-0.5 text-xs",
         none: "h-auto p-0",
       },

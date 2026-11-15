@@ -3,12 +3,12 @@
 > Fast seasonal anime broadcast schedule radar, 1080p creditless theme player, and synchronized personal watchlist platform.
 
 ## Overview
-Yozora (https://yozora.moe) is a high-performance web platform built for anime viewers, researchers, and AI agents. It indexes seasonal television releases, delivers millisecond-accurate broadcast countdowns synced to Tokyo television networks (JST), streams 1080p creditless opening (OP) and ending (ED) themes via AnimeThemes.moe, and supports seamless AniList watchlist tracking.
+Yozora (https://yozora.moe) is an anime catalog, Japanese broadcast radar, and creditless theme player. It lists the current season, shows episode countdowns from AniList airing times (JST), streams creditless opening and ending themes via AnimeThemes.moe, and keeps a personal watchlist.
 
 ## Core Pages & Features
 - [Home](https://yozora.moe/): Seasonal spotlights, trending broadcasts, top-rated anime, and recent soundtrack releases.
 - [Airing Radar](https://yozora.moe/airing): Live weekly broadcast schedule with real-time episode countdowns synced to Tokyo JST.
-- [Seasonal Archive](https://yozora.moe/seasonal): Interactive seasonal cour browser (Winter, Spring, Summer, Fall) spanning 1970–present.
+- [Seasonal Chart](https://yozora.moe/seasonal): The anime airing in the current season.
 - [Catalog Search](https://yozora.moe/search): Instant full-text search with multi-parameter filtering (genres, formats, years, status).
 - [About & Architecture](https://yozora.moe/about): Complete system architecture, caching layers, and FAQs.
 - [Privacy Policy](https://yozora.moe/privacy): Zero-telemetry privacy policy, local-first storage, and Clerk authentication security.
@@ -24,9 +24,10 @@ Yozora (https://yozora.moe) is a high-performance web platform built for anime v
 ## Technical Architecture & Key Facts
 - **Platform Name**: Yozora (夜空 — Japanese for "Night Sky")
 - **Official URL**: https://yozora.moe
-- **Framework**: TanStack Start, React 19, Vite, Nitro SSR, Tailwind CSS v4, Base UI
+- **Framework**: Astro 7 islands architecture, React 19, Tailwind CSS v4, Base UI
 - **Data Integrations**: AniList GraphQL API (catalog metadata), AnimeThemes GraphQL API (theme streams)
-- **Caching**: L1 in-memory single-flight Map + L2 Upstash Redis via REST (fail-open design)
+- **Hosting**: Cloudflare Workers — static-first prerendering with edge-cached SSR routes
+- **Caching**: L1 in-memory single-flight Map + L2 Cloudflare Workers Cache API (fail-open design)
 - **Authentication**: Clerk with SSR middleware and neon PostgreSQL database
 - **Telemetry**: Zero third-party tracker scripts. Complete user privacy.
 - **Repository**: https://github.com/shiinasaku/yozora

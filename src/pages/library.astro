@@ -1,0 +1,35 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro"
+import { LibraryClient } from "@/components/pages/library-client"
+import { getUserId } from "@/lib/server/auth"
+import { getMyLibraryData } from "@/lib/server/library"
+import { canonicalLinks, openGraphImageUrl } from "@/lib/seo/meta"
+
+export const prerender = false
+
+const userId = await getUserId(Astro.locals)
+if (!userId) {
+  return Astro.redirect(`/sign-in?redirect=${encodeURIComponent("/library")}`)
+}
+
+const data = await getMyLibraryData(userId)
+const description =
+  "Manage and track your anime library, watchlist progress, ratings, and custom collections on Yozora."
+const image = openGraphImageUrl({
+  type: "library",
+  title: "Anime Library & Watchlists",
+  subtitle: "Personal Collection & Episode Progress",
+  tag: "Personal Library",
+  description,
+})
+---
+
+<BaseLayout
+  title="My Anime Watchlist & Library Tracker | Yozora"
+  description={description}
+  robots="noindex, nofollow"
+  image={image}
+  links={canonicalLinks("/library")}
+>
+  <LibraryClient client:load data={data} />
+</BaseLayout>

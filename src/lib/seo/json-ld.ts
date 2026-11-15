@@ -6,6 +6,11 @@ import type {
   CharacterDetail,
 } from "@/lib/types/anime"
 import { SITE_URL } from "@/lib/seo/meta"
+import { getAnimeUrl, getCharacterUrl } from "@/lib/utils/slug"
+
+function animePageUrl(anime: { id: number; title?: string }) {
+  return `${SITE_URL}${getAnimeUrl(anime)}`
+}
 
 /**
  * Serializes a JSON-LD payload for embedding in a <script type="application/ld+json">
@@ -40,7 +45,7 @@ export function generateAnimeJsonLd(
   const cleanDescription =
     cleanText(anime.description) ||
     `Watch, track, and listen to OSTs for ${anime.title} on Yozora.`
-  const canonicalUrl = `${SITE_URL}/anime/${anime.id}`
+  const canonicalUrl = animePageUrl(anime)
 
   const schema: Record<string, any> = {
     "@context": "https://schema.org",
@@ -61,7 +66,7 @@ export function generateAnimeJsonLd(
       "@type": "WebPage",
       "@id": canonicalUrl,
     },
-    inLanguage: ["ja", "en"],
+    inLanguage: "en",
     isAccessibleForFree: true,
     countryOfOrigin: {
       "@type": "Country",
@@ -71,9 +76,7 @@ export function generateAnimeJsonLd(
     publisher: { "@id": `${SITE_URL}/#organization` },
     sameAs: [
       `https://anilist.co/anime/${anime.id}`,
-      anime.idMal
-        ? `https://myanimelist.net/anime/${anime.idMal}`
-        : `https://myanimelist.net/anime/${anime.id}`,
+      anime.idMal ? `https://myanimelist.net/anime/${anime.idMal}` : undefined,
     ].filter(Boolean),
     speakable: {
       "@type": "SpeakableSpecification",
@@ -98,20 +101,14 @@ export function generateAnimeJsonLd(
     ]
       .filter(Boolean)
       .join(", "),
-    potentialAction: [
-      {
-        "@type": "WatchAction",
-        target: canonicalUrl,
-      },
-      ...(themes.length > 0
-        ? [
-            {
-              "@type": "ListenAction",
-              target: `${canonicalUrl}#themes`,
-            },
-          ]
-        : []),
-    ],
+    ...(themes.length > 0
+      ? {
+          potentialAction: {
+            "@type": "ListenAction",
+            target: `${canonicalUrl}#themes`,
+          },
+        }
+      : {}),
   }
 
   if (anime.banner) {
@@ -124,17 +121,6 @@ export function generateAnimeJsonLd(
 
   if (!isMovie && anime.episodes) {
     schema.numberOfEpisodes = anime.episodes
-  }
-
-  // Google Rich Results Gold Star Snippets
-  if (anime.score && anime.score > 0) {
-    schema.aggregateRating = {
-      "@type": "AggregateRating",
-      ratingValue: anime.score.toFixed(1),
-      bestRating: "10",
-      worstRating: "0",
-      ratingCount: Math.max(anime.favourites || 0, anime.popularity || 100),
-    }
   }
 
   // Production Studios
@@ -200,7 +186,7 @@ export function generateAnimeJsonLd(
  * Generates Schema.org Person JSON-LD for Anime Characters.
  */
 export function generateCharacterJsonLd(char: CharacterDetail) {
-  const canonicalUrl = `${SITE_URL}/character/${char.id}`
+  const canonicalUrl = `${SITE_URL}${getCharacterUrl({ id: char.id, name: { full: char.name.full } })}`
   return {
     "@context": "https://schema.org",
     "@type": "Person",
@@ -219,14 +205,11 @@ export function generateCharacterJsonLd(char: CharacterDetail) {
       "@id": canonicalUrl,
     },
     jobTitle: "Anime Character",
-    sameAs: [
-      `https://anilist.co/character/${char.id}`,
-      `https://myanimelist.net/character/${char.id}`,
-    ],
+    sameAs: [`https://anilist.co/character/${char.id}`],
     performerIn: char.media.slice(0, 8).map((m) => ({
       "@type": m.format === "MOVIE" ? "Movie" : "TVSeries",
       name: m.title,
-      url: `${SITE_URL}/anime/${m.id}`,
+      url: animePageUrl(m),
     })),
     isPartOf: { "@id": `${SITE_URL}/#website` },
   }
@@ -446,7 +429,7 @@ export function generateWebSiteJsonLd() {
     ],
     description:
       "Comprehensive anime broadcast scheduling, seasonal release archives, creditless theme playback, and synchronized personal watchlists.",
-    inLanguage: ["en", "ja"],
+    inLanguage: "en",
     publisher: { "@id": `${SITE_URL}/#organization` },
     potentialAction: {
       "@type": "SearchAction",
@@ -525,8 +508,8 @@ export function generateSoftwareApplicationJsonLd() {
       priceCurrency: "USD",
     },
     featureList: [
-      "Millisecond-accurate Tokyo broadcast countdowns",
-      "Layered memory, Redis, and CDN caching for sub-millisecond responses",
+      "Episode countdowns synced to Japanese broadcast times (JST)",
+      "Layered memory, Workers edge, and CDN caching",
       "1080p clean opening and ending music playback via AnimeThemes.moe",
       "Personal watchlist and episode progress synchronization",
       "Keyboard-driven command palette navigation",
@@ -550,8 +533,8 @@ export function generateSeasonalJsonLd(
     "@context": "https://schema.org",
     "@type": "ItemList",
     "@id": `${SITE_URL}/seasonal#list`,
-    name: `${seasonTitle} Anime Lineup & Broadcast Schedule`,
-    description: `Official ranking and broadcast schedule for ${seasonTitle} seasonal anime releases on Yozora.`,
+    name: `${seasonTitle} Anime Lineup`,
+    description: `Current-season anime currently listed on Yozora for ${seasonTitle}.`,
     numberOfItems: items.length,
     itemListElement: items.slice(0, 30).map((anime, idx) => ({
       "@type": "ListItem",
@@ -559,22 +542,8 @@ export function generateSeasonalJsonLd(
       item: {
         "@type": anime.format === "MOVIE" ? "Movie" : "TVSeries",
         name: anime.title,
-        url: `${SITE_URL}/anime/${anime.id}`,
+        url: animePageUrl(anime),
         image: anime.coverExtraLarge || anime.coverLarge || anime.cover,
-        ...(anime.score && anime.score > 0
-          ? {
-              aggregateRating: {
-                "@type": "AggregateRating",
-                ratingValue: anime.score.toFixed(1),
-                bestRating: "10",
-                worstRating: "0",
-                ratingCount: Math.max(
-                  anime.favourites || 0,
-                  anime.popularity || 100
-                ),
-              },
-            }
-          : {}),
       },
     })),
   }
@@ -590,9 +559,8 @@ export function generateDatasetJsonLd() {
     "@id": `${SITE_URL}/#dataset`,
     name: "Yozora Anime Broadcast & Theme Music Archive",
     description:
-      "Comprehensive database of seasonal anime television schedules, countdown timetables, voice acting credits, and creditless soundtrack records.",
+      "Seasonal anime schedules, airing times, and creditless theme records on Yozora, sourced from AniList and AnimeThemes.",
     url: SITE_URL,
-    license: "https://creativecommons.org/licenses/by-nc-sa/4.0/",
     isAccessibleForFree: true,
     creator: { "@id": `${SITE_URL}/#organization` },
     keywords: [
@@ -627,7 +595,7 @@ export function generateAiringScheduleJsonLd(items: AiringScheduleItem[]) {
         "@type": "BroadcastEvent",
         name: `${item.media.title} Episode ${item.episode}`,
         startDate: new Date(item.airingAt * 1000).toISOString(),
-        url: `${SITE_URL}/anime/${item.media.id}`,
+        url: animePageUrl(item.media),
         workPresented: {
           "@type": "TVSeries",
           name: item.media.title,

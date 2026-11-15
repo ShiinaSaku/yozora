@@ -1,4 +1,3 @@
-import "@tanstack/react-start/server-only"
 
 /**
  * Two-tier cache with zero paid-service dependencies:
@@ -81,6 +80,16 @@ function resolveKey(
   }
 }
 
+/** Parses the freshness metadata stamped onto a cached response. */
+function readFreshness(
+  response: Response
+): { ageMs: number; ttlMs: number } | null {
+  const storedAt = Number(response.headers.get("x-yz-stored-at"))
+  const ttl = Number(response.headers.get("x-yz-ttl"))
+  if (!Number.isFinite(storedAt) || !Number.isFinite(ttl)) return null
+  return { ageMs: Date.now() - storedAt, ttlMs: ttl * 1000 }
+}
+
 /** Retrieves a deserialized value from the edge cache. Returns null on miss or error. */
 export async function cacheGet<T>(key: string): Promise<T | null> {
   const cache = getEdgeCache()
@@ -90,12 +99,35 @@ export async function cacheGet<T>(key: string): Promise<T | null> {
     const { request } = resolveKey(key)
     const response = await cache.match(request)
     if (!response) return null
+    // Freshness is enforced by us (the synthetic origin URL has no Date
+    // semantics a plain match() would respect reliably).
+    const freshness = readFreshness(response)
+    if (freshness && freshness.ageMs > freshness.ttlMs) return null
     return (await response.json()) as T
   } catch (error) {
     console.warn(
       "[Cache] Edge cache read failed:",
       error instanceof Error ? error.message : error
     )
+    return null
+  }
+}
+
+/**
+ * Retrieves a value ignoring freshness — the fail-open fallback for upstream
+ * outages. "Stale beats broken": a page renders with slightly old data rather
+ * than failing because its TTL expired during an upstream blip.
+ */
+export async function cacheGetStale<T>(key: string): Promise<T | null> {
+  const cache = getEdgeCache()
+  if (!cache) return null
+
+  try {
+    const { request } = resolveKey(key)
+    const response = await cache.match(request)
+    if (!response) return null
+    return (await response.json()) as T
+  } catch {
     return null
   }
 }
@@ -117,6 +149,8 @@ export async function cacheSet<T>(
         headers: {
           "content-type": "application/json; charset=utf-8",
           "cache-control": `public, max-age=${ttl}`,
+          "x-yz-stored-at": String(Date.now()),
+          "x-yz-ttl": String(ttl),
         },
       })
     )

@@ -1,6 +1,6 @@
 import * as React from "react"
 import type { Theme } from "@/components/theme-provider"
-import { useTheme } from "@/components/theme-provider"
+import { ThemeProvider, useTheme } from "@/components/theme-provider"
 import { Button } from "@/components/ui/button"
 import {
   segmentedControlItemVariants,
@@ -63,7 +63,19 @@ const themeOptions: Array<{ value: Theme; label: string }> = [
 /**
  * 1-click theme switch toggle button with press feedback (no rotation).
  */
+/**
+ * Circle-half contrast icon for navbar theme switching. Self-wraps its
+ * provider because Astro islands are separate React roots.
+ */
 export function ThemeToggle() {
+  return (
+    <ThemeProvider defaultTheme="dark" storageKey="theme">
+      <Toggle />
+    </ThemeProvider>
+  )
+}
+
+function Toggle() {
   const { theme, setTheme, resolvedTheme } = useTheme()
   const mounted = useMounted()
 
@@ -109,8 +121,17 @@ const itemClassName = segmentedControlItemVariants({
 
 /**
  * Segmented 3-way theme selector (Light / Dark / System) using @coss/segmented-control.
+ * Self-wraps its provider for the same reason as ThemeToggle.
  */
 export function ThemeSegmentedToggle() {
+  return (
+    <ThemeProvider defaultTheme="dark" storageKey="theme">
+      <SegmentedToggle />
+    </ThemeProvider>
+  )
+}
+
+function SegmentedToggle() {
   const { theme, setTheme } = useTheme()
   const mounted = useMounted()
 

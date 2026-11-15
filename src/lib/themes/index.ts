@@ -1,4 +1,3 @@
-import { createIsomorphicFn } from "@tanstack/react-start"
 import { GraphQLClient } from "graphql-request"
 import type {
   AnimeTheme,
@@ -9,7 +8,7 @@ import type {
 import {
   AnimeThemesDocument,
 } from "./operations"
-import type { AnimeThemesQuery } from "@/gql/themes/graphql"
+import type { ResultOf } from "gql.tada"
 
 const DEFAULT_ANIMETHEMES_ENDPOINT = "https://rs.animethemes.moe/graphql"
 
@@ -26,19 +25,23 @@ const MAX_THEMES_CACHE_ENTRIES = 500
 const THEMES_TTL_MS = 1000 * 60 * 60 * 24 * 30
 const THEMES_NEGATIVE_TTL_MS = 1000 * 60 * 60 * 6
 
-const redisGet = createIsomorphicFn()
-  .server(async (key: string) => {
-    const { cacheGet } = await import("@/lib/cache")
-    return cacheGet(key)
-  })
-  .client(async (_key: string) => null)
+const edgeCacheGet = async (key: string) => {
+  if (!import.meta.env.SSR) return null
+  const { cacheGet } = await import("@/lib/cache")
+  return cacheGet(key)
+}
 
-const redisSet = createIsomorphicFn()
-  .server(async (key: string, value: unknown, ttlSeconds: number) => {
-    const { cacheSet } = await import("@/lib/cache")
-    await cacheSet(key, value, ttlSeconds)
-  })
-  .client(async (_key: string, _value: unknown, _ttlSeconds: number) => {})
+const edgeCacheGetStale = async (key: string) => {
+  if (!import.meta.env.SSR) return null
+  const { cacheGetStale } = await import("@/lib/cache")
+  return cacheGetStale<AnimeThemesResponse>(key)
+}
+
+const edgeCacheSet = async (key: string, value: unknown, ttlSeconds: number) => {
+  if (!import.meta.env.SSR) return
+  const { cacheSet } = await import("@/lib/cache")
+  await cacheSet(key, value, ttlSeconds)
+}
 
 function cacheThemes(
   animeId: number,
@@ -106,7 +109,7 @@ function toThemeVideo(v: GqlVideo): AnimeThemeVideo {
  */
 function toTheme(
   theme: NonNullable<
-    AnimeThemesQuery["filterAnimeByExternalSite"][number]["themes"][number]
+    ResultOf<typeof AnimeThemesDocument>["filterAnimeByExternalSite"][number]["themes"][number]
   >
 ): AnimeTheme {
   const entries: AnimeThemeEntry[] = theme.entries.map((entry) => {
@@ -145,7 +148,9 @@ export async function getAnimeThemes(
   animeId: number
 ): Promise<AnimeThemesResponse> {
   const cached = themesCache.get(animeId)
-  if (cached && Date.now() < cached.expiresAt) {
+  // 15-minute stale grace: expired entries remain usable as a failure
+  // fallback so an upstream blip never blanks the theme player.
+  if (cached && Date.now() < cached.expiresAt + 1000 * 60 * 15) {
     return cached.data
   }
 
@@ -156,11 +161,11 @@ export async function getAnimeThemes(
   const cacheKey = `themes:${animeId}`
 
   const fetchPromise = (async () => {
-    // 1. Check Redis L2 cache
-    const redisHit = (await redisGet(cacheKey)) as AnimeThemesResponse | null
-    if (redisHit !== null) {
-      cacheThemes(animeId, redisHit, THEMES_TTL_MS)
-      return redisHit
+    // 1. Check edge cache L2
+    const edgeHit = (await edgeCacheGet(cacheKey)) as AnimeThemesResponse | null
+    if (edgeHit !== null) {
+      cacheThemes(animeId, edgeHit, THEMES_TTL_MS)
+      return edgeHit
     }
 
     try {
@@ -180,7 +185,7 @@ export async function getAnimeThemes(
         // Not in the AnimeThemes archive: negative-cache for 6h.
         const result: AnimeThemesResponse = { animeId, themes: [] }
         cacheThemes(animeId, result, THEMES_NEGATIVE_TTL_MS)
-        void redisSet(
+        void edgeCacheSet(
           cacheKey,
           result,
           Math.round(THEMES_NEGATIVE_TTL_MS / 1000)
@@ -196,17 +201,23 @@ export async function getAnimeThemes(
       }
 
       cacheThemes(animeId, result, THEMES_TTL_MS)
-      void redisSet(cacheKey, result, Math.round(THEMES_TTL_MS / 1000))
+      void edgeCacheSet(cacheKey, result, Math.round(THEMES_TTL_MS / 1000))
 
       return result
     } catch (error) {
       // GraphQL/transport errors: don't cache so the next request can retry.
       // Bare HTTP failures from AnimeThemes' Cloudflare edge are treated as a
-      // temporary outage rather than an empty archive.
+      // temporary outage rather than an empty archive. Prefer any stale
+      // cached entry over blanking the player, then fall back to empty.
       console.warn(
         `[Themes] GraphQL fetch for AniList #${animeId} failed:`,
         error instanceof Error ? error.message : error
       )
+      const edgeStale = await edgeCacheGetStale(cacheKey)
+      if (edgeStale) {
+        cacheThemes(animeId, edgeStale, THEMES_TTL_MS)
+        return edgeStale
+      }
       return { animeId, themes: [] }
     } finally {
       inFlightThemes.delete(animeId)

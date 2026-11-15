@@ -51,11 +51,11 @@ export default [
     ignores: [
       "eslint.config.js",
       ".prettierrc",
-      ".output",
       "dist",
       "node_modules",
-      "src/routeTree.gen.ts",
-      "src/gql/**",
+      ".agents",
+      ".astro",
+      ".wrangler",
     ],
   },
 ]

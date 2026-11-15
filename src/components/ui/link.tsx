@@ -1,6 +1,4 @@
 import * as React from "react"
-import { Link as RouterLink } from "@tanstack/react-router"
-import type { LinkProps as TanStackLinkProps } from "@tanstack/react-router"
 
 import { cva } from "class-variance-authority"
 import type { VariantProps } from "class-variance-authority"
@@ -14,7 +12,7 @@ export const linkVariants = cva("", {
       muted: "text-muted-foreground transition-colors hover:text-foreground",
       primary: "gap-1 text-xs font-semibold text-primary hover:underline",
       title:
-        "rounded-lg transition-colors hover:text-white/90 focus-visible:outline-2 focus-visible:outline-ring",
+        "rounded-lg transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-ring",
       pill: "inline-flex items-center gap-1.5 rounded-full border border-border/40 bg-muted/40 px-3 py-1.5 text-xs font-semibold text-foreground/80 transition-all duration-150 hover:border-border/80 hover:bg-muted hover:text-foreground",
       "pill-primary":
         "rounded-full border border-border/60 bg-muted/40 px-3 py-1.5 text-xs font-semibold text-foreground transition-colors hover:border-primary/40 hover:bg-primary/10 hover:text-primary",
@@ -47,30 +45,14 @@ export const linkVariants = cva("", {
 
 export type LinkProps = React.AnchorHTMLAttributes<HTMLAnchorElement> & {
   href: string
-} & Partial<Omit<TanStackLinkProps, "to" | "href">> &
-  VariantProps<typeof linkVariants>
+} & VariantProps<typeof linkVariants>
 
-/** A compatibility link that routes same-origin paths through TanStack Router. */
-export function Link({
-  href,
-  children,
-  className,
-  variant,
-  ...props
-}: LinkProps) {
+/**
+ * Styled anchor. Same-origin navigations are intercepted by Astro's
+ * <ClientRouter /> and links are prefetched globally via the prefetch config.
+ */
+export function Link({ href, children, className, variant, ...props }: LinkProps) {
   const finalClass = cn(linkVariants({ variant }), className)
-  if (href.startsWith("/")) {
-    return (
-      <RouterLink
-        to={href as TanStackLinkProps["to"]}
-        className={finalClass}
-        {...props}
-      >
-        {children}
-      </RouterLink>
-    )
-  }
-
   return (
     <a {...props} href={href} className={finalClass}>
       {children}

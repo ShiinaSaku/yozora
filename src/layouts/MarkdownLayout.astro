@@ -1,0 +1,41 @@
+---
+/**
+ * Layout for Markdown/MDX content pages. Frontmatter supplies `title`,
+ * `description` and optional `heading` / `lead`; the body is rendered with the
+ * shadcn `typeset` styles inside a Card.
+ */
+import BaseLayout from "@/layouts/BaseLayout.astro"
+import { Card } from "@/components/ui/card"
+import { canonicalLinks } from "@/lib/seo/meta"
+
+interface Props {
+  frontmatter: {
+    title: string
+    description: string
+    heading?: string
+    lead?: string
+  }
+}
+
+const { frontmatter } = Astro.props
+---
+
+<BaseLayout
+  title={frontmatter.title}
+  description={frontmatter.description}
+  links={canonicalLinks(Astro.url.pathname)}
+>
+  <div class="container mx-auto flex max-w-4xl flex-col gap-10 px-4 py-16 sm:px-6">
+    <header class="flex flex-col gap-3">
+      <h1 class="text-4xl font-black tracking-tight text-foreground">
+        {frontmatter.heading ?? frontmatter.title}
+      </h1>
+      {frontmatter.lead && <p class="text-base text-muted-foreground">{frontmatter.lead}</p>}
+    </header>
+    <Card variant="subtle" size="none">
+      <article class="typeset p-8 text-sm">
+        <slot />
+      </article>
+    </Card>
+  </div>
+</BaseLayout>

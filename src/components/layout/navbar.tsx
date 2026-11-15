@@ -5,8 +5,8 @@ import {
   SignInButton,
   SignUpButton,
   UserButton,
-  useUser,
-} from "@clerk/tanstack-react-start"
+} from "@clerk/astro/react"
+import { useUser } from "@/lib/clerk"
 import { HugeiconsIcon } from "@hugeicons/react"
 import {
   Calendar03Icon,
@@ -214,7 +214,7 @@ function NavbarDesktopMenu({
             strokeWidth={2}
             data-icon="inline-start"
           />
-          <span>Showcase</span>
+          <span>Explore</span>
         </Link>
 
         <Link
@@ -313,24 +313,7 @@ function NavbarAuthControls({
               userButtonAvatarBox: "size-8 rounded-xl",
             },
           }}
-        >
-          <UserButton.MenuItems>
-            <UserButton.Link
-              label="My Profile"
-              href={userProfileUrl}
-              labelIcon={
-                <HugeiconsIcon icon={UserIcon} size={15} strokeWidth={2} />
-              }
-            />
-            <UserButton.Link
-              label="Settings & Profile"
-              href="/settings/profile"
-              labelIcon={
-                <HugeiconsIcon icon={UserIcon} size={15} strokeWidth={2} />
-              }
-            />
-          </UserButton.MenuItems>
-        </UserButton>
+        />
       </div>
     )
   }
@@ -507,9 +490,9 @@ export function Navbar() {
               isSignedIn={Boolean(isSignedIn)}
             />
 
-            <Link href="/" variant="brand">
+            <Link href="/" variant="brand" aria-label="Yozora home">
               <BrandLogo className="size-9 transition-transform duration-200 group-hover:scale-105" />
-              <span className="hidden text-lg leading-none font-black tracking-tight text-foreground sm:inline-block">
+              <span className="hidden font-heading text-lg leading-none font-bold tracking-tight text-foreground sm:inline-block">
                 Yozora
               </span>
             </Link>

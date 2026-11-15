@@ -1,7 +1,7 @@
 import * as React from "react"
 import Image from "@/components/ui/image"
 import { usePathname, useRouter } from "@/lib/navigation"
-import { useQuery } from "@tanstack/react-query"
+import { fetchTrending, searchCatalog } from "@/lib/api"
 import {
   ArrowRight,
   Calendar,
@@ -31,7 +31,6 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command"
-import { getAnimeCollection, searchAnime } from "@/lib/catalog"
 import { getAnimeUrl } from "@/lib/utils/slug"
 import type { Anime } from "@/lib/types/anime"
 
@@ -270,19 +269,37 @@ function SearchDialogInner({ open, onOpenChange }: SearchDialogProps) {
 
   const isSearching = debouncedQuery.trim().length > 0
 
-  const { data: results = [], isLoading } = useQuery<Anime[]>({
-    queryKey: ["search-dialog", debouncedQuery],
-    queryFn: () => searchAnime(debouncedQuery),
-    enabled: isSearching,
-    staleTime: 1000 * 60 * 5,
-  })
+  const [results, setResults] = React.useState<Anime[]>([])
+  const [isLoading, setIsLoading] = React.useState(false)
 
-  const { data: dynamicTrending } = useQuery<Anime[]>({
-    queryKey: ["search-dialog-trending"],
-    queryFn: () => getAnimeCollection("trending"),
-    staleTime: 1000 * 60 * 30,
-    enabled: open && !isSearching,
-  })
+  React.useEffect(() => {
+    if (!isSearching) {
+      setResults([])
+      return
+    }
+    const controller = new AbortController()
+    setIsLoading(true)
+    searchCatalog(debouncedQuery, controller.signal)
+      .then(setResults)
+      .catch(() => {})
+      .finally(() => {
+        if (!controller.signal.aborted) setIsLoading(false)
+      })
+    return () => controller.abort()
+  }, [debouncedQuery, isSearching])
+
+  const [dynamicTrending, setDynamicTrending] = React.useState<Anime[] | null>(
+    null
+  )
+
+  React.useEffect(() => {
+    if (!open || isSearching) return
+    const controller = new AbortController()
+    fetchTrending(controller.signal)
+      .then(setDynamicTrending)
+      .catch(() => {})
+    return () => controller.abort()
+  }, [open, isSearching])
 
   const trendingAnimeList = React.useMemo(() => {
     if (dynamicTrending && dynamicTrending.length > 0) {

@@ -1,0 +1,29 @@
+---
+/**
+ * Sign-in flow. Clerk's Astro <SignIn /> component mounts its UI into the
+ * placeholder div once clerk-js loads — no React island needed. The
+ * `redirect` query param is forwarded as the post-auth destination.
+ */
+import BaseLayout from "@/layouts/BaseLayout.astro"
+import { SignIn } from "@clerk/astro/components"
+
+export const prerender = false
+
+const redirectUrl = Astro.url.searchParams.get("redirect") ?? undefined
+---
+
+<BaseLayout
+  title="Sign In | Yozora"
+  description="Sign in to your Yozora account to manage your anime library."
+  robots="noindex, nofollow"
+  links={[{ rel: "canonical", href: new URL("/sign-in", Astro.site).href }]}
+>
+  <div class="flex min-h-140 items-center justify-center px-4 py-12">
+    <SignIn
+      path="/sign-in"
+      routing="path"
+      forceRedirectUrl={redirectUrl}
+      fallbackRedirectUrl={redirectUrl || "/"}
+    />
+  </div>
+</BaseLayout>

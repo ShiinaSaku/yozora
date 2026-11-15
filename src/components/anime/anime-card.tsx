@@ -63,7 +63,7 @@ export function AnimeCard({
         </div>
 
         {anime.score > 0 && (
-          <div className="pointer-events-none absolute top-2.5 right-2.5 z-10 flex items-center gap-1 rounded-md bg-background/80 px-2 py-0.5 text-xs font-bold text-amber-500 backdrop-blur-md">
+          <div className="pointer-events-none absolute top-2.5 right-2.5 z-10 flex items-center gap-1 rounded-md bg-background/90 px-2 py-0.5 text-xs font-bold text-amber-500">
             <HugeiconsIcon
               icon={StarIcon}
               size={12}
@@ -75,7 +75,7 @@ export function AnimeCard({
         )}
 
         {onSaveClick && (
-          <div className="absolute right-2.5 bottom-2.5 z-10 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
+          <div className="absolute right-2.5 bottom-2.5 z-10 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100 pointer-coarse:opacity-100">
             <Button
               size="icon-sm"
               variant="overlay"

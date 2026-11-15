@@ -1,0 +1,49 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro"
+import {
+  ProfileSettingsClient,
+  type SettingsTab,
+} from "@/components/pages/profile-settings-client"
+import { getUserId } from "@/lib/server/auth"
+import { canonicalLinks, openGraphImageUrl } from "@/lib/seo/meta"
+
+export const prerender = false
+
+const userId = await getUserId(Astro.locals)
+if (!userId) {
+  return Astro.redirect(
+    `/sign-in?redirect=${encodeURIComponent("/settings/profile")}`
+  )
+}
+
+const TABS: SettingsTab[] = [
+  "profile",
+  "account",
+  "showcase",
+  "connections",
+  "preferences",
+  "danger",
+]
+const requestedTab = Astro.url.searchParams.get("tab") as SettingsTab | null
+const tab = requestedTab && TABS.includes(requestedTab) ? requestedTab : "profile"
+
+const description =
+  "Customize your public profile, account security, connected anime accounts, and preferences on Yozora."
+const image = openGraphImageUrl({
+  type: "settings",
+  title: "Account & Profile Settings",
+  subtitle: "Preferences, Security & Integrations",
+  tag: "User Settings",
+  description,
+})
+---
+
+<BaseLayout
+  title="Settings | Yozora"
+  description={description}
+  robots="noindex, nofollow"
+  image={image}
+  links={canonicalLinks("/settings/profile")}
+>
+  <ProfileSettingsClient client:load defaultTab={tab} />
+</BaseLayout>

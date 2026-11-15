@@ -1,0 +1,87 @@
+---
+import { HugeiconsIcon } from "@hugeicons/react"
+import { ArrowRight01Icon, Calendar03Icon, FireIcon, RadioIcon, TrophyIcon } from "@hugeicons/core-free-icons"
+import { Image } from "astro:assets"
+import AnimeCard from "@/components/anime/AnimeCard.astro"
+import { HomeInteractions } from "@/components/pages/home-interactions"
+import { getAnimeUrl } from "@/lib/utils/slug"
+import type { AiringScheduleItem, Anime } from "@/lib/types/anime"
+
+interface Props {
+  trending: Anime[]
+  seasonal: Anime[]
+  popular: Anime[]
+  airing: AiringScheduleItem[]
+}
+
+const { trending, seasonal, popular, airing } = Astro.props
+const sections = [
+  { id: "trending", title: "Trending Now", description: "Most popular series in the global anime community this week", icon: FireIcon, iconClass: "bg-orange-500/10 text-orange-500", items: trending },
+  { id: "seasonal", title: "Current Season", description: "Top broadcasting series from the current anime season", icon: Calendar03Icon, iconClass: "bg-amber-500/10 text-amber-500", items: seasonal, href: "/seasonal", link: "View Seasonal Chart" },
+  { id: "popular", title: "All-Time Popular", description: "Legendary titles with the largest worldwide community followings", icon: TrophyIcon, iconClass: "bg-sky-500/10 text-sky-500", items: popular },
+]
+const catalog = [...new Map(sections.flatMap(({ items }) => items.slice(0, 12)).map(({ id, title, cover, coverMedium, format, year, episodes }) => [id, { id, title, cover, coverMedium, format, year, episodes }])).values()]
+---
+
+<div id="home-main-container" class="container mx-auto flex max-w-7xl flex-col gap-16 px-4 py-6 sm:gap-20 sm:px-6 sm:py-8">
+  <h1 class="sr-only">Yozora (夜空) — Anime Airing Schedule and Creditless Themes</h1>
+  <HomeInteractions client:load trending={trending.slice(0, 5)} catalog={catalog} />
+
+  {
+    sections.map((section) => (
+      <>
+        <section id={`${section.id}-anime-section`} aria-labelledby={`${section.id}-heading`} class="flex flex-col gap-6">
+          <div class="flex flex-wrap items-end justify-between gap-4">
+            <div class="flex items-center gap-2.5">
+              <div class:list={["flex size-8 items-center justify-center rounded-lg", section.iconClass]}>
+                <HugeiconsIcon icon={section.icon} size={18} strokeWidth={2} aria-hidden="true" />
+              </div>
+              <div>
+                <h2 id={`${section.id}-heading`} class="text-xl font-bold tracking-tight text-foreground sm:text-2xl">{section.title}</h2>
+                <p class="mt-1 text-sm text-muted-foreground">{section.description}</p>
+              </div>
+            </div>
+            {section.href && <a href={section.href} class="group flex items-center gap-1 text-xs font-semibold text-primary hover:underline">{section.link}<HugeiconsIcon icon={ArrowRight01Icon} size={14} strokeWidth={2} aria-hidden="true" /></a>}
+          </div>
+          <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+            {section.items.slice(0, 12).map((anime) => <AnimeCard anime={anime} saveable />)}
+          </div>
+        </section>
+
+        {section.id === "seasonal" && airing.length > 0 && (
+          <section id="airing-radar-section" aria-labelledby="airing-radar-heading" class="flex flex-col gap-6">
+            <div class="flex flex-wrap items-end justify-between gap-4">
+              <div class="flex items-center gap-2.5">
+                <div class="flex size-8 items-center justify-center rounded-lg bg-rose-500/10 text-rose-500"><HugeiconsIcon icon={RadioIcon} size={18} strokeWidth={2} aria-hidden="true" /></div>
+                <div><h2 id="airing-radar-heading" class="text-xl font-bold tracking-tight sm:text-2xl">Airing Radar</h2><p class="mt-1 text-sm text-muted-foreground">Live broadcasting countdowns for today and upcoming days</p></div>
+              </div>
+              <a href="/airing" class="flex items-center gap-1 text-xs font-semibold text-primary hover:underline">Full Schedule <HugeiconsIcon icon={ArrowRight01Icon} size={14} strokeWidth={2} aria-hidden="true" /></a>
+            </div>
+            <div class="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
+              {airing.slice(0, 6).map((item) => (
+                <a href={getAnimeUrl(item.media)} class="group flex items-center gap-3.5 rounded-2xl border border-border/40 bg-card p-3 transition-colors hover:border-border hover:bg-muted/50">
+                  <Image src={item.media.coverMedium || item.media.cover} alt="" width="56" height="56" loading="lazy" decoding="async" class="size-14 shrink-0 rounded-xl object-cover" />
+                  <span class="flex min-w-0 flex-col"><span class="truncate text-sm font-bold group-hover:text-primary">{item.media.title}</span><span class="mt-0.5 font-mono text-xs text-muted-foreground">Episode {item.episode}</span></span>
+                </a>
+              ))}
+            </div>
+          </section>
+        )}
+      </>
+    ))
+  }
+  <section id="about-yozora-summary" aria-labelledby="about-yozora-heading" class="flex flex-col gap-6 rounded-3xl border border-border/50 bg-card/60 p-6 sm:p-8">
+    <div class="flex flex-col gap-2">
+      <h2 id="about-yozora-heading" class="text-lg font-bold tracking-tight sm:text-xl">What is Yozora?</h2>
+      <p class="max-w-4xl text-sm leading-relaxed text-pretty text-muted-foreground">Yozora (夜空) is an anime catalog and broadcast radar. Discover seasonal series, follow episode schedules, explore creditless opening and ending themes, and keep a personal watchlist.</p>
+    </div>
+    <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      {[
+        ["Tokyo JST", "Airing schedules"],
+        ["Anime themes", "Creditless OP / ED"],
+        ["Watchlists", "Track your anime"],
+        ["Free & open source", "Ad-free discovery"],
+      ].map(([title, description]) => <div class="flex flex-col gap-0.5 rounded-xl border border-border/40 bg-background/50 p-3"><span class="text-base font-bold">{title}</span><span class="text-xs text-muted-foreground">{description}</span></div>)}
+    </div>
+  </section>
+</div>

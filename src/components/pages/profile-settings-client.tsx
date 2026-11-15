@@ -1,8 +1,10 @@
 import * as React from "react"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { useUser, useClerk, UserProfile } from "@clerk/tanstack-react-start"
+import { UserProfile as ClerkUserProfile } from "@clerk/astro/react"
+import { useClerk, useUser } from "@/lib/clerk"
 import { toast } from "sonner"
 import {
+  ArrowUpRight,
+  ExternalLink,
   Link2,
   Loader2,
   Palette,
@@ -41,17 +43,23 @@ import { Input } from "@/components/ui/input"
 import { MarkdownEditor } from "@/components/ui/markdown-editor"
 import { ThemeSegmentedToggle } from "@/components/layout/theme-toggle"
 import { Image } from "@/components/ui/image"
+import { Badge } from "@/components/ui/badge"
 import { useRouter } from "@/lib/navigation"
 import { cn } from "@/lib/utils"
 import { z } from "zod"
-import type { SettingsTab } from "@/routes/_authed/settings/profile"
-import { myProfileQueryOptions } from "@/lib/queries/profile"
-import {
-  batchAnimeQueryOptions,
-  searchCatalogQueryOptions,
-} from "@/lib/queries/catalog"
-import { deleteUserDataFn, updateProfileFn } from "@/lib/server/profile"
+import { fetchBatchAnime, fetchMyProfile, searchCatalog } from "@/lib/api"
+import { actions } from "astro:actions"
+import { AniListIcon, MyAnimeListIcon } from "@/components/icons/platform-icons"
+import type { UserProfile } from "@/lib/db/schema"
 import type { Anime } from "@/lib/types/anime"
+
+export type SettingsTab =
+  | "profile"
+  | "account"
+  | "showcase"
+  | "connections"
+  | "preferences"
+  | "danger"
 
 const profileSchema = z.compile(
   z.object({
@@ -155,12 +163,29 @@ const TABS: Array<{
   },
 ]
 
-export function ProfileSettingsClient({
+/** Fetches the signed-in user's DB profile (null when none exists). */
+function useProfileQuery(enabled: boolean) {
+  const [data, setData] = React.useState<UserProfile | null>(null)
+  React.useEffect(() => {
+    if (!enabled) return
+    const controller = new AbortController()
+    fetchMyProfile(controller.signal)
+      .then(setData)
+      .catch(() => {})
+    return () => controller.abort()
+  }, [enabled])
+  return { data }
+}
+
+export function ProfileSettingsClient(props: ProfileSettingsClientProps) {
+  return <ProfileSettingsClientContent {...props} />
+}
+
+function ProfileSettingsClientContent({
   defaultTab = "profile",
 }: ProfileSettingsClientProps) {
   const router = useRouter()
   const { user, isSignedIn, isLoaded } = useUser()
-  const queryClient = useQueryClient()
   const [activeTab, setActiveTab] = React.useState<SettingsTab>(defaultTab)
 
   React.useEffect(() => {
@@ -174,45 +199,56 @@ export function ProfileSettingsClient({
   const [fieldErrors, setFieldErrors] = React.useState<Record<string, string>>(
     {}
   )
+  const [isSaving, setIsSaving] = React.useState(false)
+  const [hasChanges, setHasChanges] = React.useState(false)
+  const baselineRef = React.useRef<string>("")
 
-  // Load current user profile from DB
-  const { data: profile, isLoading } = useQuery(
-    myProfileQueryOptions(Boolean(isSignedIn))
-  )
+  const { data: profile } = useProfileQuery(isSignedIn)
 
   React.useEffect(() => {
+    let payload: Partial<ProfileState> | null = null
+
     if (profile) {
-      dispatch({
-        type: "LOAD_PROFILE",
-        payload: {
-          handle: profile.handle || "",
-          displayName: profile.displayName || "",
-          avatarUrl: profile.avatarUrl || "",
-          bannerUrl: profile.bannerUrl || "",
-          bio: profile.bio || "",
-          isPublic: profile.isPublic,
-          anilistUsername: profile.anilistUsername || "",
-          malUsername: profile.malUsername || "",
-          pinnedAnimeIds: profile.pinnedAnimeIds || [],
-        },
-      })
+      payload = {
+        handle: profile.handle || "",
+        displayName: profile.displayName || "",
+        avatarUrl: profile.avatarUrl || "",
+        bannerUrl: profile.bannerUrl || "",
+        bio: profile.bio || "",
+        isPublic: profile.isPublic,
+        anilistUsername: profile.anilistUsername || "",
+        malUsername: profile.malUsername || "",
+        pinnedAnimeIds: profile.pinnedAnimeIds || [],
+      }
     } else if (user) {
       const userHandle = (user.username || user.id.slice(-8)).toLowerCase()
       const userDisplayName =
         [user.firstName, user.lastName].filter(Boolean).join(" ") ||
         user.username ||
         "User"
-      dispatch({
-        type: "LOAD_PROFILE",
-        payload: {
-          handle: userHandle,
-          displayName: userDisplayName,
-          avatarUrl: user.imageUrl || "",
-          isPublic: true,
-        },
+      payload = {
+        handle: userHandle,
+        displayName: userDisplayName,
+        avatarUrl: user.imageUrl || "",
+        isPublic: true,
+      }
+    }
+
+    if (payload) {
+      dispatch({ type: "LOAD_PROFILE", payload })
+      baselineRef.current = JSON.stringify({
+        ...initialProfileState,
+        ...payload,
       })
+      setHasChanges(false)
     }
   }, [profile, user])
+
+  React.useEffect(() => {
+    setHasChanges(
+      baselineRef.current !== "" && JSON.stringify(state) !== baselineRef.current
+    )
+  }, [state])
 
   const validateForm = () => {
     const result = profileSchema.safeParse({
@@ -223,7 +259,7 @@ export function ProfileSettingsClient({
 
     if (!result.success) {
       const errors: Record<string, string> = {}
-      const flattened = result.error.flatten()
+      const flattened = z.flattenError(result.error)
       for (const [key, messages] of Object.entries(flattened.fieldErrors)) {
         if (messages.length > 0) {
           errors[key] = messages[0]!
@@ -241,47 +277,37 @@ export function ProfileSettingsClient({
     return true
   }
 
-  // Save mutation
-  const saveMutation = useMutation({
-    mutationFn: () =>
-      updateProfileFn({
-        data: {
-          handle: state.handle.trim().toLowerCase(),
-          displayName: state.displayName.trim(),
-          avatarUrl: state.avatarUrl.trim() || null,
-          bannerUrl: state.bannerUrl.trim() || null,
-          bio: state.bio.trim() || null,
-          isPublic: state.isPublic,
-          anilistUsername: state.anilistUsername.trim() || null,
-          malUsername: state.malUsername.trim() || null,
-          pinnedAnimeIds: state.pinnedAnimeIds,
-        },
-      }),
-    onSuccess: (data) => {
+  const saveProfile = async () => {
+    if (!validateForm() || isSaving) return
+    setIsSaving(true)
+    try {
+      const { error } = await actions.profile.update({
+        handle: state.handle.trim().toLowerCase(),
+        displayName: state.displayName.trim(),
+        avatarUrl: state.avatarUrl.trim() || null,
+        bannerUrl: state.bannerUrl.trim() || null,
+        bio: state.bio.trim() || null,
+        isPublic: state.isPublic,
+        anilistUsername: state.anilistUsername.trim() || null,
+        malUsername: state.malUsername.trim() || null,
+        pinnedAnimeIds: state.pinnedAnimeIds,
+      })
+      if (error) throw new Error(error.message)
+
       toast.success("Settings Saved", {
         description:
           "Your profile and preferences are synced live across Yozora.",
       })
-      queryClient.invalidateQueries({
-        queryKey: myProfileQueryOptions().queryKey,
-      })
-      if (data.handle) {
-        queryClient.invalidateQueries({
-          queryKey: ["public-profile", data.handle.toLowerCase()],
-        })
-      }
-    },
-    onError: (err: Error) => {
+      baselineRef.current = JSON.stringify(state)
+      setHasChanges(false)
+    } catch (error) {
       toast.error("Failed to Save Settings", {
-        description: err.message || "An error occurred while saving.",
+        description:
+          error instanceof Error ? error.message : "An error occurred.",
       })
-    },
-  })
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    if (!validateForm()) return
-    saveMutation.mutate()
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   const handleTabSelect = (tabId: SettingsTab) => {
@@ -289,7 +315,7 @@ export function ProfileSettingsClient({
     void router.replace(`/settings/profile?tab=${tabId}`)
   }
 
-  if (!isLoaded || isLoading) {
+  if (!isLoaded) {
     return (
       <div className="container mx-auto flex max-w-5xl justify-center px-4 py-24">
         <Loader2 className="size-8 animate-spin text-muted-foreground" />
@@ -297,20 +323,36 @@ export function ProfileSettingsClient({
     )
   }
 
+  if (!isSignedIn) {
+    return (
+      <div className="container mx-auto max-w-5xl px-4 py-24 text-center sm:px-6">
+        <ShieldCheck className="mx-auto size-10 text-muted-foreground" />
+        <h2 className="mt-4 text-xl font-bold">Sign in required</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Sign in to manage your profile and settings.
+        </p>
+      </div>
+    )
+  }
+
+  const dirtyBadge = hasChanges ? (
+    <Badge variant="outline">Unsaved changes</Badge>
+  ) : null
+
   return (
     <div className="container mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-10">
-      <div className="mb-8">
+      <div className="mb-8 flex flex-col gap-1.5">
         <h1 className="text-3xl font-black tracking-tight text-foreground">
           Settings
         </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Unified control center for your public anime profile, account
-          security, connected services, and preferences.
+        <p className="text-sm text-muted-foreground">
+          Public profile, account security, connected services, and
+          preferences — all in one place.
         </p>
       </div>
 
       <div className="flex flex-col gap-8 md:flex-row">
-        <aside className="no-scrollbar flex shrink-0 gap-1 overflow-x-auto pb-2 md:w-56 md:flex-col md:overflow-x-visible md:pb-0 lg:w-60">
+        <aside className="no-scrollbar flex shrink-0 gap-1 overflow-x-auto pb-2 md:sticky md:top-24 md:w-56 md:flex-col md:self-start md:overflow-x-visible md:pb-0 lg:w-60">
           {TABS.map((tab) => {
             const Icon = tab.icon
             const isSelected = activeTab === tab.id
@@ -343,7 +385,17 @@ export function ProfileSettingsClient({
                         : "text-muted-foreground"
                   )}
                 />
-                <span className="whitespace-nowrap">{tab.label}</span>
+                <span className="min-w-0">
+                  <span className="block whitespace-nowrap">{tab.label}</span>
+                  <span
+                    className={cn(
+                      "hidden truncate text-xs font-normal opacity-70 lg:block",
+                      isSelected && "opacity-100"
+                    )}
+                  >
+                    {tab.description}
+                  </span>
+                </span>
               </button>
             )
           })}
@@ -351,7 +403,13 @@ export function ProfileSettingsClient({
 
         <main className="min-w-0 flex-1">
           {activeTab === "profile" && (
-            <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault()
+                void saveProfile()
+              }}
+              className="flex flex-col gap-6"
+            >
               <ProfilePublicInfoCard
                 state={state}
                 fieldErrors={fieldErrors}
@@ -360,6 +418,8 @@ export function ProfileSettingsClient({
                 }
               />
 
+              <ProfileLivePreview state={state} />
+
               <ProfileBioCard
                 bio={state.bio}
                 onChange={(value) =>
@@ -367,23 +427,7 @@ export function ProfileSettingsClient({
                 }
               />
 
-              <div className="flex justify-end">
-                <Button
-                  type="submit"
-                  size="hero"
-                  disabled={saveMutation.isPending}
-                >
-                  {saveMutation.isPending ? (
-                    <Loader2
-                      className="size-4 animate-spin"
-                      data-icon="inline-start"
-                    />
-                  ) : (
-                    <Save data-icon="inline-start" className="size-4" />
-                  )}
-                  Save Profile
-                </Button>
-              </div>
+              <SaveRow isSaving={isSaving} dirtyBadge={dirtyBadge} label="Save Profile" />
             </form>
           )}
 
@@ -400,7 +444,7 @@ export function ProfileSettingsClient({
               </div>
 
               <div className="overflow-hidden rounded-2xl border border-border/50 bg-card p-2 sm:p-4">
-                <UserProfile
+                <ClerkUserProfile
                   routing="hash"
                   appearance={{
                     elements: {
@@ -418,7 +462,13 @@ export function ProfileSettingsClient({
           )}
 
           {activeTab === "showcase" && (
-            <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault()
+                void saveProfile()
+              }}
+              className="flex flex-col gap-6"
+            >
               <PinnedAnimeCard
                 pinnedIds={state.pinnedAnimeIds}
                 onChange={(ids) =>
@@ -430,28 +480,22 @@ export function ProfileSettingsClient({
                 }
               />
 
-              <div className="flex justify-end">
-                <Button
-                  type="submit"
-                  size="hero"
-                  disabled={saveMutation.isPending}
-                >
-                  {saveMutation.isPending ? (
-                    <Loader2
-                      className="size-4 animate-spin"
-                      data-icon="inline-start"
-                    />
-                  ) : (
-                    <Save data-icon="inline-start" className="size-4" />
-                  )}
-                  Save Pinned Anime
-                </Button>
-              </div>
+              <SaveRow
+                isSaving={isSaving}
+                dirtyBadge={dirtyBadge}
+                label="Save Pinned Anime"
+              />
             </form>
           )}
 
           {activeTab === "connections" && (
-            <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault()
+                void saveProfile()
+              }}
+              className="flex flex-col gap-6"
+            >
               <ProfileIntegrationsCard
                 state={state}
                 onChange={(field, value) =>
@@ -459,54 +503,37 @@ export function ProfileSettingsClient({
                 }
               />
 
-              <div className="flex justify-end">
-                <Button
-                  type="submit"
-                  size="hero"
-                  disabled={saveMutation.isPending}
-                >
-                  {saveMutation.isPending ? (
-                    <Loader2
-                      className="size-4 animate-spin"
-                      data-icon="inline-start"
-                    />
-                  ) : (
-                    <Save data-icon="inline-start" className="size-4" />
-                  )}
-                  Save Trackers
-                </Button>
-              </div>
+              <SaveRow
+                isSaving={isSaving}
+                dirtyBadge={dirtyBadge}
+                label="Save Trackers"
+              />
             </form>
           )}
 
           {activeTab === "preferences" && (
-            <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault()
+                void saveProfile()
+              }}
+              className="flex flex-col gap-6"
+            >
               <ProfileAppearanceCard />
 
               <ProfilePrivacyCard
+                handle={state.handle}
                 isPublic={state.isPublic}
                 onChange={(value) =>
                   dispatch({ type: "SET_FIELD", field: "isPublic", value })
                 }
               />
 
-              <div className="flex justify-end">
-                <Button
-                  type="submit"
-                  size="hero"
-                  disabled={saveMutation.isPending}
-                >
-                  {saveMutation.isPending ? (
-                    <Loader2
-                      className="size-4 animate-spin"
-                      data-icon="inline-start"
-                    />
-                  ) : (
-                    <Save data-icon="inline-start" className="size-4" />
-                  )}
-                  Save Preferences
-                </Button>
-              </div>
+              <SaveRow
+                isSaving={isSaving}
+                dirtyBadge={dirtyBadge}
+                label="Save Preferences"
+              />
             </form>
           )}
 
@@ -514,6 +541,104 @@ export function ProfileSettingsClient({
         </main>
       </div>
     </div>
+  )
+}
+
+function SaveRow({
+  isSaving,
+  dirtyBadge,
+  label,
+}: {
+  isSaving: boolean
+  dirtyBadge: React.ReactNode
+  label: string
+}) {
+  return (
+    <div className="flex items-center justify-end gap-3 border-t border-border/50 pt-5">
+      <div className="mr-auto">{dirtyBadge}</div>
+      <Button type="submit" size="hero" disabled={isSaving}>
+        {isSaving ? (
+          <Loader2 className="size-4 animate-spin" data-icon="inline-start" />
+        ) : (
+          <Save data-icon="inline-start" className="size-4" />
+        )}
+        {label}
+      </Button>
+    </div>
+  )
+}
+
+/** Strips markdown syntax for a plain-text preview line. */
+function previewText(markdown: string) {
+  return markdown
+    .replace(/[#*_`~>[\]()!-]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+}
+
+function ProfileLivePreview({ state }: { state: ProfileState }) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Live Preview</CardTitle>
+        <CardDescription>
+          A quick look at what visitors see on your public profile.
+        </CardDescription>
+      </CardHeader>
+
+      <CardContent>
+        <div className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-xs">
+          <div className="relative h-24 overflow-hidden bg-muted sm:h-32">
+            {state.bannerUrl ? (
+              <Image
+                src={state.bannerUrl}
+                alt=""
+                fill
+                unoptimized
+                sizes="(max-width: 640px) 100vw, 640px"
+                className="object-cover object-center"
+              />
+            ) : (
+              <div className="size-full bg-linear-to-br from-primary/30 via-accent/50 to-secondary" />
+            )}
+            <div className="absolute inset-0 bg-linear-to-t from-card via-card/20 to-transparent" />
+          </div>
+
+          <div className="flex items-end gap-3 px-4 pb-4 -mt-8 sm:px-5">
+            <div className="relative size-16 shrink-0 overflow-hidden rounded-2xl border-4 border-card bg-muted shadow-md">
+              {state.avatarUrl ? (
+                <Image
+                  src={state.avatarUrl}
+                  alt={state.displayName || "Avatar preview"}
+                  fill
+                  unoptimized
+                  sizes="64px"
+                  className="object-cover"
+                />
+              ) : (
+                <div className="flex size-full items-center justify-center bg-primary/10 text-lg font-black text-primary">
+                  {(state.displayName || "U").slice(0, 1).toUpperCase()}
+                </div>
+              )}
+            </div>
+            <div className="min-w-0 flex-1 pb-1">
+              <p className="truncate text-lg leading-tight font-bold text-foreground">
+                {state.displayName || "Your Display Name"}
+              </p>
+              <p className="truncate font-mono text-xs text-muted-foreground">
+                @{state.handle || "handle"}
+              </p>
+            </div>
+          </div>
+
+          {state.bio.trim() && (
+            <p className="line-clamp-2 border-t border-border/40 px-4 py-3 text-xs text-muted-foreground sm:px-5">
+              {previewText(state.bio)}
+            </p>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   )
 }
 
@@ -534,26 +659,54 @@ function ProfilePublicInfoCard({
       <CardHeader>
         <CardTitle>Public Information</CardTitle>
         <CardDescription>
-          Your public display name, handle, and visual branding on Yozora.
+          Your public handle, display name, and visual branding on Yozora.
         </CardDescription>
       </CardHeader>
 
       <CardContent>
         <FieldGroup>
-          <Field>
-            <FieldLabel htmlFor="displayName">Display Name</FieldLabel>
-            <Input
-              id="displayName"
-              value={state.displayName}
-              onChange={(e) => onChange("displayName", e.target.value)}
-              placeholder="e.g. Saksham"
-              autoComplete="name"
-              required
-            />
-            {fieldErrors.displayName && (
-              <FieldError>{fieldErrors.displayName}</FieldError>
-            )}
-          </Field>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Field>
+              <FieldLabel htmlFor="handle">Handle (profile URL)</FieldLabel>
+              <div className="relative">
+                <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 font-mono text-sm text-muted-foreground">
+                  @
+                </span>
+                <Input
+                  id="handle"
+                  value={state.handle}
+                  onChange={(e) =>
+                    onChange(
+                      "handle",
+                      e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, "")
+                    )
+                  }
+                  placeholder="e.g. saksham"
+                  size="prefixed"
+                  maxLength={30}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Letters, numbers, dashes and underscores only. Changing this
+                breaks existing links to your profile.
+              </p>
+            </Field>
+
+            <Field>
+              <FieldLabel htmlFor="displayName">Display Name</FieldLabel>
+              <Input
+                id="displayName"
+                value={state.displayName}
+                onChange={(e) => onChange("displayName", e.target.value)}
+                placeholder="e.g. Saksham"
+                autoComplete="name"
+                required
+              />
+              {fieldErrors.displayName && (
+                <FieldError>{fieldErrors.displayName}</FieldError>
+              )}
+            </Field>
+          </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field>
@@ -614,6 +767,7 @@ function ProfileBioCard({
           onChange={onChange}
           placeholder="Write your anime bio in Markdown... (e.g. **Favorite Series**: Steins;Gate)"
           minHeight="140px"
+          maxLength={2000}
         />
       </CardContent>
     </Card>
@@ -630,6 +784,25 @@ function ProfileIntegrationsCard({
     value: ProfileState[TKey]
   ) => void
 }) {
+  const trackers = [
+    {
+      id: "anilistUsername",
+      label: "AniList Username",
+      icon: AniListIcon,
+      username: state.anilistUsername,
+      href: `https://anilist.co/user/${state.anilistUsername}`,
+      placeholder: "e.g. saksham",
+    },
+    {
+      id: "malUsername",
+      label: "MyAnimeList Username",
+      icon: MyAnimeListIcon,
+      username: state.malUsername,
+      href: `https://myanimelist.net/profile/${state.malUsername}`,
+      placeholder: "e.g. saksham",
+    },
+  ] as const
+
   return (
     <Card>
       <CardHeader>
@@ -642,25 +815,38 @@ function ProfileIntegrationsCard({
 
       <CardContent>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Field>
-            <FieldLabel htmlFor="anilistUsername">AniList Username</FieldLabel>
-            <Input
-              id="anilistUsername"
-              value={state.anilistUsername}
-              onChange={(e) => onChange("anilistUsername", e.target.value)}
-              placeholder="e.g. saksham"
-            />
-          </Field>
-
-          <Field>
-            <FieldLabel htmlFor="malUsername">MyAnimeList Username</FieldLabel>
-            <Input
-              id="malUsername"
-              value={state.malUsername}
-              onChange={(e) => onChange("malUsername", e.target.value)}
-              placeholder="e.g. saksham"
-            />
-          </Field>
+          {trackers.map(({ id, label, icon: Icon, username, href, placeholder }) => (
+            <Field key={id}>
+              <FieldLabel htmlFor={id}>
+                <span className="flex items-center gap-1.5">
+                  <Icon className="size-3.5" />
+                  {label}
+                </span>
+              </FieldLabel>
+              <Input
+                id={id}
+                value={username}
+                onChange={(e) =>
+                  onChange(
+                    id,
+                    e.target.value
+                  )
+                }
+                placeholder={placeholder}
+              />
+              {username && (
+                <a
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+                >
+                  View {username}
+                  <ExternalLink className="size-3" />
+                </a>
+              )}
+            </Field>
+          ))}
         </div>
       </CardContent>
     </Card>
@@ -668,9 +854,11 @@ function ProfileIntegrationsCard({
 }
 
 function ProfilePrivacyCard({
+  handle,
   isPublic,
   onChange,
 }: {
+  handle: string
   isPublic: boolean
   onChange: (value: boolean) => void
 }) {
@@ -684,17 +872,41 @@ function ProfilePrivacyCard({
       </CardHeader>
 
       <CardContent>
-        <label className="flex cursor-pointer items-center gap-3">
-          <input
-            type="checkbox"
-            checked={isPublic}
-            onChange={(e) => onChange(e.target.checked)}
-            className="size-4 cursor-pointer rounded accent-primary"
-          />
-          <span className="text-sm font-medium text-foreground select-none">
-            Make my anime library and stats public
-          </span>
-        </label>
+        <div
+          className={cn(
+            "flex items-center justify-between gap-4 rounded-xl border p-4 transition-colors",
+            isPublic
+              ? "border-primary/30 bg-primary/5"
+              : "border-border/50 bg-muted/30"
+          )}
+        >
+          <label className="flex cursor-pointer items-start gap-3">
+            <input
+              type="checkbox"
+              checked={isPublic}
+              onChange={(e) => onChange(e.target.checked)}
+              className="mt-0.5 size-4 cursor-pointer rounded accent-primary"
+            />
+            <span>
+              <span className="block text-sm font-semibold text-foreground">
+                Public profile
+              </span>
+              <span className="mt-0.5 block text-xs text-muted-foreground">
+                Anyone can view your anime library, stats and pinned showcase.
+              </span>
+            </span>
+          </label>
+
+          {isPublic && handle && (
+            <a
+              href={`/u/${encodeURIComponent(handle)}`}
+              className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-primary hover:underline"
+            >
+              View profile
+              <ArrowUpRight className="size-3.5" />
+            </a>
+          )}
+        </div>
       </CardContent>
     </Card>
   )
@@ -738,17 +950,39 @@ function PinnedAnimeCard({
     return () => clearTimeout(timer)
   }, [search])
 
-  const { data: searchResults = [], isFetching } = useQuery(
-    searchCatalogQueryOptions(debounced)
-  )
-  const results = React.useMemo(
-    () => searchResults.slice(0, 6),
-    [searchResults]
-  )
+  const [searchResults, setSearchResults] = React.useState<Anime[]>([])
+  const [isFetching, setIsFetching] = React.useState(false)
 
-  const { data: pinnedDetails = [] } = useQuery(
-    batchAnimeQueryOptions(pinnedIds)
-  )
+  React.useEffect(() => {
+    if (debounced.length < 2) {
+      setSearchResults([])
+      return
+    }
+    const controller = new AbortController()
+    setIsFetching(true)
+    searchCatalog(debounced, controller.signal)
+      .then((items) => setSearchResults(items.slice(0, 6)))
+      .catch(() => {})
+      .finally(() => {
+        if (!controller.signal.aborted) setIsFetching(false)
+      })
+    return () => controller.abort()
+  }, [debounced])
+
+  const [pinnedDetails, setPinnedDetails] = React.useState<Anime[]>([])
+  const detailKey = pinnedIds.join(",")
+
+  React.useEffect(() => {
+    if (pinnedIds.length === 0) {
+      setPinnedDetails([])
+      return
+    }
+    const controller = new AbortController()
+    fetchBatchAnime(pinnedIds, controller.signal)
+      .then(setPinnedDetails)
+      .catch(() => {})
+    return () => controller.abort()
+  }, [detailKey])
 
   const addPin = (id: number) => {
     if (pinnedIds.includes(id) || pinnedIds.length >= MAX_PINS) return
@@ -777,7 +1011,7 @@ function PinnedAnimeCard({
         <div className="flex flex-col gap-4">
           {pinnedIds.length > 0 && (
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-              {pinnedIds.map((id) => {
+              {pinnedIds.map((id, index) => {
                 const detail = pinnedDetails.find((d: Anime) => d.id === id)
                 return (
                   <div
@@ -785,7 +1019,7 @@ function PinnedAnimeCard({
                     className="relative flex items-center gap-2.5 rounded-xl border border-border/50 bg-muted/30 p-2"
                   >
                     <div className="relative size-12 shrink-0 overflow-hidden rounded-lg bg-muted">
-                      {detail?.coverMedium || detail?.cover ? (
+                      {detail ? (
                         <Image
                           src={detail.coverMedium || detail.cover}
                           alt={detail.title}
@@ -794,7 +1028,11 @@ function PinnedAnimeCard({
                           sizes="48px"
                           className="object-cover"
                         />
-                      ) : null}
+                      ) : (
+                        <div className="flex size-full items-center justify-center font-mono text-xs font-bold text-muted-foreground">
+                          {index + 1}
+                        </div>
+                      )}
                     </div>
                     <span className="line-clamp-2 min-w-0 text-xs font-semibold text-foreground">
                       {detail?.title || `Anime #${id}`}
@@ -834,18 +1072,18 @@ function PinnedAnimeCard({
 
           {debounced.length >= 2 && pinnedIds.length < MAX_PINS && (
             <div className="divide-y divide-border/40 overflow-hidden rounded-xl border border-border/50 bg-background/60">
-              {isFetching && results.length === 0 && (
+              {isFetching && searchResults.length === 0 && (
                 <div className="flex items-center gap-2 p-3 text-xs text-muted-foreground">
                   <Loader2 className="size-3.5 animate-spin" />
                   Searching…
                 </div>
               )}
-              {!isFetching && results.length === 0 && (
+              {!isFetching && searchResults.length === 0 && (
                 <div className="p-3 text-xs text-muted-foreground">
                   No results found.
                 </div>
               )}
-              {results.map((result) => (
+              {searchResults.map((result) => (
                 <button
                   key={result.id}
                   type="button"
@@ -889,21 +1127,27 @@ function DangerZoneCard() {
   const clerk = useClerk()
   const [confirmOpen, setConfirmOpen] = React.useState(false)
   const [confirmText, setConfirmText] = React.useState("")
+  const [isDeleting, setIsDeleting] = React.useState(false)
 
-  const deleteAllMutation = useMutation({
-    mutationFn: () => deleteUserDataFn(),
-    onSuccess: (data) => {
+  const deleteAll = async () => {
+    setIsDeleting(true)
+    try {
+      const { data, error } = await actions.profile.deleteData()
+      if (error) throw new Error(error.message)
       toast.success("All Data Deleted", {
         description: `${data.deletedEntries} entries and ${data.deletedCollections} collections were permanently removed.`,
       })
       setConfirmOpen(false)
       setConfirmText("")
-      void clerk.signOut()
-    },
-    onError: (err: Error) => {
-      toast.error("Deletion Failed", { description: err.message })
-    },
-  })
+      void clerk?.signOut()
+    } catch (error) {
+      toast.error("Deletion Failed", {
+        description: error instanceof Error ? error.message : "Deletion failed.",
+      })
+    } finally {
+      setIsDeleting(false)
+    }
+  }
 
   if (!isSignedIn) return null
 
@@ -975,14 +1219,11 @@ function DangerZoneCard() {
             <Button
               type="button"
               variant="destructive"
-              disabled={!canDelete || deleteAllMutation.isPending}
-              onClick={() => deleteAllMutation.mutate()}
+              disabled={!canDelete || isDeleting}
+              onClick={() => void deleteAll()}
             >
-              {deleteAllMutation.isPending ? (
-                <Loader2
-                  className="size-4 animate-spin"
-                  data-icon="inline-start"
-                />
+              {isDeleting ? (
+                <Loader2 className="size-4 animate-spin" data-icon="inline-start" />
               ) : (
                 <Trash2 data-icon="inline-start" className="size-4" />
               )}

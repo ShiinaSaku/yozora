@@ -1,0 +1,29 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro"
+import { AboutPage, ABOUT_FAQS } from "@/components/pages/about-page"
+import { generateFaqJsonLd, stringifyJsonLd } from "@/lib/seo/json-ld"
+import { canonicalLinks, openGraphImageUrl } from "@/lib/seo/meta"
+
+const title = "About Yozora (夜空) — Seasonal Anime Catalog & Airing Radar"
+const description =
+  "Learn about Yozora, the seasonal anime catalog, Japanese broadcast radar, creditless theme player, and watchlist."
+const image = openGraphImageUrl({
+  type: "about",
+  title: "About Yozora (夜空)",
+  subtitle: "The Modern Anime Intelligence Engine",
+  tag: "Platform & Manifesto",
+  description:
+    "Seasonal anime charts, Japanese broadcast countdowns, and creditless opening and ending themes.",
+})
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  keywords="about yozora, anime platform, anime catalog, anime soundtrack player, anime tracker, open anime database, Yozora, 夜空, アニメ, 放送予定, 新番"
+  image={image}
+  links={canonicalLinks("/about")}
+  jsonLd={[stringifyJsonLd(generateFaqJsonLd(ABOUT_FAQS))]}
+>
+  <AboutPage client:load />
+</BaseLayout>

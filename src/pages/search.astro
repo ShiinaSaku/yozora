@@ -1,0 +1,122 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro"
+import { HugeiconsIcon } from "@hugeicons/react"
+import { ArrowRight01Icon, Compass01Icon, Search01Icon } from "@hugeicons/core-free-icons"
+import Link from "@/components/ui/link"
+import AnimeCard from "@/components/anime/AnimeCard.astro"
+import { Badge } from "@/components/ui/badge"
+import { SearchForm } from "@/components/pages/search-form"
+import { getSearchPageData } from "@/lib/server/catalog"
+import { canonicalLinks } from "@/lib/seo/meta"
+
+export const prerender = false
+
+const rawQ = Astro.url.searchParams.get("q") ?? ""
+const { query, items } = await getSearchPageData(rawQ)
+const hasQuery = query.length >= 2
+const suggestions = !hasQuery ? items.slice(0, 6) : []
+
+const title = query
+  ? `Search results for “${query}” | Yozora Anime`
+  : "Search Anime by Title | Yozora"
+const description = query
+  ? `Find anime matching ${query}, including alternate and native titles, on Yozora.`
+  : "Search anime by English, romaji, or native title and explore details, characters, recommendations, and themes on Yozora."
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  robots={query ? "noindex, follow" : undefined}
+  links={canonicalLinks("/search")}
+>
+  <div class="container mx-auto flex max-w-7xl flex-col gap-10 px-4 py-8 sm:gap-12 sm:px-6 sm:py-12">
+    <section aria-labelledby="search-page-heading" class="relative overflow-hidden rounded-3xl border border-border/70 bg-card p-6 sm:p-10 lg:p-12">
+      <div aria-hidden="true" class="pointer-events-none absolute -top-32 -right-20 size-80 rounded-full bg-primary/10 blur-3xl"></div>
+      <div class="relative flex max-w-3xl flex-col items-start gap-6">
+        <Badge variant="secondary">
+          <HugeiconsIcon icon={Compass01Icon} data-icon="inline-start" strokeWidth={2} aria-hidden="true" />
+          Discover anime
+        </Badge>
+        <div class="flex flex-col gap-3">
+          <h1 id="search-page-heading" class="text-3xl font-bold tracking-tight text-foreground sm:text-5xl">
+            Find your next story.
+          </h1>
+          <p class="max-w-xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+            Find a familiar favorite or discover something new in the AniList catalog.
+          </p>
+        </div>
+        <SearchForm client:load initialQuery={query} />
+        {query.length > 0 && !hasQuery && (
+          <p class="text-sm text-muted-foreground">Enter at least two characters to search.</p>
+        )}
+      </div>
+    </section>
+
+    {suggestions.length > 0 && (
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="mr-1 text-xs font-semibold text-muted-foreground">
+          Try a trending title
+        </span>
+        {suggestions.map((anime) => (
+          <Link
+            href={`/search?q=${encodeURIComponent(anime.title)}`}
+            variant="pill-primary"
+          >
+            {anime.title}
+          </Link>
+        ))}
+      </div>
+    )}
+
+    <section
+      class="flex flex-col gap-6"
+      aria-labelledby="search-results-heading"
+    >
+      <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h2
+            id="search-results-heading"
+            class="text-xl font-bold tracking-tight text-foreground sm:text-2xl"
+          >
+            {hasQuery ? `Results for “${query}”` : "Trending now"}
+          </h2>
+          <p class="mt-1 text-sm text-muted-foreground">
+            {hasQuery
+              ? `Showing ${items.length} ${items.length === 1 ? "match" : "matches"}${items.length === 16 ? " (top results)" : ""}`
+              : "A little inspiration from the anime community."}
+          </p>
+        </div>
+        {hasQuery ? (
+          <Link href="/search" variant="primary">Clear search</Link>
+        ) : (
+          <Link href="/seasonal" variant="primary" className="flex items-center">
+            Explore this season
+            <HugeiconsIcon icon={ArrowRight01Icon} size={14} strokeWidth={2} aria-hidden="true" />
+          </Link>
+        )}
+      </div>
+
+      {items.length > 0 ? (
+        <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+          {items.map((anime, index) => (
+            <AnimeCard anime={anime} priority={index < 6} />
+          ))}
+        </div>
+      ) : (
+        <div class="flex min-h-64 flex-col items-center justify-center gap-3 rounded-3xl border border-dashed border-border bg-muted/20 px-6 text-center">
+          <HugeiconsIcon icon={Search01Icon} size={32} strokeWidth={1.5} className="text-muted-foreground" aria-hidden="true" />
+          <div>
+            <p class="font-bold text-foreground">
+              No anime matched that title
+            </p>
+            <p class="mt-1 text-xs text-muted-foreground">
+              Try an alternate title, shorter phrase, or different spelling.
+            </p>
+          </div>
+          <Link href="/search" variant="button-outline">Explore trending anime</Link>
+        </div>
+      )}
+    </section>
+  </div>
+</BaseLayout>

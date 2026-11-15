@@ -21,7 +21,11 @@ const segmentedItemClassName = segmentedControlItemVariants({
 
 const EMPTY_SEASONAL_ITEMS: Anime[] = []
 
-export function SeasonalClient({
+export function SeasonalClient(props: { items?: Anime[] }) {
+  return <SeasonalClientContent {...props} />
+}
+
+function SeasonalClientContent({
   items = EMPTY_SEASONAL_ITEMS,
 }: {
   items?: Anime[]

@@ -1,6 +1,6 @@
 import * as React from "react"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { SignInButton, useUser } from "@clerk/tanstack-react-start"
+import { SignInButton } from "@clerk/astro/react"
+import { useUser } from "@/lib/clerk"
 import { toast } from "sonner"
 import {
   Bookmark,
@@ -29,19 +29,23 @@ import {
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
+import { fetchEntry } from "@/lib/api"
 import type { Anime } from "@/lib/types/anime"
 import type { AnimeEntry } from "@/lib/db/schema"
-import {
-  animeEntryQueryOptions,
-  myLibraryQueryOptions,
-} from "@/lib/queries/library"
-import { deleteEntryFn, upsertEntryFn } from "@/lib/server/entries"
+import { actions } from "astro:actions"
 
 interface SaveDialogProps {
-  anime: Anime | null
+  anime: SaveableAnime | null
   open: boolean
   onOpenChange: (open: boolean) => void
+  /** Invoked after a successful save or delete so the owner can refetch. */
+  onChanged?: () => void
 }
+
+export type SaveableAnime = Pick<
+  Anime,
+  "id" | "title" | "cover" | "coverMedium" | "format" | "year" | "episodes"
+>
 
 type LibraryStatus =
   "watching" | "completed" | "planning" | "paused" | "dropped" | "rewatching"
@@ -97,12 +101,30 @@ const statusOptions: Array<{
   },
 ]
 
-export function SaveDialog({ anime, open, onOpenChange }: SaveDialogProps) {
+export function SaveDialog({
+  anime,
+  open,
+  onOpenChange,
+  onChanged,
+}: SaveDialogProps) {
   const { isSignedIn } = useUser()
+  const [entryState, setEntryState] = React.useState<{
+    entry: AnimeEntry | null
+    loading: boolean
+  }>({ entry: null, loading: true })
 
-  const { data: existingEntry, isLoading: isEntryLoading } = useQuery(
-    animeEntryQueryOptions(anime?.id, Boolean(isSignedIn && open))
-  )
+  // Load the user's existing entry each time the dialog opens.
+  React.useEffect(() => {
+    if (!open || !isSignedIn || !anime) return
+    const controller = new AbortController()
+    setEntryState({ entry: null, loading: true })
+    fetchEntry(anime.id, controller.signal)
+      .then((entry) =>
+        setEntryState({ entry: entry ?? null, loading: false })
+      )
+      .catch(() => setEntryState({ entry: null, loading: false }))
+    return () => controller.abort()
+  }, [open, isSignedIn, anime?.id])
 
   if (!anime) return null
 
@@ -136,15 +158,16 @@ export function SaveDialog({ anime, open, onOpenChange }: SaveDialogProps) {
               </div>
             </SignInButton>
           </div>
-        ) : isEntryLoading ? (
+        ) : entryState.loading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="size-8 animate-spin text-primary" />
           </div>
         ) : (
           <SaveForm
-            key={existingEntry?.id || anime.id}
+            key={entryState.entry?.id || anime.id}
             anime={anime}
-            existingEntry={existingEntry || null}
+            existingEntry={entryState.entry}
+            onChanged={onChanged}
             onClose={() => onOpenChange(false)}
           />
         )}
@@ -158,7 +181,7 @@ function SaveHeaderCard({
   favorite,
   onToggleFavorite,
 }: {
-  anime: Anime
+  anime: SaveableAnime
   favorite: boolean
   onToggleFavorite: () => void
 }) {
@@ -388,14 +411,17 @@ function SaveRatingInput({
 function SaveForm({
   anime,
   existingEntry,
+  onChanged,
   onClose,
 }: {
-  anime: Anime
+  anime: SaveableAnime
   existingEntry: AnimeEntry | null
+  onChanged?: () => void
   onClose: () => void
 }) {
-  const queryClient = useQueryClient()
   const [showDeleteConfirm, setShowDeleteConfirm] = React.useState(false)
+  const [isSaving, setIsSaving] = React.useState(false)
+  const [isDeleting, setIsDeleting] = React.useState(false)
   const [fieldErrors, setFieldErrors] = React.useState<Record<string, string>>(
     {}
   )
@@ -429,63 +455,58 @@ function SaveForm({
     return Object.keys(errors).length === 0
   }
 
-  const saveMutation = useMutation({
-    mutationFn: () =>
-      upsertEntryFn({
-        data: {
-          anilistId: anime.id,
-          status: form.status,
-          progress: Number(form.progress) || 0,
-          totalEpisodes: anime.episodes || null,
-          score: form.score !== "" ? Math.round(Number(form.score) * 10) : null,
-          notes: form.notes.trim() || null,
-          favorite: form.favorite,
-        },
-      }),
-    onSuccess: () => {
+  const saveEntry = async () => {
+    setIsSaving(true)
+    try {
+      const { error } = await actions.library.upsertEntry({
+        anilistId: anime.id,
+        status: form.status,
+        progress: Number(form.progress) || 0,
+        totalEpisodes: anime.episodes || null,
+        score: form.score !== "" ? Math.round(Number(form.score) * 10) : null,
+        notes: form.notes.trim() || null,
+        favorite: form.favorite,
+      })
+      if (error) throw new Error(error.message)
+
       toast.success(existingEntry ? "Library Updated" : "Added to Library", {
         description: `"${anime.title}" has been saved to your ${form.status} list.`,
       })
-      queryClient.invalidateQueries({
-        queryKey: animeEntryQueryOptions(anime.id).queryKey,
-      })
-      queryClient.invalidateQueries({
-        queryKey: myLibraryQueryOptions().queryKey,
-      })
+      onChanged?.()
       onClose()
-    },
-    onError: () => {
+    } catch {
       toast.error("Failed to Save", {
         description: `Could not save "${anime.title}" to your library. Please try again.`,
       })
-    },
-  })
+    } finally {
+      setIsSaving(false)
+    }
+  }
 
-  const deleteMutation = useMutation({
-    mutationFn: () => deleteEntryFn({ data: anime.id }),
-    onSuccess: () => {
+  const deleteEntry = async () => {
+    setIsDeleting(true)
+    try {
+      const { error } = await actions.library.deleteEntry({ anilistId: anime.id })
+      if (error) throw new Error(error.message)
+
       toast.success("Removed from Library", {
         description: `"${anime.title}" was removed from your watchlist.`,
       })
-      queryClient.invalidateQueries({
-        queryKey: animeEntryQueryOptions(anime.id).queryKey,
-      })
-      queryClient.invalidateQueries({
-        queryKey: myLibraryQueryOptions().queryKey,
-      })
+      onChanged?.()
       onClose()
-    },
-    onError: () => {
+    } catch {
       toast.error("Failed to Remove", {
         description: `Could not remove "${anime.title}" from your library.`,
       })
-    },
-  })
+    } finally {
+      setIsDeleting(false)
+    }
+  }
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (!validateForm()) return
-    saveMutation.mutate()
+    void saveEntry()
   }
 
   const handleProgressChange = (newProgress: number) => {
@@ -516,8 +537,8 @@ function SaveForm({
       {showDeleteConfirm ? (
         <SaveDeleteConfirm
           onCancel={() => setShowDeleteConfirm(false)}
-          onConfirm={() => deleteMutation.mutate()}
-          isPending={deleteMutation.isPending}
+          onConfirm={() => void deleteEntry()}
+          isPending={isDeleting}
         />
       ) : (
         <form
@@ -591,8 +612,8 @@ function SaveForm({
               >
                 Cancel
               </Button>
-              <Button type="submit" size="sm" disabled={saveMutation.isPending}>
-                {saveMutation.isPending && (
+              <Button type="submit" size="sm" disabled={isSaving}>
+                {isSaving && (
                   <Loader2 className="size-3.5 animate-spin" />
                 )}
                 {existingEntry ? "Save Changes" : "Add to Library"}

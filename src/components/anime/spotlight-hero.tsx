@@ -73,7 +73,7 @@ function SpotlightArtwork({
             fetchPriority={isFirst ? "high" : "low"}
             loading={index < 2 ? "eager" : "lazy"}
             className={cn(
-              "absolute inset-0 size-full scale-110 object-cover object-center opacity-40 blur-2xl transition-transform duration-700 ease-out select-none",
+              "absolute inset-0 size-full transform-gpu scale-110 object-cover object-center opacity-40 blur-2xl transition-transform duration-700 ease-out select-none",
               isActive ? "scale-110" : "scale-120"
             )}
           />
@@ -89,24 +89,12 @@ function SpotlightArtwork({
         </>
       )}
 
-      {/* Dynamic accent lighting */}
-      <div
-        className="absolute inset-0 opacity-40 mix-blend-screen"
-        style={{
-          background: `radial-gradient(ellipse 80% 60% at 75% 25%, ${anime.accent || "#6366f1"}55, transparent 70%)`,
-        }}
-      />
-
-      {/* Readability scrims */}
-      <div className="absolute inset-0 bg-linear-to-t from-zinc-950 via-zinc-950/75 to-zinc-950/10" />
-      <div className="absolute inset-0 w-full bg-linear-to-r from-zinc-950 via-zinc-950/85 to-transparent md:w-3/4" />
-      <div className="absolute inset-y-0 right-0 w-32 bg-linear-to-l from-zinc-950/85 via-zinc-950/40 to-transparent" />
-      <div className="absolute inset-x-0 top-0 h-28 bg-linear-to-b from-zinc-950/80 via-zinc-950/30 to-transparent" />
+      <div className="spotlight-artwork absolute inset-0" />
 
       {/* Consistent uniform dimming layer for peeking cards */}
       <div
         className={cn(
-          "absolute inset-0 bg-zinc-950/65 backdrop-blur-xs transition-opacity duration-300",
+          "absolute inset-0 bg-background/50 transition-opacity duration-300",
           isActive ? "opacity-0" : "opacity-100"
         )}
       />
@@ -133,11 +121,8 @@ function SpotlightSlideCard({
 
   return (
     <div
-      className={cn(
-        "relative size-full",
-        !isActive && "pointer-events-none"
-      )}
-      aria-hidden={!isActive || undefined}
+      className="relative size-full"
+      inert={!isActive || undefined}
     >
       <SpotlightArtwork anime={anime} index={index} isActive={isActive} />
 
@@ -146,7 +131,7 @@ function SpotlightSlideCard({
         <div className="pointer-events-none absolute top-4 right-4 z-10 sm:top-6 sm:right-6 lg:top-8 lg:right-8">
           <span
             className={cn(
-              "inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-black/60 px-3 py-1 font-mono text-xs font-semibold text-amber-400 shadow-sm backdrop-blur-md transition-opacity duration-300",
+              "inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-background/90 px-3 py-1.5 font-numeric text-xs font-bold text-foreground shadow-sm backdrop-blur-md transition-opacity duration-300",
               isActive ? "opacity-100" : "opacity-0"
             )}
             aria-label={`Rating: ${anime.score.toFixed(1)} out of 10`}
@@ -155,7 +140,7 @@ function SpotlightSlideCard({
               icon={StarIcon}
               size={13}
               strokeWidth={2}
-              className="fill-amber-400 text-amber-400"
+              className="fill-amber-500 text-amber-500"
               aria-hidden="true"
             />
             {anime.score.toFixed(1)}
@@ -166,7 +151,7 @@ function SpotlightSlideCard({
       {/* Information overlay */}
       <div
         className={cn(
-          "absolute inset-x-0 bottom-0 z-10 flex max-w-2xl flex-col items-start gap-2.5 p-5 sm:gap-3.5 sm:p-8 lg:p-10",
+          "absolute inset-x-0 bottom-0 z-10 flex max-w-2xl flex-col items-start gap-3 p-5 sm:gap-4 sm:p-8 lg:p-12",
           "transition-opacity duration-300 ease-out",
           isActive
             ? "opacity-100 duration-500"
@@ -174,11 +159,14 @@ function SpotlightSlideCard({
         )}
       >
         {/* Meta badges */}
-        <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-zinc-400">
+        <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-muted-foreground">
+          <span className="rounded-full bg-primary/10 px-2.5 py-1 text-primary">
+            Spotlight
+          </span>
           {anime.year && <span>{anime.year}</span>}
           {anime.episodes && (
             <>
-              <span aria-hidden="true" className="text-zinc-600">
+              <span aria-hidden="true">
                 ·
               </span>
               <span>{anime.episodes} Episodes</span>
@@ -186,10 +174,10 @@ function SpotlightSlideCard({
           )}
           {anime.studios && anime.studios.length > 0 && (
             <>
-              <span aria-hidden="true" className="text-zinc-600">
+              <span aria-hidden="true">
                 ·
               </span>
-              <span className="max-w-44 truncate text-zinc-200">
+              <span className="max-w-44 truncate">
                 {anime.studios[0]}
               </span>
             </>
@@ -197,19 +185,15 @@ function SpotlightSlideCard({
         </div>
 
         {/* Title */}
-        <h2 className="line-clamp-2 text-2xl leading-tight font-black tracking-tight text-white drop-shadow-md sm:text-4xl lg:text-5xl">
-          <Link
-            href={getAnimeUrl(anime)}
-            tabIndex={isActive ? 0 : -1}
-            variant="title"
-          >
+        <h2 className="line-clamp-2 text-3xl leading-tight font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
+          <Link href={getAnimeUrl(anime)} variant="title">
             {anime.title}
           </Link>
         </h2>
 
         {/* Description */}
         {anime.description && (
-          <p className="line-clamp-2 max-w-xl text-xs leading-relaxed text-pretty text-zinc-300 drop-shadow-sm sm:text-sm">
+          <p className="line-clamp-2 max-w-lg text-sm leading-relaxed text-pretty text-foreground/80">
             {anime.description}
           </p>
         )}
@@ -223,7 +207,7 @@ function SpotlightSlideCard({
             {anime.tags.slice(0, 3).map((tag) => (
               <span
                 key={tag}
-                className="inline-flex items-center rounded-full border border-white/15 bg-white/10 px-2.5 py-0.5 text-xs font-medium text-white shadow-2xs backdrop-blur-md"
+                className="inline-flex items-center rounded-full border border-border/70 bg-background/70 px-2.5 py-1 text-xs font-medium text-foreground backdrop-blur-md"
               >
                 {tag}
               </span>
@@ -235,10 +219,8 @@ function SpotlightSlideCard({
         <div className="flex flex-wrap items-center gap-2 pt-1.5 sm:gap-3">
           <Link
             href={getAnimeUrl(anime)}
-            tabIndex={isActive ? 0 : -1}
-            aria-label={`Watch overview for ${anime.title}`}
-            variant="button-white"
-            className={cn(!isActive && "pointer-events-none")}
+            aria-label={`Explore ${anime.title}`}
+            variant="button"
           >
             <Play
               className="size-3.5 shrink-0 fill-current"
@@ -246,15 +228,14 @@ function SpotlightSlideCard({
               data-icon="inline-start"
               aria-hidden="true"
             />
-            <span>Watch Overview</span>
+            <span>Explore Anime</span>
           </Link>
 
           {onSaveClick && (
             <div className="interactive-press">
               <Button
-                variant="glass"
+                variant="hero-outline"
                 size="lg"
-                tabIndex={isActive ? 0 : -1}
                 aria-label={`Add to Watchlist: ${anime.title}`}
                 onClick={(e) => {
                   e.stopPropagation()
@@ -277,9 +258,8 @@ function SpotlightSlideCard({
             <div className="interactive-press">
               <Button
                 type="button"
-                variant="glass-dark"
+                variant="hero-outline"
                 size="lg"
-                tabIndex={isActive ? 0 : -1}
                 aria-label={`Watch trailer: ${anime.title}`}
                 onClick={(e) => {
                   e.stopPropagation()
@@ -344,7 +324,7 @@ export function SpotlightHero({ items, onSaveClick }: SpotlightHeroProps) {
               key={anime.id}
               className="relative h-120 spotlight-slide-basis snap-center lg:h-135 xl:h-145 @max-3xl:h-120 sm:@max-3xl:h-125"
             >
-              <div className="dark relative size-full overflow-hidden rounded-3xl bg-zinc-950 text-white select-none ring-1 ring-black/20 shadow-xl shadow-black/25 transition-all duration-500 hover:ring-white/25 sm:rounded-4xl">
+              <div className="relative size-full overflow-hidden rounded-3xl border border-border/70 bg-card text-foreground select-none shadow-sm sm:rounded-4xl">
                 <SpotlightSlideCard
                   anime={anime}
                   index={index}

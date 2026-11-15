@@ -1,8 +1,3 @@
-import "zod/compile"
-import { createServerFn } from "@tanstack/react-start"
-import { notFound } from "@tanstack/react-router"
-import { setResponseHeaders } from "@tanstack/react-start/server"
-import { z } from "zod"
 import {
   getAiringSchedule,
   getAnimeCollection,
@@ -13,125 +8,121 @@ import {
 } from "@/lib/catalog"
 import { getAnimeThemes } from "@/lib/themes"
 
-const publicCatalogHeaders = new Headers({
-  "Cache-Control":
-    "public, max-age=3600, s-maxage=7200, stale-while-revalidate=86400",
-  "CDN-Cache-Control": "max-age=7200, stale-while-revalidate=3600",
-})
+// Plain async data loaders — framework-agnostic. Astro pages call them
+// directly in frontmatter (no HTTP roundtrip needed for page data), so the
+// per-route CDN caching that used to live in these functions is expressed
+// declaratively through `routeRules` in astro.config.ts instead.
+//
+// Callers handle "not found" by checking for null and rendering the 404 page.
 
-const publicAiringHeaders = new Headers({
-  "Cache-Control":
-    "public, max-age=600, s-maxage=1800, stale-while-revalidate=7200",
-  "CDN-Cache-Control": "max-age=1800, stale-while-revalidate=600",
-})
+/**
+ * Home page data: three AniList collections fetched concurrently.
+ */
+export async function getHomeData() {
+  const [trending, seasonal, popular] = await Promise.all([
+    getAnimeCollection("trending"),
+    getAnimeCollection("seasonal"),
+    getAnimeCollection("popular"),
+  ])
+  return { trending, seasonal, popular }
+}
 
-const publicDetailHeaders = new Headers({
-  "Cache-Control":
-    "public, max-age=86400, s-maxage=604800, stale-while-revalidate=2592000",
-  "CDN-Cache-Control": "max-age=604800",
-})
+/**
+ * Live airing radar schedule for the home page radar section.
+ */
+export async function getHomeAiring() {
+  return getAiringSchedule()
+}
 
-const publicSearchHeaders = new Headers({
-  "Cache-Control":
-    "public, max-age=600, s-maxage=21600, stale-while-revalidate=86400",
-})
+/**
+ * Seasonal releases page data.
+ */
+export async function getSeasonalData() {
+  return getAnimeCollection("seasonal")
+}
 
-const idSchema = z.compile(z.number().int().positive())
-const searchQuerySchema = z.compile(z.string().trim().max(100))
+/**
+ * Search page data: falls back to trending when the query is too short.
+ */
+export async function getSearchPageData(query: string) {
+  const trimmed = query.trim().slice(0, 100)
+  return {
+    query: trimmed,
+    items:
+      trimmed.length >= 2
+        ? await searchAnime(trimmed)
+        : await getAnimeCollection("trending"),
+  }
+}
 
-export const getHomeData = createServerFn({ method: "GET" }).handler(
-  async () => {
-    setResponseHeaders(publicCatalogHeaders)
-    const [trending, seasonal, popular] = await Promise.all([
-      getAnimeCollection("trending"),
-      getAnimeCollection("seasonal"),
-      getAnimeCollection("popular"),
+/**
+ * Airing radar page data.
+ */
+export async function getAiringData() {
+  return {
+    items: await getAiringSchedule(),
+    generatedAt: Math.floor(Date.now() / 1000),
+  }
+}
+
+/**
+ * Anime detail page data: AniList detail + creditless theme songs.
+ * Returns null when the anime does not exist (page renders 404).
+ */
+export async function getAnimePageData(id: string) {
+  const animeId = Number.parseInt(id, 10)
+  if (!Number.isInteger(animeId) || animeId <= 0) {
+    return null
+  }
+  try {
+    const [detail, themes] = await Promise.all([
+      getAnimeDetail(animeId),
+      getAnimeThemes(animeId).catch(() => ({ animeId, themes: [] })),
     ])
-    return { trending, seasonal, popular }
-  }
-)
-
-export const getHomeAiring = createServerFn({ method: "GET" }).handler(
-  async () => {
-    setResponseHeaders(publicAiringHeaders)
-    return getAiringSchedule()
-  }
-)
-
-export const getSeasonalData = createServerFn({ method: "GET" }).handler(
-  async () => {
-    setResponseHeaders(publicCatalogHeaders)
-    return getAnimeCollection("seasonal")
-  }
-)
-
-export const getSearchPageData = createServerFn({ method: "GET" })
-  .validator(searchQuerySchema)
-  .handler(async ({ data: query }) => {
-    setResponseHeaders(publicSearchHeaders)
-    return {
-      query,
-      items:
-        query.length >= 2
-          ? await searchAnime(query)
-          : await getAnimeCollection("trending"),
+    return { detail, themes: themes.themes }
+  } catch (error) {
+    if (error instanceof Error && error.message === "Anime not found") {
+      return null
     }
-  })
-
-export const getAiringData = createServerFn({ method: "GET" }).handler(
-  async () => {
-    setResponseHeaders(publicAiringHeaders)
-    return {
-      items: await getAiringSchedule(),
-      generatedAt: Math.floor(Date.now() / 1000),
-    }
+    throw error
   }
-)
+}
 
-export const getAnimePageData = createServerFn({ method: "GET" })
-  .validator(idSchema)
-  .handler(async ({ data: id }) => {
-    setResponseHeaders(publicDetailHeaders)
-    try {
-      const [detail, themes] = await Promise.all([
-        getAnimeDetail(id),
-        getAnimeThemes(id).catch(() => ({ animeId: id, themes: [] })),
-      ])
-      return { detail, themes: themes.themes }
-    } catch (error) {
-      if (error instanceof Error && error.message === "Anime not found") {
-        throw notFound()
-      }
-      throw error
+/**
+ * Character detail page data. Returns null when the character does not exist.
+ */
+export async function getCharacterPageData(id: string) {
+  const characterId = Number.parseInt(id, 10)
+  if (!Number.isInteger(characterId) || characterId <= 0) {
+    return null
+  }
+  try {
+    return await getCharacterDetail(characterId)
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      (error.message === "Character not found" ||
+        error.message === "Anime not found")
+    ) {
+      return null
     }
-  })
+    throw error
+  }
+}
 
-export const getCharacterPageData = createServerFn({ method: "GET" })
-  .validator(idSchema)
-  .handler(async ({ data: id }) => {
-    setResponseHeaders(publicDetailHeaders)
-    try {
-      return await getCharacterDetail(id)
-    } catch (error) {
-      if (error instanceof Error && error.message === "Character not found") {
-        throw notFound()
-      }
-      throw error
-    }
-  })
+/**
+ * Batch fetch for server islands / client prefetch paths.
+ */
+export async function getBatchAnimeData(ids: number[]) {
+  if (ids.length === 0) return []
+  return getMultipleAnime(ids)
+}
 
-const batchIdsSchema = z.compile(z.array(z.number().int().positive()).max(50))
-
-export const getBatchAnimeData = createServerFn({ method: "GET" })
-  .validator(batchIdsSchema)
-  .handler(async ({ data: ids }) => {
-    if (ids.length === 0) return []
-    return await getMultipleAnime(ids)
-  })
-
-export const searchCatalogFn = createServerFn({ method: "GET" })
-  .validator(searchQuerySchema)
-  .handler(async ({ data: query }) => {
-    if (query.length < 2) return []
-    return await searchAnime(query)
-  })
+/**
+ * Instant search for the Cmd+K dialog. Returns [] for short queries.
+ */
+export async function searchCatalog(query: string) {
+  const trimmed = query.trim().slice(0, 100)
+  if (trimmed.length < 2) return []
+  return searchAnime(trimmed)
+}

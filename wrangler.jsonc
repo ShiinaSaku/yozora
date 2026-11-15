@@ -6,7 +6,12 @@
 	"compatibility_flags": [
 		"nodejs_compat"
 	],
-	"main": "@tanstack/react-start/server-entry",
+	"main": "@astrojs/cloudflare/entrypoints/server",
+	"assets": {
+		"directory": "./dist",
+		"binding": "ASSETS",
+		"html_handling": "drop-trailing-slash"
+	},
 	"routes": [
 		{
 			"pattern": "yozora.moe",
@@ -19,5 +24,8 @@
 		"enabled": true,
 		"head_sampling_rate": 1
 	},
-	"preview_urls": false
+	"preview_urls": false,
+	"vars": {
+		"PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_live_Y2xlcmsueW96b3JhLm1vZSQ"
+	}
 }

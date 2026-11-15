@@ -1,0 +1,1689 @@
+"""
+Represents a production with at least one opening or ending sequence.
+
+For example, Bakemonogatari is an anime production with five opening sequences and one ending sequence.
+"""
+type Anime {
+  """The primary key of the resource"""
+  id: Int!
+
+  """The primary title of the anime"""
+  title: AnimeTitle!
+
+  """The format of the anime"""
+  format: AnimeFormat
+
+  """The localized string value of the format field"""
+  formatLocalized: String
+
+  """The premiere season of the anime"""
+  season: AnimeSeason
+
+  """The localized string value of the season field"""
+  seasonLocalized: String
+
+  """The URL slug & route key of the resource"""
+  slug: String!
+
+  """The brief summary of the anime"""
+  synopsis: String
+
+  """The premiere season year of the anime"""
+  year: Int
+
+  """The URL for the anime page on the website"""
+  siteUrl: String!
+  synonyms: [Synonym!]!
+  themes: [Theme!]!
+  images: ImageableConnection!
+  resources: ResourceableConnection!
+  series: AnimeSeriesConnection!
+  studios: AnimeStudioConnection!
+}
+
+type AnimeConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [AnimeEdge!]!
+
+  """A list of nodes."""
+  nodes: [Anime!]!
+}
+
+"""An edge in a connection."""
+type AnimeEdge {
+  """The item at the end of the edge"""
+  node: Anime!
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+input AnimeFilterInput {
+  titleLike: String
+  season: AnimeSeason
+  year: Int
+  format: AnimeFormat
+}
+
+enum AnimeFormat {
+  TV
+  TV_SHORT
+  OVA
+  MOVIE
+  SPECIAL
+  ONA
+}
+
+type AnimePagination {
+  """The data for the current page."""
+  data: [Anime!]!
+
+  """Information to aid in pagination."""
+  pageInfo: OffsetPageInfo!
+}
+
+enum AnimeSeason {
+  WINTER
+  SPRING
+  SUMMER
+  FALL
+}
+
+type AnimeSeriesConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [AnimeSeriesEdge!]!
+
+  """A list of nodes."""
+  nodes: [Series!]!
+}
+
+"""An edge in a connection."""
+type AnimeSeriesEdge {
+  """The item at the end of the edge"""
+  node: Series!
+  createdAt(format: String! = "%+"): String!
+  updatedAt(format: String! = "%+"): String!
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+enum AnimeSort {
+  ID
+  ID_DESC
+  TITLE_ROMAJI
+  TITLE_ROMAJI_DESC
+  TITLE_ENGLISH
+  TITLE_ENGLISH_DESC
+  TITLE_NATIVE
+  TITLE_NATIVE_DESC
+  YEAR
+  YEAR_DESC
+  CREATED_AT
+  CREATED_AT_DESC
+  UPDATED_AT
+  UPDATED_AT_DESC
+  RANDOM
+}
+
+type AnimeStudioConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [AnimeStudioEdge!]!
+
+  """A list of nodes."""
+  nodes: [Studio!]!
+}
+
+"""An edge in a connection."""
+type AnimeStudioEdge {
+  """The item at the end of the edge"""
+  node: Studio!
+  createdAt(format: String! = "%+"): String!
+  updatedAt(format: String! = "%+"): String!
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+type AnimeTitle {
+  romaji: String!
+  english: String
+  native: String
+}
+
+"""The anime year response type, grouped by season"""
+type AnimeYear {
+  """The year of the AnimeYear type"""
+  year: Int!
+
+  """The available seasons of the year and its anime"""
+  season(season: AnimeSeason): [AnimeYearSeason!]!
+}
+
+"""The anime year season type."""
+type AnimeYearSeason {
+  """The season of the anime year."""
+  season: AnimeSeason!
+
+  """The formatted string value of the season field."""
+  seasonLocalized: String!
+  anime(pagination: PaginationInput, filter: AnimeFilterInput, sort: [AnimeSort!]): AnimeConnection!
+}
+
+"""Represents a site-wide message to be broadcasted on the homepage."""
+type Announcement {
+  """The primary key of the resource"""
+  id: Int!
+
+  """The announcement text"""
+  content: String!
+}
+
+"""
+Represents a musical performer of anime sequences.
+
+For example, Chiwa Saitou is the musical performer of the Bakemonogatari OP1 theme, among many others.
+"""
+type Artist {
+  """The primary key of the resource"""
+  id: Int!
+
+  """The primary title of the artist"""
+  name: ArtistName!
+
+  """The URL slug & route key of the resource"""
+  slug: String!
+
+  """The brief information of the resource"""
+  information: String
+
+  """The URL for the artist page on the website"""
+  siteUrl: String!
+  synonyms: [Synonym!]!
+  members: ArtistMemberConnection!
+  groups: ArtistMemberConnection!
+  songStaff: [SongStaff!]!
+  memberSongStaff: [SongStaff!]!
+  themeStaff: [ThemeStaff!]!
+  images: ImageableConnection!
+  resources: ResourceableConnection!
+}
+
+type ArtistConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [ArtistEdge!]!
+
+  """A list of nodes."""
+  nodes: [Artist!]!
+}
+
+"""An edge in a connection."""
+type ArtistEdge {
+  """The item at the end of the edge"""
+  node: Artist!
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+input ArtistFilterInput {
+  nameMainLike: String
+}
+
+type ArtistMemberConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [ArtistMemberEdge!]!
+
+  """A list of nodes."""
+  nodes: [Artist!]!
+}
+
+"""An edge in a connection."""
+type ArtistMemberEdge {
+  """The item at the end of the edge"""
+  node: Artist!
+
+  """Used to distinguish member by alias"""
+  alias: String
+
+  """Used to distinguish member by character"""
+  as: String
+
+  """Used to extra annotation, like member role"""
+  notes: String
+
+  """Used to determine the relevance order of members in group"""
+  relevance: Int!
+
+  """The date that the resource was created"""
+  createdAt(format: String! = "%+"): String!
+
+  """The date that the resource was updated"""
+  updatedAt(format: String! = "%+"): String!
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+type ArtistName {
+  """The stylized name of the artist"""
+  main: String!
+
+  """The native name of the artist"""
+  native: String
+}
+
+type ArtistPagination {
+  """The data for the current page."""
+  data: [Artist!]!
+
+  """Information to aid in pagination."""
+  pageInfo: OffsetPageInfo!
+}
+
+enum ArtistSort {
+  ID
+  ID_DESC
+  NAME_MAIN
+  NAME_MAIN_DESC
+  NAME_NATIVE
+  NAME_NATIVE_DESC
+  CREATED_AT
+  CREATED_AT_DESC
+  UPDATED_AT
+  UPDATED_AT_DESC
+  RANDOM
+}
+
+"""
+Represents the audio track of a video.
+
+For example, the audio Bakemonogatari-OP1.ogg represents the audio track of the Bakemonogatari-OP1.webm video.
+"""
+type Audio {
+  """The primary key of the resource"""
+  id: Int!
+
+  """The basename of the file in storage"""
+  basename: String!
+
+  """The filename of the file in storage"""
+  filename: String!
+
+  """The URL to stream the file from storage"""
+  link: String!
+
+  """The media type of the file in storage"""
+  mimetype: String!
+
+  """The path of the file in storage"""
+  path: String!
+
+  """The size of the file in storage in Bytes"""
+  size: Int!
+}
+
+input CreatePlaylistInput {
+  name: String!
+  description: String
+  visibility: PlaylistVisibility!
+}
+
+input CreatePlaylistTrackInput {
+  entryId: Int!
+  videoId: Int!
+  position: Int
+}
+
+"""Represents the current featured theme on the homepage of the site."""
+type CurrentFeaturedTheme {
+  """The primary key of the resource"""
+  id: Int!
+
+  """The start date of the resource"""
+  startAt(format: String! = "%+"): String
+
+  """The end date of the resource"""
+  endAt(format: String! = "%+"): String
+  entry: Entry!
+  video: Video!
+  user: User
+}
+
+"""
+Implement the DateTime<Utc> scalar
+
+The input/output is a string in RFC3339 format.
+"""
+scalar DateTime @specifiedBy(url: "https://datatracker.ietf.org/doc/html/rfc3339")
+
+"""
+Represents a version of a theme.
+
+For example, the ED theme of the Bakemonogatari anime has three theme entries to represent three versions.
+"""
+type Entry {
+  """The primary key of the resource"""
+  id: Int!
+
+  """The episodes that the theme is used for"""
+  episodes: String
+
+  """The number of favorites recorded for the resource"""
+  favoritesCount: Int!
+
+  """Any additional information for this sequence"""
+  notes: String
+
+  """Is not safe for work content included?"""
+  nsfw: Boolean!
+
+  """Is content included that may spoil the viewer?"""
+  spoiler: Boolean!
+
+  """The number of tracks belonging to the resource"""
+  tracksCount: Int!
+
+  """The version number of the theme"""
+  version: Int!
+  theme: Theme!
+  videos: EntryVideoConnection!
+}
+
+type EntryConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [EntryEdge!]!
+
+  """A list of nodes."""
+  nodes: [Entry!]!
+}
+
+"""An edge in a connection."""
+type EntryEdge {
+  """The item at the end of the edge"""
+  node: Entry!
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+input EntryFilterInput {
+  spoiler: Boolean
+}
+
+type EntryVideoConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [EntryVideoEdge!]!
+
+  """A list of nodes."""
+  nodes: [Video!]!
+}
+
+"""An edge in a connection."""
+type EntryVideoEdge {
+  """The item at the end of the edge"""
+  node: Video!
+  createdAt(format: String! = "%+"): String!
+  updatedAt(format: String! = "%+"): String!
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+"""
+Represents a site with supplementary information for another resource such as an anime or artist.
+
+For example, the Bakemonogatari anime has MyAnimeList, AniList and AniDB resources.
+"""
+type ExternalResource {
+  """The primary key of the resource"""
+  id: Int!
+
+  """The primary key of the resource in the external site"""
+  externalId: Int
+
+  """The URL of the external site"""
+  link: String!
+
+  """The external site that the resource belongs to"""
+  site: ResourceSite!
+
+  """The localized string value of the site field"""
+  siteLocalized: String!
+}
+
+"""Represents a favorite of a user."""
+type Favorite {
+  id: Int!
+  position: Int!
+  entry: Entry
+  favoriteable: Favoriteable!
+  user: User!
+}
+
+enum FavoriteSort {
+  ID
+  ID_DESC
+  POSITION
+  POSITION_DESC
+  RANDOM
+}
+
+union Favoriteable = Entry
+
+input FavoriteableType @oneOf {
+  entry: Int
+}
+
+"""
+Represents a visual component for another resource such as an anime or artist.
+
+For example, the Bakemonogatari anime has two images to represent small and large cover images.
+"""
+type Image {
+  """The primary key of the resource"""
+  id: Int!
+
+  """The component that the resource is intended for"""
+  facet: ImageFacet!
+
+  """The localized string value of the facet field"""
+  facetLocalized: String!
+
+  """The path of the file in storage"""
+  path: String!
+
+  """The URL to stream the file from storage"""
+  link: String!
+}
+
+type ImageConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [ImageEdge!]!
+
+  """A list of nodes."""
+  nodes: [Image!]!
+}
+
+"""An edge in a connection."""
+type ImageEdge {
+  """The item at the end of the edge"""
+  node: Image!
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+enum ImageFacet {
+  SMALL_COVER
+  LARGE_COVER
+  GRILL
+  DOCUMENT
+  AVATAR
+  BANNER
+}
+
+input ImageFilterInput {
+  facet: ImageFacet
+}
+
+enum ImageSort {
+  ID
+  ID_DESC
+  CREATED_AT
+  CREATED_AT_DESC
+  UPDATED_AT
+  UPDATED_AT_DESC
+  RANDOM
+}
+
+type ImageableConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [ImageableEdge!]!
+
+  """A list of nodes."""
+  nodes: [Image!]!
+}
+
+"""An edge in a connection."""
+type ImageableEdge {
+  """The item at the end of the edge"""
+  node: Image!
+
+  """Used to sort the images"""
+  depth: Int!
+
+  """The date that the resource was created"""
+  createdAt(format: String! = "%+"): String!
+
+  """The date that the resource was updated"""
+  updatedAt(format: String! = "%+"): String!
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+"""Represents an Themes account."""
+type Me {
+  """The primary key of the resource"""
+  id: Int!
+
+  """The username of the resource"""
+  name: String!
+
+  """The email of the user"""
+  email: String!
+
+  """The date the user verified their email"""
+  emailVerifiedAt: DateTime
+
+  """The date that the resource was created"""
+  createdAt: DateTime!
+
+  """The date that the resource was updated"""
+  updatedAt: DateTime!
+
+  """The playlists of the authenticated user."""
+  playlists(pagination: PaginationInput, sort: [PlaylistSort!]): PlaylistConnection!
+
+  """The roles of the authenticated user."""
+  roles: [Role!]!
+
+  """The watch history of the authenticated user."""
+  watchHistory(pagination: PaginationInput, sort: [WatchHistorySort!]): WatchHistoryConnection!
+
+  """The favorites of the authenticated user."""
+  favorites(filter: UserFavoritesFilterInput, sort: [FavoriteSort!]): [Favorite!]!
+
+  """The ratings of the authenticated user."""
+  ratings(sort: [RatingSort!]): [Rating!]!
+}
+
+type Mutation {
+  createPlaylist(input: CreatePlaylistInput!): Playlist!
+  updatePlaylist(id: String!, input: UpdatePlaylistInput!): Playlist!
+  deletePlaylist(id: String!): Boolean!
+  createPlaylistTrack(playlist: String!, input: CreatePlaylistTrackInput!): PlaylistTrack!
+  updatePlaylistTrack(id: String!, playlist: String!, input: UpdatePlaylistTrackInput!): PlaylistTrack!
+  deletePlaylistTrack(id: String!, playlist: String!): Boolean!
+  toggleFavorite(favorite: FavoriteableType!): Favorite
+  updateFavorite(id: Int!, input: UpdateFavoriteInput!): Favorite!
+
+  """Mark a video as watched for the authenticated user."""
+  watch(entryId: Int!, videoId: Int!): WatchHistory!
+
+  """Clear the watch history for the authenticated user."""
+  clearWatchHistory: Boolean!
+}
+
+type OffsetPageInfo {
+  """The total number of items."""
+  total: Int!
+
+  """The offset of the current page."""
+  offset: Int!
+
+  """The number of items per page."""
+  first: Int!
+
+  """
+  When paginating backwards, are there more items? Note: Paginating backwards is not supported.
+  """
+  hasPreviousPage: Boolean!
+
+  """When paginating forwards, are there more items?"""
+  hasNextPage: Boolean!
+}
+
+"""
+Represents a static markdown page used for guides and other documentation.
+
+For example, the 'encoding/audio_normalization' page represents the documentation for audio normalization.
+"""
+type Page {
+  """The primary key of the resource"""
+  id: Int!
+
+  """The primary title of the page"""
+  name: String!
+
+  """The URL slug & route key of the resource"""
+  slug: String!
+
+  """The body content of the resource"""
+  body: String!
+
+  """The date that the resource was created"""
+  createdAt(format: String! = "%+"): String!
+
+  """The date that the resource was updated"""
+  updatedAt(format: String! = "%+"): String!
+  previous: Page
+  next: Page
+}
+
+type PageConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [PageEdge!]!
+
+  """A list of nodes."""
+  nodes: [Page!]!
+}
+
+"""An edge in a connection."""
+type PageEdge {
+  """The item at the end of the edge"""
+  node: Page!
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+input PageFilterInput {
+  nameLike: String
+}
+
+"""Information about pagination in a connection"""
+type PageInfo {
+  """When paginating backwards, are there more items?"""
+  hasPreviousPage: Boolean!
+
+  """When paginating forwards, are there more items?"""
+  hasNextPage: Boolean!
+
+  """When paginating backwards, the cursor to continue."""
+  startCursor: String
+
+  """When paginating forwards, the cursor to continue."""
+  endCursor: String
+}
+
+enum PageSort {
+  ID
+  ID_DESC
+  NAME
+  NAME_DESC
+  CREATED_AT
+  CREATED_AT_DESC
+  UPDATED_AT
+  UPDATED_AT_DESC
+  RANDOM
+}
+
+input PaginationInput {
+  after: String
+  before: String
+  first: Int
+  last: Int
+}
+
+type Permissions {
+  canRevalidatePages: Boolean!
+  canCreatePlaylist: PermissionsResult!
+}
+
+type PermissionsResult {
+  """Whether the permission check was successful."""
+  allow: Boolean!
+
+  """The reason for the permission check failure, if any."""
+  reason: String
+}
+
+"""
+Represents a list of ordered tracks intended for continuous playback.
+
+For example, a "/r/anime's Best OPs and EDs of 2022" playlist may contain a collection of tracks allowing the continuous playback of Best OP and ED nominations for the /r/anime Awards.
+"""
+type Playlist {
+  """The primary key of the resource"""
+  id: String!
+
+  """The title of the playlist"""
+  name: String!
+
+  """The description of the playlist"""
+  description: String
+
+  """The state of who can see the playlist"""
+  visibility: PlaylistVisibility!
+
+  """The localized string value of the visibility field"""
+  visibilityLocalized: String!
+
+  """The URL for the playlist page on the website"""
+  siteUrl: String!
+  tracksCount: Int!
+  tracksExists: Boolean!
+  user: User!
+  tracks(filter: PlaylistTracksFilterInput, sort: [PlaylistTrackSort!]): [PlaylistTrack!]!
+  permissions: PlaylistPermissions!
+}
+
+type PlaylistConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [PlaylistEdge!]!
+
+  """A list of nodes."""
+  nodes: [Playlist!]!
+}
+
+"""An edge in a connection."""
+type PlaylistEdge {
+  """The item at the end of the edge"""
+  node: Playlist!
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+input PlaylistFilterInput {
+  nameLike: String
+  tracksExist: Boolean
+}
+
+type PlaylistPagination {
+  """The data for the current page."""
+  data: [Playlist!]!
+
+  """Information to aid in pagination."""
+  pageInfo: OffsetPageInfo!
+}
+
+type PlaylistPermissions {
+  canUpdate: Boolean!
+  canDelete: Boolean!
+  canReorderTracks: Boolean!
+}
+
+enum PlaylistSort {
+  ID
+  ID_DESC
+  NAME
+  NAME_DESC
+  CREATED_AT
+  CREATED_AT_DESC
+  UPDATED_AT
+  UPDATED_AT_DESC
+  RANDOM
+}
+
+"""
+Represents an entry in a playlist.
+
+For example, a "/r/anime's Best OPs and EDs of 2022" playlist may contain a track for the ParipiKoumei-OP1.webm video.
+"""
+type PlaylistTrack {
+  """The primary key of the resource"""
+  id: String!
+
+  """The position of the playlist track within the playlist"""
+  position: Int!
+  playlist: Playlist!
+  entry: Entry!
+  video: Video!
+}
+
+enum PlaylistTrackSort {
+  POSITION
+  POSITION_DESC
+  CREATED_AT
+  CREATED_AT_DESC
+  UPDATED_AT
+  UPDATED_AT_DESC
+  RANDOM
+}
+
+input PlaylistTracksFilterInput {
+  entryId: Int
+  videoId: Int
+}
+
+enum PlaylistVisibility {
+  PUBLIC
+  PRIVATE
+  UNLISTED
+}
+
+type Query {
+  me: Me
+  permissions: Permissions!
+  search(search: String!, first: Int! = 10, page: Int! = 1): Search!
+  currentAnnouncements: [Announcement!]!
+  currentFeaturedTheme: CurrentFeaturedTheme
+  page(slug: String!): Page
+  pageConnection(pagination: PaginationInput, filter: PageFilterInput): PageConnection!
+  blogPages(pagination: PaginationInput, sort: [PageSort!]): PageConnection!
+  playlist(id: String!): Playlist
+  playlistConnection(pagination: PaginationInput, filter: PlaylistFilterInput, sort: [PlaylistSort!]): PlaylistConnection!
+  anime(slug: String!): Anime
+  animeConnection(pagination: PaginationInput, filter: AnimeFilterInput, sort: [AnimeSort!]): AnimeConnection!
+
+  """Filter anime by its external id on given site"""
+  filterAnimeByExternalSite(site: ResourceSite!, id: [Int!], link: String): [Anime!]!
+
+  """Returns a list of years grouped by its seasons."""
+  animeyears(year: [Int!]): [AnimeYear!]!
+  themeShuffle(first: Int! = 15, input: ThemeShuffleInput): [Theme!]!
+  themeConnection(pagination: PaginationInput, filter: ThemeFilterInput, sort: [ThemeSort!]): ThemeConnection!
+  mostPopularEntries(pagination: PaginationInput, filter: EntryFilterInput): EntryConnection!
+  artist(slug: String!): Artist
+  artistConnection(pagination: PaginationInput, filter: ArtistFilterInput, sort: [ArtistSort!]): ArtistConnection!
+  imageConnection(pagination: PaginationInput, filter: ImageFilterInput, sort: [ImageSort!]): ImageConnection!
+  series(slug: String!): Series
+  seriesConnection(pagination: PaginationInput, filter: SeriesFilterInput, sort: [SeriesSort!]): SeriesConnection!
+  studio(slug: String!): Studio
+  studioConnection(pagination: PaginationInput, filter: StudioFilterInput, sort: [StudioSort!]): StudioConnection!
+  video(id: Int!): Video
+  videoConnection(pagination: PaginationInput, filter: VideoFilterInput, sort: [VideoSort!]): VideoConnection!
+}
+
+"""Represents the rating of the authenticated user."""
+type Rating {
+  """The score of the rating."""
+  score: Float!
+  entry: Entry!
+}
+
+enum RatingSort {
+  SCORE
+  SCORE_DESC
+  RANDOM
+}
+
+enum ResourceSite {
+  OFFICIAL_SITE
+  X
+  ANIDB
+  ANILIST
+  ANIME_PLANET @deprecated(reason: "No longer actively maintained")
+  ANN @deprecated(reason: "No longer actively maintained")
+  KITSU @deprecated(reason: "No longer actively maintained")
+  MAL
+  WIKI @deprecated(reason: "No longer actively maintained")
+  SPOTIFY
+  YOUTUBE_MUSIC
+  YOUTUBE
+  APPLE_MUSIC
+  AMAZON_MUSIC
+  CRUNCHYROLL
+  HIDIVE
+  NETFLIX
+  DISNEY_PLUS
+  HULU
+  AMAZON_PRIME_VIDEO
+  LIVECHART
+}
+
+type ResourceableConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [ResourceableEdge!]!
+
+  """A list of nodes."""
+  nodes: [ExternalResource!]!
+}
+
+"""An edge in a connection."""
+type ResourceableEdge {
+  """The item at the end of the edge"""
+  node: ExternalResource!
+
+  """Used to distinguish resources that map to the same resourceable"""
+  as: String
+
+  """The date that the resource was created"""
+  createdAt(format: String! = "%+"): String!
+  updatedAt(format: String! = "%+"): String!
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+"""
+Represents an assignable label for users that provides a configured group of permissions.
+"""
+type Role {
+  """The primary key of the resource"""
+  id: Int!
+
+  """The label of the resource"""
+  name: String!
+
+  """The hex representation of the color used to distinguish the resource"""
+  color: String
+
+  """Is the role assigned on account verification?"""
+  default: Boolean!
+
+  """
+  The weight assigned to the resource, where higher values correspond to higher priority
+  """
+  priority: Int!
+}
+
+"""Returns a listing of resources that match a given search term."""
+type Search {
+  """The anime results of the search"""
+  anime(filter: SearchAnimeFilterInput, sort: [SearchAnimeSort!]): AnimePagination!
+
+  """The artist results of the search"""
+  artists(filter: SearchArtistFilterInput, sort: [SearchArtistSort!]): ArtistPagination!
+
+  """The theme results of the search"""
+  themes(filter: SearchThemeFilterInput, sort: [SearchThemeSort!]): ThemePagination!
+
+  """The playlist results of the search"""
+  playlists(sort: [SearchPlaylistSort!]): PlaylistPagination!
+
+  """The series results of the search"""
+  series(filter: SearchSeriesFilterInput, sort: [SearchSeriesSort!]): SeriesPagination!
+
+  """The song results of the search"""
+  songs: SongPagination!
+
+  """The studio results of the search"""
+  studios(filter: SearchStudioFilterInput, sort: [SearchStudioSort!]): StudioPagination!
+
+  """The video results of the search"""
+  videos: VideoPagination!
+}
+
+input SearchAnimeFilterInput {
+  titleRomajiPrefix: String
+  season: AnimeSeason
+  year: Int
+  format: AnimeFormat
+}
+
+enum SearchAnimeSort {
+  TITLE_ROMAJI
+  TITLE_ROMAJI_DESC
+  YEAR
+  YEAR_DESC
+  SEASON
+  SEASON_DESC
+  CREATED_AT_DESC
+}
+
+input SearchArtistFilterInput {
+  nameMainPrefix: String
+}
+
+enum SearchArtistSort {
+  NAME_MAIN
+  NAME_MAIN_DESC
+  CREATED_AT_DESC
+}
+
+enum SearchPlaylistSort {
+  NAME
+  NAME_DESC
+  CREATED_AT_DESC
+}
+
+input SearchSeriesFilterInput {
+  titleRomajiPrefix: String
+}
+
+enum SearchSeriesSort {
+  TITLE_ROMAJI
+  TITLE_ROMAJI_DESC
+  CREATED_AT_DESC
+}
+
+input SearchStudioFilterInput {
+  namePrefix: String
+}
+
+enum SearchStudioSort {
+  NAME
+  NAME_DESC
+  CREATED_AT_DESC
+}
+
+input SearchThemeFilterInput {
+  songTitleRomajiPrefix: String
+  type: ThemeType
+}
+
+enum SearchThemeSort {
+  SONG_TITLE_ROMAJI
+  SONG_TITLE_ROMAJI_DESC
+  ANIME_YEAR
+  ANIME_YEAR_DESC
+  ANIME_SEASON
+  ANIME_SEASON_DESC
+  CREATED_AT_DESC
+}
+
+"""
+Represents a collection of related anime.
+
+For example, the Monogatari series is the collection of the Bakemonogatari anime and its related productions.
+"""
+type Series {
+  """The primary key of the resource"""
+  id: Int!
+
+  """The primary title of the series"""
+  title: SeriesTitle!
+
+  """The URL slug & route key of the resource"""
+  slug: String!
+
+  """The URL for the series page on the website"""
+  siteUrl: String!
+  anime: SeriesAnimeConnection!
+}
+
+type SeriesAnimeConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [SeriesAnimeEdge!]!
+
+  """A list of nodes."""
+  nodes: [Anime!]!
+}
+
+"""An edge in a connection."""
+type SeriesAnimeEdge {
+  """The item at the end of the edge"""
+  node: Anime!
+  createdAt(format: String! = "%+"): String!
+  updatedAt(format: String! = "%+"): String!
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+type SeriesConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [SeriesEdge!]!
+
+  """A list of nodes."""
+  nodes: [Series!]!
+}
+
+"""An edge in a connection."""
+type SeriesEdge {
+  """The item at the end of the edge"""
+  node: Series!
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+input SeriesFilterInput {
+  titleRomajiLike: String
+}
+
+type SeriesPagination {
+  """The data for the current page."""
+  data: [Series!]!
+
+  """Information to aid in pagination."""
+  pageInfo: OffsetPageInfo!
+}
+
+enum SeriesSort {
+  ID
+  ID_DESC
+  TITLE_ROMAJI
+  TITLE_ROMAJI_DESC
+  CREATED_AT
+  CREATED_AT_DESC
+  UPDATED_AT
+  UPDATED_AT_DESC
+  RANDOM
+}
+
+type SeriesTitle {
+  romaji: String!
+}
+
+"""
+Represents the composition that accompanies an Theme.
+
+For example, Staple Stable is the song for the Bakemonogatari OP1 Theme.
+"""
+type Song {
+  """The primary key of the resource"""
+  id: Int!
+
+  """The title of the composition"""
+  title: SongTitle!
+  themes: [Theme!]!
+  staff: [SongStaff!]!
+  resources: ResourceableConnection!
+}
+
+type SongPagination {
+  """The data for the current page."""
+  data: [Song!]!
+
+  """Information to aid in pagination."""
+  pageInfo: OffsetPageInfo!
+}
+
+"""Represents the link between a song and an artist or group."""
+type SongStaff {
+  """The primary key of the resource"""
+  id: Int!
+
+  """The alias the artist is using for this staff"""
+  alias: String
+
+  """The character the artist is performing as"""
+  as: String
+
+  """The alias the member is using for this staff"""
+  memberAlias: String
+
+  """The character the member is performing as"""
+  memberAs: String
+
+  """Used to determine the relevance order of artists in staffs"""
+  relevance: Int!
+
+  """The role the artist is performing"""
+  role: String!
+  artist: Artist!
+  member: Artist
+  song: Song!
+}
+
+type SongTitle {
+  """The romaji title of the composition"""
+  romaji: String
+
+  """The native title of the composition"""
+  native: String
+}
+
+"""
+Represents a company that produces anime.
+
+For example, Shaft is the studio that produced the anime Bakemonogatari.
+"""
+type Studio {
+  """The primary key of the resource"""
+  id: Int!
+
+  """The primary title of the Studio"""
+  name: String!
+
+  """The URL slug & route key of the resource"""
+  slug: String!
+
+  """The URL for the studio page on the website"""
+  siteUrl: String!
+  anime: StudioAnimeConnection!
+  images: ImageableConnection!
+  resources: ResourceableConnection!
+}
+
+type StudioAnimeConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [StudioAnimeEdge!]!
+
+  """A list of nodes."""
+  nodes: [Anime!]!
+}
+
+"""An edge in a connection."""
+type StudioAnimeEdge {
+  """The item at the end of the edge"""
+  node: Anime!
+  createdAt(format: String! = "%+"): String!
+  updatedAt(format: String! = "%+"): String!
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+type StudioConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [StudioEdge!]!
+
+  """A list of nodes."""
+  nodes: [Studio!]!
+}
+
+"""An edge in a connection."""
+type StudioEdge {
+  """The item at the end of the edge"""
+  node: Studio!
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+input StudioFilterInput {
+  nameLike: String
+}
+
+type StudioPagination {
+  """The data for the current page."""
+  data: [Studio!]!
+
+  """Information to aid in pagination."""
+  pageInfo: OffsetPageInfo!
+}
+
+enum StudioSort {
+  ID
+  ID_DESC
+  NAME
+  NAME_DESC
+  CREATED_AT
+  CREATED_AT_DESC
+  UPDATED_AT
+  UPDATED_AT_DESC
+  RANDOM
+}
+
+"""
+Represents an alternate title or common abbreviation for an entity.
+
+For example, the anime Bakemonogatari has the synonym "Monstory".
+"""
+type Synonym {
+  """The primary key of the resource"""
+  id: Int!
+
+  """The language of the synonym. It may be used for short synonyms"""
+  language: String
+
+  """The alternate title or common abbreviations"""
+  text: String!
+}
+
+"""
+Represents an OP or ED sequence for an anime.
+
+For example, the anime Bakemonogatari has five OP themes and one ED theme.
+"""
+type Theme {
+  """The primary key of the resource"""
+  id: Int!
+
+  """The numeric ordering of the theme"""
+  sequence: Int
+
+  """The slug that represents the theme."""
+  slug: String!
+
+  """The type of the sequence"""
+  type: ThemeType!
+
+  """The localized string value of the type field"""
+  typeLocalized: String!
+  anime: Anime!
+  entries: [Entry!]!
+  song: Song
+  group: ThemeGroup
+  staff: [ThemeStaff!]!
+}
+
+type ThemeConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [ThemeEdge!]!
+
+  """A list of nodes."""
+  nodes: [Theme!]!
+}
+
+"""An edge in a connection."""
+type ThemeEdge {
+  """The item at the end of the edge"""
+  node: Theme!
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+input ThemeFilterInput {
+  idIn: [Int!]
+  type: ThemeType
+}
+
+"""
+Represents the group that accompanies a Theme.
+For example, English Version is the group for english dubbed Theme.For example, Staple Stable is the song for the Bakemonogatari OP1 Theme.
+"""
+type ThemeGroup {
+  """The primary key of the resource"""
+  id: Int!
+
+  """The name of the group"""
+  name: String!
+
+  """The slug of the group"""
+  slug: String!
+}
+
+type ThemePagination {
+  """The data for the current page."""
+  data: [Theme!]!
+
+  """Information to aid in pagination."""
+  pageInfo: OffsetPageInfo!
+}
+
+input ThemeShuffleInput {
+  type: [ThemeType!]
+  format: AnimeFormat
+  yearGte: Int
+  yearLte: Int
+  spoiler: Boolean
+}
+
+enum ThemeSort {
+  ID
+  ID_DESC
+  SEQUENCE
+  SEQUENCE_DESC
+  CREATED_AT
+  CREATED_AT_DESC
+  UPDATED_AT
+  UPDATED_AT_DESC
+  RANDOM
+}
+
+"""Represents the link between a theme and an artist."""
+type ThemeStaff {
+  """The primary key of the resource"""
+  id: Int!
+
+  """The alias the artist is using for this staff"""
+  alias: String
+
+  """Used to determine the relevance order of artists in staffs"""
+  relevance: Int!
+
+  """The role the artist is performing"""
+  role: String!
+  artist: Artist!
+  theme: Theme!
+}
+
+enum ThemeType {
+  """Opening"""
+  OP
+
+  """Ending"""
+  ED
+
+  """Insert Song"""
+  IN
+}
+
+input UpdateFavoriteInput {
+  position: Int
+}
+
+input UpdatePlaylistInput {
+  name: String
+  description: String
+  visibility: PlaylistVisibility
+}
+
+input UpdatePlaylistTrackInput {
+  entryId: Int
+  videoId: Int
+  position: Int
+}
+
+"""Represents an Themes account."""
+type User {
+  """The primary key of the resource"""
+  id: Int!
+
+  """The username of the resource"""
+  name: String!
+  playlists(sort: [PlaylistSort!]): [Playlist!]!
+}
+
+input UserFavoritesFilterInput {
+  entryId: Int
+}
+
+"""
+Represents a WebM of a theme.
+
+For example, the video Bakemonogatari-OP1.webm represents the WebM of the Bakemonogatari OP1 theme.
+"""
+type Video {
+  """The primary key of the resource"""
+  id: Int!
+
+  """The basename of the file in storage"""
+  basename: String!
+
+  """The filename of the file in storage"""
+  filename: String!
+
+  """The URL to stream the file from storage"""
+  link: String!
+
+  """Does the video include subtitles of song lyrics?"""
+  lyrics: Boolean!
+
+  """The media type of the file in storage"""
+  mimetype: String!
+
+  """Is the video creditless?"""
+  nc: Boolean!
+
+  """The degree to which the sequence and episode content overlap"""
+  overlap: VideoOverlap!
+
+  """The formatted string value of the overlap field"""
+  overlapLocalized: String!
+
+  """The path of the file in storage"""
+  path: String!
+
+  """The frame height of the file in storage"""
+  resolution: Int
+
+  """The size of the file in storage in Bytes"""
+  size: Int
+
+  """Where did this video come from?"""
+  source: VideoSource
+
+  """The formatted string value of the source field"""
+  sourceLocalized: String
+
+  """Does the video include subtitles of dialogue?"""
+  subbed: Boolean!
+
+  """
+  The attributes used to distinguish the file within the context of a theme
+  """
+  tags: String!
+
+  """Is the video an uncensored version of a censored sequence?"""
+  uncen: Boolean!
+  entries: VideoEntryConnection!
+  audio: Audio
+  videoscript: VideoScript
+  tracks: [PlaylistTrack!]!
+}
+
+type VideoConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [VideoEdge!]!
+
+  """A list of nodes."""
+  nodes: [Video!]!
+}
+
+"""An edge in a connection."""
+type VideoEdge {
+  """The item at the end of the edge"""
+  node: Video!
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+type VideoEntryConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [VideoEntryEdge!]!
+
+  """A list of nodes."""
+  nodes: [Entry!]!
+}
+
+"""An edge in a connection."""
+type VideoEntryEdge {
+  """The item at the end of the edge"""
+  node: Entry!
+  createdAt(format: String! = "%+"): String!
+  updatedAt(format: String! = "%+"): String!
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+input VideoFilterInput {
+  nc: Boolean
+}
+
+enum VideoOverlap {
+  NONE
+  TRANS
+  OVER
+}
+
+type VideoPagination {
+  """The data for the current page."""
+  data: [Video!]!
+
+  """Information to aid in pagination."""
+  pageInfo: OffsetPageInfo!
+}
+
+"""
+Represents an encoding script used to produce a video.
+
+For example, the 2009/Summer/Bakemonogatari-OP1.txt video script represents the encoding script of the Bakemonogatari-OP1.webm video.
+"""
+type VideoScript {
+  """The primary key of the resource"""
+  id: Int!
+
+  """The path of the file in storage"""
+  path: String!
+
+  """The URL to stream the file from storage"""
+  link: String!
+}
+
+enum VideoSort {
+  ID
+  ID_DESC
+  CREATED_AT
+  CREATED_AT_DESC
+  UPDATED_AT
+  UPDATED_AT_DESC
+  RANDOM
+}
+
+enum VideoSource {
+  WEB
+  RAW
+  BD
+  DVD
+  VHS
+  LD
+}
+
+type WatchHistory {
+  entry: Entry!
+  video: Video!
+}
+
+type WatchHistoryConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [WatchHistoryEdge!]!
+
+  """A list of nodes."""
+  nodes: [WatchHistory!]!
+}
+
+"""An edge in a connection."""
+type WatchHistoryEdge {
+  """The item at the end of the edge"""
+  node: WatchHistory!
+
+  """A cursor for use in pagination"""
+  cursor: String!
+}
+
+enum WatchHistorySort {
+  ID
+  ID_DESC
+  RANDOM
+}

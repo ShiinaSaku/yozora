@@ -11,9 +11,9 @@ const envSchema = z.compile(
       .string()
       .min(1, "CLERK_SECRET_KEY is required for Clerk authentication")
       .optional(),
-    VITE_CLERK_PUBLISHABLE_KEY: z.string().min(1).optional(),
+    PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().min(1).optional(),
     CLERK_WEBHOOK_SIGNING_SECRET: z.string().min(1).optional(),
-    VITE_APP_URL: z.string().min(1).default("http://localhost:3000"),
+    PUBLIC_APP_URL: z.string().min(1).default("http://localhost:3000"),
     ANILIST_API_URL: z.string().min(1).default("https://graphql.anilist.co"),
     ANIMETHEMES_GRAPHQL_URL: z
       .string()

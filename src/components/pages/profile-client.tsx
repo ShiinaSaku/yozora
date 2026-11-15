@@ -1,10 +1,11 @@
 import * as React from "react"
 import Image from "@/components/ui/image"
-import { useQuery } from "@tanstack/react-query"
 import { toast } from "sonner"
 import {
+  Calendar,
   Check,
   CheckCircle2,
+  Clapperboard,
   Clock,
   ExternalLink,
   Layers,
@@ -25,76 +26,94 @@ import { AnimeCard } from "@/components/anime/anime-card"
 import { SaveDialog } from "@/components/anime/save-dialog"
 import { MarkdownRenderer } from "@/components/ui/markdown-renderer"
 import { AniListIcon, MyAnimeListIcon } from "@/components/icons/platform-icons"
-import type { Anime } from "@/lib/types/anime"
+import { useUser } from "@/lib/clerk"
+import { fetchBatchAnime, fetchPublicProfile } from "@/lib/api"
+import type { UserStats, PublicProfileData } from "@/lib/api"
 import type { AnimeEntry, UserProfile } from "@/lib/db/schema"
+import type { Anime } from "@/lib/types/anime"
 import { getAnimeUrl } from "@/lib/utils/slug"
-import { batchAnimeQueryOptions } from "@/lib/queries/catalog"
-import { publicProfileQueryOptions } from "@/lib/queries/profile"
 
-export interface UserStats {
-  totalEntries: number
-  totalEpisodes: number
-  meanScore: number | null
-  daysWatched: number
-  completedCount: number
-  watchingCount: number
-}
-
-interface ProfilePageData {
-  profile: UserProfile
-  stats: UserStats
-  entries: AnimeEntry[]
-  anime: Anime[]
-}
-
-interface ProfileClientProps {
+type ProfileClientProps = {
   handle: string
-  initialData: ProfilePageData
+  initialData: PublicProfileData
+}
+
+/** Formats a profile creation date deterministically (UTC, fixed locale). */
+function formatJoinDate(value: Date | string | undefined) {
+  if (!value) return null
+  const date = value instanceof Date ? value : new Date(value)
+  if (Number.isNaN(date.getTime())) return null
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    timeZone: "UTC",
+  })
 }
 
 function ProfileHeader({ profile }: { profile: UserProfile }) {
   const [copied, setCopied] = React.useState(false)
+  const joined = formatJoinDate(profile.createdAt)
 
-  const copyProfileLink = () => {
-    if (typeof window !== "undefined") {
-      navigator.clipboard.writeText(window.location.href)
+  const copyProfileLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href)
       setCopied(true)
       setTimeout(setCopied, 2000, false)
-      toast.success("Link Copied", {
-        description: `@${profile.handle}'s profile URL copied to clipboard.`,
-      })
+      toast.success("Profile link copied")
+    } catch {
+      toast.error("Couldn't copy the profile link")
     }
   }
 
-  return (
-    <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-card shadow-lg">
-      <div
-        className="pointer-events-none absolute -top-24 left-1/2 h-56 w-xl max-w-full -translate-x-1/2 rounded-full bg-primary/15 blur-3xl"
-        aria-hidden="true"
-      />
+  const trackerLinks = [
+    profile.anilistUsername
+      ? {
+          href: `https://anilist.co/user/${profile.anilistUsername}`,
+          icon: AniListIcon,
+          label: "AniList",
+          title: `AniList: ${profile.anilistUsername}`,
+        }
+      : null,
+    profile.malUsername
+      ? {
+          href: `https://myanimelist.net/profile/${profile.malUsername}`,
+          icon: MyAnimeListIcon,
+          label: "MAL",
+          title: `MyAnimeList: ${profile.malUsername}`,
+        }
+      : null,
+  ].filter(Boolean) as Array<{
+    href: string
+    icon: React.ComponentType<{ className?: string }>
+    label: string
+    title: string
+  }>
 
-      <div className="relative h-48 w-full overflow-hidden bg-muted sm:h-64 md:h-72">
+  return (
+    <div className="relative overflow-hidden rounded-3xl border border-border/70 bg-card shadow-sm">
+      <div className="relative h-44 w-full overflow-hidden bg-muted sm:h-60 md:h-72">
         {profile.bannerUrl ? (
           <Image
             src={profile.bannerUrl}
             alt={`${profile.displayName}'s banner`}
             fill
-            unoptimized
+            priority
             sizes="100vw"
-            className="object-cover"
+            className="object-cover object-center"
           />
         ) : (
-          <div className="size-full bg-linear-to-br from-primary/25 via-accent/15 to-secondary/30" />
+          <div className="size-full bg-linear-to-br from-primary/30 via-accent/50 to-secondary" />
         )}
         <div
           className="bg-grid absolute inset-0 opacity-5"
           aria-hidden="true"
         />
-        <div className="absolute inset-0 bg-linear-to-t from-card via-card/20 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-card via-card/30 to-transparent" />
       </div>
 
-      <div className="relative z-10 -mt-16 flex flex-col justify-between gap-6 px-6 pt-0 pb-6 sm:-mt-20 sm:flex-row sm:items-end sm:px-10">
-        <div className="flex flex-col items-center gap-5 text-center sm:flex-row sm:items-end sm:text-left">
+      <div className="relative z-10 -mt-12 flex flex-col gap-4 px-5 pb-6 sm:-mt-14 sm:flex-row sm:items-end sm:justify-between sm:px-8 sm:pb-7">
+        <div className="flex min-w-0 flex-col items-start gap-4 sm:flex-row sm:items-end sm:gap-5">
           <Avatar variant="profile" size="profile">
             <AvatarImage
               variant="profile"
@@ -106,24 +125,33 @@ function ProfileHeader({ profile }: { profile: UserProfile }) {
             </AvatarFallback>
           </Avatar>
 
-          <div className="flex flex-col">
-            <div className="flex flex-wrap items-center justify-center gap-2.5 sm:justify-start">
-              <h1 className="text-2xl font-black tracking-tight text-foreground sm:text-3xl md:text-4xl">
-                {profile.displayName}
-              </h1>
-              <Badge variant="subtle">PRO Curator</Badge>
+          <div className="flex min-w-0 flex-col pb-1">
+            <h1 className="text-2xl leading-tight font-bold tracking-tight text-foreground sm:text-3xl md:text-4xl">
+              {profile.displayName}
+            </h1>
+            <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+              <span className="font-mono text-xs font-semibold text-primary">
+                @{profile.handle}
+              </span>
+              {joined && (
+                <>
+                  <span aria-hidden="true" className="hidden sm:inline">
+                    ·
+                  </span>
+                  <span className="flex items-center gap-1.5 text-xs">
+                    <Calendar className="size-3.5" />
+                    Joined {joined}
+                  </span>
+                </>
+              )}
             </div>
 
-            <p className="mt-0.5 font-mono text-sm text-muted-foreground">
-              @{profile.handle}
-            </p>
-
             {profile.favoriteGenres && profile.favoriteGenres.length > 0 && (
-              <div className="mt-2.5 flex flex-wrap items-center justify-center gap-1.5 sm:justify-start">
+              <div className="mt-3 flex flex-wrap items-center gap-1.5">
                 {profile.favoriteGenres.map((genre: string) => (
                   <span
                     key={genre}
-                    className="rounded-md border border-border/60 bg-secondary px-2 py-0.5 font-mono text-xs font-semibold text-secondary-foreground"
+                    className="rounded-full border border-border/60 bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground"
                   >
                     #{genre}
                   </span>
@@ -133,34 +161,21 @@ function ProfileHeader({ profile }: { profile: UserProfile }) {
           </div>
         </div>
 
-        <div className="flex shrink-0 flex-wrap items-center justify-center gap-2 sm:justify-end">
-          {profile.anilistUsername && (
+        <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">
+          {trackerLinks.map(({ href, icon: Icon, label, title }) => (
             <a
-              href={`https://anilist.co/user/${profile.anilistUsername}`}
+              key={label}
+              href={href}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 rounded-xl border border-anilist/20 bg-anilist/10 px-3 py-1.5 text-xs font-semibold text-anilist shadow-2xs transition-all hover:bg-anilist/20 active:scale-95"
-              title={`AniList: ${profile.anilistUsername}`}
+              className="flex items-center gap-1.5 rounded-xl border border-border/50 bg-muted/40 px-3 py-1.5 text-xs font-semibold text-foreground transition-all hover:bg-muted active:scale-95"
+              title={title}
             >
-              <AniListIcon className="size-3.5 shrink-0" />
-              <span>AniList</span>
+              <Icon className="size-3.5 shrink-0" />
+              <span>{label}</span>
               <ExternalLink className="size-3 opacity-60" />
             </a>
-          )}
-
-          {profile.malUsername && (
-            <a
-              href={`https://myanimelist.net/profile/${profile.malUsername}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 rounded-xl border border-mal/20 bg-mal/10 px-3 py-1.5 text-xs font-semibold text-mal shadow-2xs transition-all hover:bg-mal/20 active:scale-95 dark:text-mal-light"
-              title={`MyAnimeList: ${profile.malUsername}`}
-            >
-              <MyAnimeListIcon className="size-3.5 shrink-0" />
-              <span>MAL</span>
-              <ExternalLink className="size-3 opacity-60" />
-            </a>
-          )}
+          ))}
 
           <Button variant="outline" size="sm" onClick={copyProfileLink}>
             {copied ? (
@@ -188,84 +203,77 @@ function ProfileStatsGrid({
   stats: UserStats | null | undefined
   entries: AnimeEntry[]
 }) {
-  const total = Number(stats?.totalEntries || entries.length || 0)
+  const total = Number(stats?.totalEntries ?? entries.length)
   const completed = Number(
-    stats?.completedCount ||
-      entries.filter((e) => e.status === "completed").length ||
-      0
+    stats?.completedCount ??
+      entries.filter((e) => e.status === "completed").length
   )
   const watching = Number(
-    stats?.watchingCount ||
+    stats?.watchingCount ??
       entries.filter(
         (e) => e.status === "watching" || e.status === "rewatching"
-      ).length ||
-      0
+      ).length
   )
   const planning = entries.filter((e) => e.status === "planning").length
+  const episodes =
+    Number(stats?.totalEpisodes) ||
+    entries.reduce((sum, e) => sum + (e.progress || 0), 0)
   const completedPercent = total > 0 ? Math.round((completed / total) * 100) : 0
+
+  const statCards = [
+    {
+      label: "Episodes Watched",
+      value: episodes.toLocaleString("en-US"),
+      icon: Clapperboard,
+      iconClass: "bg-primary/10 text-primary",
+    },
+    {
+      label: "Days Watched",
+      value: String(stats?.daysWatched || 0),
+      icon: Clock,
+      iconClass: "bg-emerald-500/10 text-emerald-500",
+    },
+    {
+      label: "Mean Score",
+      value: stats?.meanScore ? stats.meanScore.toFixed(1) : "—",
+      icon: Star,
+      iconClass: "bg-amber-500/10 text-amber-500",
+    },
+    {
+      label: "Completed",
+      value: completed.toLocaleString("en-US"),
+      icon: CheckCircle2,
+      iconClass: "bg-indigo-500/10 text-indigo-500",
+    },
+  ]
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <Card variant="stat" size="stat">
-          <div className="mb-1 flex size-8 items-center justify-center rounded-xl bg-primary/10 text-primary">
-            <Layers className="size-4" />
-          </div>
-          <p className="font-mono text-2xl font-black tracking-tight text-foreground sm:text-3xl">
-            {total}
-          </p>
-          <p className="text-xs font-bold tracking-wider text-muted-foreground uppercase">
-            Total Anime
-          </p>
-        </Card>
-
-        <Card variant="stat" size="stat">
-          <div className="mb-1 flex size-8 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-500">
-            <CheckCircle2 className="size-4" />
-          </div>
-          <p className="font-mono text-2xl font-black tracking-tight text-foreground sm:text-3xl">
-            {completed}
-          </p>
-          <p className="text-xs font-bold tracking-wider text-muted-foreground uppercase">
-            Completed
-          </p>
-        </Card>
-
-        <Card variant="stat" size="stat">
-          <div className="mb-1 flex size-8 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500">
-            <Clock className="size-4" />
-          </div>
-          <p className="font-mono text-2xl font-black tracking-tight text-foreground sm:text-3xl">
-            {stats?.daysWatched || 0}
-            <span className="ml-1 font-sans text-xs text-muted-foreground">
-              d
-            </span>
-          </p>
-          <p className="text-xs font-bold tracking-wider text-muted-foreground uppercase">
-            Days Watched
-          </p>
-        </Card>
-
-        <Card variant="stat" size="stat">
-          <div className="mb-1 flex size-8 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500">
-            <Star className="size-4" />
-          </div>
-          <p className="font-mono text-2xl font-black tracking-tight text-foreground sm:text-3xl">
-            {stats?.meanScore ? stats.meanScore.toFixed(1) : "—"}
-          </p>
-          <p className="text-xs font-bold tracking-wider text-muted-foreground uppercase">
-            Mean Score
-          </p>
-        </Card>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
+        {statCards.map(({ label, value, icon: Icon, iconClass }) => (
+          <Card key={label} variant="stat" size="stat">
+            <div
+              className={`mb-1 flex size-8 items-center justify-center rounded-xl ${iconClass}`}
+            >
+              <Icon className="size-4" />
+            </div>
+            <p className="font-numeric text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+              {value}
+            </p>
+            <p className="text-xs font-bold tracking-wider text-muted-foreground uppercase">
+              {label}
+            </p>
+          </Card>
+        ))}
       </div>
 
       <div className="flex flex-col gap-3 rounded-2xl border border-border/50 bg-card p-4 shadow-xs sm:p-5">
-        <div className="flex items-center justify-between text-xs">
+        <div className="flex flex-wrap items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-2">
             <span className="font-bold text-foreground">Completion Rate</span>
             <Badge variant="tag">{completedPercent}%</Badge>
           </div>
-          <div className="flex items-center gap-4 font-mono text-xs text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
             <span className="flex items-center gap-1.5">
               <span className="size-2 rounded-full bg-emerald-500" />
               {watching} Watching
@@ -307,26 +315,22 @@ function ProfileStatsGrid({
   )
 }
 
-/**
- * Hikari-specific: showcase of anime the user hand-pinned in their settings.
- * Rendered as large horizontal feature cards above the library shelf.
- */
-function PinnedShowcase({
-  handle,
-  pinnedIds,
-}: {
-  handle: string
-  pinnedIds: number[]
-}) {
-  const { data: rawBatch, isLoading } = useQuery(
-    batchAnimeQueryOptions(pinnedIds)
-  )
-  const pinnedAnime = React.useMemo(() => {
-    if (!rawBatch) return []
-    return pinnedIds
-      .map((id) => rawBatch.find((a: Anime) => a.id === id))
-      .filter((a): a is Anime => Boolean(a))
-  }, [rawBatch, pinnedIds])
+function PinnedShowcase({ pinnedIds }: { pinnedIds: number[] }) {
+  const [pinnedAnime, setPinnedAnime] = React.useState<Anime[] | null>(null)
+
+  React.useEffect(() => {
+    if (pinnedIds.length === 0) return
+    const controller = new AbortController()
+    fetchBatchAnime(pinnedIds, controller.signal)
+      .then((items) => {
+        const order = new Map(pinnedIds.map((id, i) => [id, i]))
+        setPinnedAnime(
+          [...items].sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0))
+        )
+      })
+      .catch(() => setPinnedAnime([]))
+    return () => controller.abort()
+  }, [pinnedIds])
 
   if (pinnedIds.length === 0) return null
 
@@ -339,21 +343,21 @@ function PinnedShowcase({
         <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
           <Pin className="size-4" />
         </div>
-        <div className="flex items-baseline gap-2">
+        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
           <h2
             id="pinned-showcase-heading"
-            className="text-xl font-black tracking-tight text-foreground"
+            className="text-xl font-bold tracking-tight text-foreground"
           >
             Pinned Anime
           </h2>
           <span className="text-xs font-medium text-muted-foreground">
-            Hand-picked by @{handle} — their top anime recommendations
+            Hand-picked recommendations
           </span>
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {isLoading &&
+        {!pinnedAnime &&
           pinnedIds.map((id, i) => (
             <div
               key={id}
@@ -373,7 +377,7 @@ function PinnedShowcase({
             </div>
           ))}
 
-        {pinnedAnime.map((anime, index) => (
+        {pinnedAnime?.map((anime, index) => (
           <Link
             key={anime.id}
             href={getAnimeUrl(anime)}
@@ -518,123 +522,87 @@ function ProfileLibraryTabs({
     (e) => e.status === "dropped"
   )
 
+  const shelves = [
+    { value: "all", items: filteredAndSortedEntries, empty: "No anime found in library." },
+    { value: "watching", items: watchingEntries, empty: "No anime currently being watched." },
+    { value: "completed", items: completedEntries, empty: "No completed anime recorded yet." },
+    { value: "planning", items: planningEntries, empty: "No anime planned to watch." },
+    { value: "paused", items: pausedEntries, empty: "No paused anime." },
+    { value: "dropped", items: droppedEntries, empty: "No dropped anime." },
+  ]
+
   return (
     <Tabs defaultValue="all" className="w-full">
-      <div className="w-full max-w-3xl">
+      <div className="no-scrollbar w-full overflow-x-auto">
         <TabsList>
-          <TabsTrigger value="all">
-            All ({filteredAndSortedEntries.length})
-          </TabsTrigger>
-          <TabsTrigger value="watching">
-            Watching ({watchingEntries.length})
-          </TabsTrigger>
-          <TabsTrigger value="completed">
-            Completed ({completedEntries.length})
-          </TabsTrigger>
-          <TabsTrigger value="planning">
-            Plan to Watch ({planningEntries.length})
-          </TabsTrigger>
-          <TabsTrigger value="paused">
-            Paused ({pausedEntries.length})
-          </TabsTrigger>
-          <TabsTrigger value="dropped">
-            Dropped ({droppedEntries.length})
-          </TabsTrigger>
+          {shelves.map(({ value, items }) => (
+            <TabsTrigger key={value} value={value}>
+              {value === "all"
+                ? `All (${items.length})`
+                : value === "planning"
+                  ? `Plan to Watch (${items.length})`
+                  : `${value[0].toUpperCase()}${value.slice(1)} (${items.length})`}
+            </TabsTrigger>
+          ))}
         </TabsList>
       </div>
 
-      <TabsContent value="all">
-        <div className="pt-6">
-          <ProfileAnimeShelf
-            items={filteredAndSortedEntries}
-            animeMap={animeMap}
-            emptyMessage="No anime found in library."
-            onSave={onSave}
-          />
-        </div>
-      </TabsContent>
-
-      <TabsContent value="watching">
-        <div className="pt-6">
-          <ProfileAnimeShelf
-            items={watchingEntries}
-            animeMap={animeMap}
-            emptyMessage="No anime currently being watched."
-            onSave={onSave}
-          />
-        </div>
-      </TabsContent>
-
-      <TabsContent value="completed">
-        <div className="pt-6">
-          <ProfileAnimeShelf
-            items={completedEntries}
-            animeMap={animeMap}
-            emptyMessage="No completed anime recorded yet."
-            onSave={onSave}
-          />
-        </div>
-      </TabsContent>
-
-      <TabsContent value="planning">
-        <div className="pt-6">
-          <ProfileAnimeShelf
-            items={planningEntries}
-            animeMap={animeMap}
-            emptyMessage="No anime planned to watch."
-            onSave={onSave}
-          />
-        </div>
-      </TabsContent>
-
-      <TabsContent value="paused">
-        <div className="pt-6">
-          <ProfileAnimeShelf
-            items={pausedEntries}
-            animeMap={animeMap}
-            emptyMessage="No paused anime."
-            onSave={onSave}
-          />
-        </div>
-      </TabsContent>
-
-      <TabsContent value="dropped">
-        <div className="pt-6">
-          <ProfileAnimeShelf
-            items={droppedEntries}
-            animeMap={animeMap}
-            emptyMessage="No dropped anime."
-            onSave={onSave}
-          />
-        </div>
-      </TabsContent>
+      {shelves.map(({ value, items, empty }) => (
+        <TabsContent key={value} value={value}>
+          <div className="pt-6">
+            <ProfileAnimeShelf
+              items={items}
+              animeMap={animeMap}
+              emptyMessage={empty}
+              onSave={onSave}
+            />
+          </div>
+        </TabsContent>
+      ))}
     </Tabs>
   )
 }
 
 export function UserProfileClient({ handle, initialData }: ProfileClientProps) {
-  const [selectedAnime, setSelectedAnime] = React.useState<Anime | null>(null)
-  const [saveOpen, setSaveOpen] = React.useState(false)
-  const [searchFilter, setSearchFilter] = React.useState("")
-  const [sortBy, setSortBy] = React.useState<"recent" | "score" | "title">(
-    "recent"
-  )
-
-  const { data: pageData } = useQuery({
-    ...publicProfileQueryOptions(handle),
-    initialData,
-  })
+  const { isSignedIn } = useUser()
+  const [pageData, setPageData] = React.useState(initialData)
+  const [saveChanged, setSaveChanged] = React.useState(false)
 
   const profile = pageData.profile
   const stats = pageData.stats
   const entries = pageData.entries
   const animeList = pageData.anime
 
+  const refresh = React.useCallback(() => {
+    if (!isSignedIn) return
+    fetchPublicProfile(handle)
+      .then(setPageData)
+      .catch(() => {})
+  }, [handle, isSignedIn])
+
+  // Refresh live data once auth state settles (SSR renders signed-out state
+  // to match the client's first render — see lib/clerk.tsx).
+  React.useEffect(() => {
+    refresh()
+  }, [refresh])
+
+  // Refetch after any library change made through the save dialog.
+  React.useEffect(() => {
+    if (saveChanged) refresh()
+  }, [saveChanged, refresh])
+
   const animeMap = React.useMemo(() => {
     const map = new Map<number, Anime>()
     animeList.forEach((a: Anime) => map.set(a.id, a))
     return map
   }, [animeList])
+
+  const [selectedAnime, setSelectedAnime] = React.useState<Anime | null>(null)
+  const [saveOpen, setSaveOpen] = React.useState(false)
+  const [searchFilter, setSearchFilter] = React.useState("")
+  const [sortBy, setSortBy] = React.useState<"recent" | "score" | "title">(
+    "recent"
+  )
 
   const filteredAndSortedEntries = React.useMemo(() => {
     let list = [...entries]
@@ -689,13 +657,16 @@ export function UserProfileClient({ handle, initialData }: ProfileClientProps) {
       <ProfileStatsGrid stats={stats} entries={entries} />
       {profile.bio && <ProfileBioCard bio={profile.bio} />}
       {profile.pinnedAnimeIds && profile.pinnedAnimeIds.length > 0 && (
-        <PinnedShowcase
-          handle={profile.handle}
-          pinnedIds={profile.pinnedAnimeIds}
-        />
+        <PinnedShowcase pinnedIds={profile.pinnedAnimeIds} />
       )}
 
       <div className="flex flex-col gap-6 pt-2">
+        <div className="flex flex-col gap-2">
+          <h2 className="text-xl font-bold tracking-tight">Anime library</h2>
+          <p className="text-sm text-muted-foreground">
+            Browse and search @{profile.handle}&apos;s public anime list.
+          </p>
+        </div>
         <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
           <div className="relative w-full sm:w-72">
             <Search className="absolute top-2.5 left-3 size-4 text-muted-foreground" />
@@ -750,6 +721,7 @@ export function UserProfileClient({ handle, initialData }: ProfileClientProps) {
         anime={selectedAnime}
         open={saveOpen}
         onOpenChange={setSaveOpen}
+        onChanged={() => setSaveChanged((v) => !v)}
       />
     </div>
   )

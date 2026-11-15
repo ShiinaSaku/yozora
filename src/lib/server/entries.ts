@@ -1,10 +1,12 @@
 import "zod/compile"
-import { createServerFn } from "@tanstack/react-start"
 import { and, eq, sql } from "drizzle-orm"
 import { z } from "zod"
 import { db } from "@/lib/db"
 import { animeEntries } from "@/lib/db/schema"
-import { authMiddleware } from "@/lib/server/auth"
+
+// Plain async library-entry operations. Auth is enforced by callers: Astro
+// pages pass a `requireUserId`-resolved id, Actions resolve it from
+// `context.locals.auth()` before invoking these functions.
 
 const anilistIdSchema = z.compile(z.number().int().positive())
 
@@ -31,38 +33,44 @@ const upsertEntrySchema = z.compile(
 export type UpsertEntryInput = z.infer<typeof upsertEntrySchema>
 
 /**
- * Fetch a single anime entry for the authenticated user.
+ * Fetch a single anime entry for a user.
  */
-export const getMyEntryFn = createServerFn({ method: "GET" })
-  .middleware([authMiddleware])
-  .validator(anilistIdSchema)
-  .handler(async ({ data: anilistId, context }) => {
-    const [entry] = (await db
-      .select()
-      .from(animeEntries)
-      .where(
-        and(
-          eq(animeEntries.userId, context.userId),
-          eq(animeEntries.anilistId, anilistId)
-        )
-      )
-      .limit(1)) as (typeof animeEntries.$inferSelect | undefined)[]
+export async function getMyEntry(userId: string, rawAnilistId: number) {
+  const anilistId = anilistIdSchema.parse(rawAnilistId)
+  const [entry] = (await db
+    .select()
+    .from(animeEntries)
+    .where(
+      and(eq(animeEntries.userId, userId), eq(animeEntries.anilistId, anilistId))
+    )
+    .limit(1)) as (typeof animeEntries.$inferSelect | undefined)[]
 
-    return entry ?? null
-  })
+  return entry ?? null
+}
 
 /**
  * Upsert an anime entry in the user's library.
  */
-export const upsertEntryFn = createServerFn({ method: "POST" })
-  .middleware([authMiddleware])
-  .validator(upsertEntrySchema)
-  .handler(async ({ data, context }) => {
-    const [saved] = await db
-      .insert(animeEntries)
-      .values({
-        userId: context.userId,
-        anilistId: data.anilistId,
+export async function upsertEntry(userId: string, data: UpsertEntryInput) {
+  const [saved] = await db
+    .insert(animeEntries)
+    .values({
+      userId,
+      anilistId: data.anilistId,
+      status: data.status,
+      progress: data.progress,
+      totalEpisodes: data.totalEpisodes,
+      score: data.score,
+      favorite: data.favorite,
+      private: data.private,
+      notes: data.notes,
+      startedAt: data.status === "watching" ? new Date() : undefined,
+      completedAt: data.status === "completed" ? new Date() : undefined,
+      updatedAt: new Date(),
+    })
+    .onConflictDoUpdate({
+      target: [animeEntries.userId, animeEntries.anilistId],
+      set: {
         status: data.status,
         progress: data.progress,
         totalEpisodes: data.totalEpisodes,
@@ -70,79 +78,58 @@ export const upsertEntryFn = createServerFn({ method: "POST" })
         favorite: data.favorite,
         private: data.private,
         notes: data.notes,
-        startedAt: data.status === "watching" ? new Date() : undefined,
-        completedAt: data.status === "completed" ? new Date() : undefined,
+        startedAt:
+          data.status === "watching" || data.status === "rewatching"
+            ? sql`coalesce(${animeEntries.startedAt}, now())`
+            : undefined,
+        completedAt: data.status === "completed" ? new Date() : null,
         updatedAt: new Date(),
-      })
-      .onConflictDoUpdate({
-        target: [animeEntries.userId, animeEntries.anilistId],
-        set: {
-          status: data.status,
-          progress: data.progress,
-          totalEpisodes: data.totalEpisodes,
-          score: data.score,
-          favorite: data.favorite,
-          private: data.private,
-          notes: data.notes,
-          startedAt:
-            data.status === "watching" || data.status === "rewatching"
-              ? sql`coalesce(${animeEntries.startedAt}, now())`
-              : undefined,
-          completedAt: data.status === "completed" ? new Date() : null,
-          updatedAt: new Date(),
-        },
-      })
-      .returning()
+      },
+    })
+    .returning()
 
-    return saved
-  })
+  return saved
+}
 
 /**
  * Atomic progress increment for an anime entry.
  */
-export const incrementProgressFn = createServerFn({ method: "POST" })
-  .middleware([authMiddleware])
-  .validator(anilistIdSchema)
-  .handler(async ({ data: anilistId, context }) => {
-    const [saved] = await db
-      .insert(animeEntries)
-      .values({
-        userId: context.userId,
-        anilistId,
-        status: "watching",
-        progress: 1,
-        startedAt: new Date(),
+export async function incrementProgress(userId: string, rawAnilistId: number) {
+  const anilistId = anilistIdSchema.parse(rawAnilistId)
+  const [saved] = await db
+    .insert(animeEntries)
+    .values({
+      userId,
+      anilistId,
+      status: "watching",
+      progress: 1,
+      startedAt: new Date(),
+      updatedAt: new Date(),
+    })
+    .onConflictDoUpdate({
+      target: [animeEntries.userId, animeEntries.anilistId],
+      set: {
+        progress: sql`${animeEntries.progress} + 1`,
+        status: sql`case when ${animeEntries.totalEpisodes} is not null and ${animeEntries.progress} + 1 >= ${animeEntries.totalEpisodes} then 'completed'::library_status else 'watching'::library_status end`,
+        completedAt: sql`case when ${animeEntries.totalEpisodes} is not null and ${animeEntries.progress} + 1 >= ${animeEntries.totalEpisodes} then coalesce(${animeEntries.completedAt}, now()) else null end`,
         updatedAt: new Date(),
-      })
-      .onConflictDoUpdate({
-        target: [animeEntries.userId, animeEntries.anilistId],
-        set: {
-          progress: sql`${animeEntries.progress} + 1`,
-          status: sql`case when ${animeEntries.totalEpisodes} is not null and ${animeEntries.progress} + 1 >= ${animeEntries.totalEpisodes} then 'completed'::library_status else 'watching'::library_status end`,
-          completedAt: sql`case when ${animeEntries.totalEpisodes} is not null and ${animeEntries.progress} + 1 >= ${animeEntries.totalEpisodes} then coalesce(${animeEntries.completedAt}, now()) else null end`,
-          updatedAt: new Date(),
-        },
-      })
-      .returning()
+      },
+    })
+    .returning()
 
-    return saved
-  })
+  return saved
+}
 
 /**
  * Remove an anime entry from the user's library.
  */
-export const deleteEntryFn = createServerFn({ method: "POST" })
-  .middleware([authMiddleware])
-  .validator(anilistIdSchema)
-  .handler(async ({ data: anilistId, context }) => {
-    await db
-      .delete(animeEntries)
-      .where(
-        and(
-          eq(animeEntries.userId, context.userId),
-          eq(animeEntries.anilistId, anilistId)
-        )
-      )
+export async function deleteEntry(userId: string, rawAnilistId: number) {
+  const anilistId = anilistIdSchema.parse(rawAnilistId)
+  await db
+    .delete(animeEntries)
+    .where(
+      and(eq(animeEntries.userId, userId), eq(animeEntries.anilistId, anilistId))
+    )
 
-    return { success: true }
-  })
+  return { success: true }
+}

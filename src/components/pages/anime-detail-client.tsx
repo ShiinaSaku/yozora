@@ -22,7 +22,11 @@ interface AnimeDetailClientProps {
   themes: AnimeTheme[]
 }
 
-export function AnimeDetailClient({ detail, themes }: AnimeDetailClientProps) {
+export function AnimeDetailClient(props: AnimeDetailClientProps) {
+  return <AnimeDetailClientContent {...props} />
+}
+
+function AnimeDetailClientContent({ detail, themes }: AnimeDetailClientProps) {
   const { anime, characters, relations, recommendations, externalLinks } =
     detail
   const [saveOpen, setSaveOpen] = React.useState(false)

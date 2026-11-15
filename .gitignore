@@ -13,13 +13,6 @@
 # testing
 /coverage
 
-# next.js
-/.next/
-/out/
-
-# production
-/build
-
 # misc
 .DS_Store
 *.pem
@@ -33,23 +26,23 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
-# vercel
-.vercel
-
 # typescript
 *.tsbuildinfo
-next-env.d.ts
 .agents
 
-# TanStack Start / Nitro build output
-.output/
+# Astro
+.astro/
+
+# Sessions / Agent logs
+session-*.md
+
 
 # Cloudflare Workers local state and generated types
 .wrangler/
 worker-configuration.d.ts
 .dev.vars*
 
-# Cloudflare Vite production output
+# Astro build output
 /dist/
 
 # clerk configuration (can include secrets)

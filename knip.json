@@ -1,22 +1,21 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "entry": [
-    "src/router.tsx",
-    "src/start.ts",
-    "src/routes/**/*.{ts,tsx}",
+    "src/pages/**/*.{astro,md,ts,tsx}",
     "src/lib/env.ts"
   ],
   "project": [
-    "**/*.{ts,tsx}"
+    "src/**/*.{astro,ts,tsx}"
   ],
   "ignore": [
-    "src/routeTree.gen.ts",
-    "src/gql/**",
-    ".output/**",
-    ".nitro/**"
+    "src/**/*.test.ts",
+    "src/graphql/*-env.d.ts",
+    "src/layouts/MarkdownLayout.astro"
   ],
   "ignoreDependencies": [
     "@base-ui/react",
+    "@clerk/shared",
+    "@clerk/shared/types",
     "tailwindcss",
     "tw-animate-css",
     "shadcn"

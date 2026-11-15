@@ -1,5 +1,6 @@
-import { createIsomorphicFn } from "@tanstack/react-start"
 import { ClientError, GraphQLClient } from "graphql-request"
+import type { DocumentNode } from "graphql"
+import { print } from "graphql"
 import type {
   AiringScheduleItem,
   Anime,
@@ -15,6 +16,7 @@ import {
   BatchAnimeDocument,
   CharacterDetailDocument,
 } from "./operations"
+import { searchWithFallback } from "./fuzzy-search"
 
 const DEFAULT_ANILIST_ENDPOINT = "https://graphql.anilist.co"
 const PLACEHOLDER_COVER =
@@ -24,44 +26,44 @@ function getAniListEndpoint() {
   if (import.meta.env.SSR) {
     return process.env.ANILIST_API_URL || DEFAULT_ANILIST_ENDPOINT
   }
-  return import.meta.env.VITE_ANILIST_API_URL || DEFAULT_ANILIST_ENDPOINT
+  return import.meta.env.PUBLIC_ANILIST_API_URL || DEFAULT_ANILIST_ENDPOINT
 }
 
-const redisGet = createIsomorphicFn()
-  .server(async (key: string) => {
-    const { cacheGet } = await import("@/lib/cache")
-    return cacheGet(key)
-  })
-  .client(async (_key: string) => null)
+// Edge-cache helpers. The cache layer only exists on the server (Workers
+// Cache API); these are no-ops in the browser.
+const edgeCacheGet = async (key: string) => {
+  if (!import.meta.env.SSR) return null
+  const { cacheGet } = await import("@/lib/cache")
+  return cacheGet(key)
+}
 
-const redisSet = createIsomorphicFn()
-  .server(async (key: string, value: unknown, ttlSeconds: number) => {
-    const { cacheSet } = await import("@/lib/cache")
-    await cacheSet(key, value, ttlSeconds)
-  })
-  .client(async (_key: string, _value: unknown, _ttlSeconds: number) => {})
+const edgeCacheGetStale = async <T>(key: string) => {
+  if (!import.meta.env.SSR) return null
+  const { cacheGetStale } = await import("@/lib/cache")
+  return cacheGetStale<T>(key)
+}
 
-const redisMGet = createIsomorphicFn()
-  .server(async (keys: string[]) => {
-    const { cacheMGet } = await import("@/lib/cache")
-    return cacheMGet(keys)
-  })
-  .client(async (keys: string[]) => keys.map(() => null))
+const edgeCacheSet = async (key: string, value: unknown, ttlSeconds: number) => {
+  if (!import.meta.env.SSR) return
+  const { cacheSet } = await import("@/lib/cache")
+  await cacheSet(key, value, ttlSeconds)
+}
 
-const redisMSet = createIsomorphicFn()
-  .server(
-    async (
-      items: Array<{ key: string; value: unknown; ttlSeconds?: number }>
-    ) => {
-      const { cacheMSet } = await import("@/lib/cache")
-      await cacheMSet(items)
-    }
-  )
-  .client(async (_items: unknown) => {})
+const edgeCacheMGet = async (keys: string[]) => {
+  if (!import.meta.env.SSR) return keys.map(() => null)
+  const { cacheMGet } = await import("@/lib/cache")
+  return cacheMGet(keys)
+}
+
+const edgeCacheMSet = async (items: Array<{ key: string; value: unknown; ttlSeconds?: number }>) => {
+  if (!import.meta.env.SSR) return
+  const { cacheMSet } = await import("@/lib/cache")
+  await cacheMSet(items)
+}
 
 /**
  * Stable, collision-resistant cache key from a query + variables pair.
- * Hashes instead of inlining the full query so Redis keys stay short.
+ * Hashes instead of inlining the full query so cache keys stay short.
  */
 function hashCacheKey(
   query: string | { toString: () => string },
@@ -208,7 +210,7 @@ function stripDescription(description?: string | null) {
 // In-flight single-flight request deduplication map
 const inFlightRequests = new Map<string, Promise<any>>()
 
-// In-memory response cache with TTL
+// In-memory response cache with TTL + stale-while-error grace window
 interface CacheEntry<T> {
   data: T
   expiresAt: number
@@ -216,11 +218,23 @@ interface CacheEntry<T> {
 
 const memoryCache = new Map<string, CacheEntry<any>>()
 const MAX_CACHE_ENTRIES = 500
+// How long past expiry an entry stays available as a failure fallback.
+// Upstream blips are served stale instead of throwing — the cache never
+// becomes a liability the moment its TTL ends.
+const STALE_GRACE_MS = 1000 * 60 * 15
 
 function getCached<T>(key: string): T | null {
   const entry = memoryCache.get(key)
   if (!entry) return null
-  if (Date.now() > entry.expiresAt) {
+  if (Date.now() > entry.expiresAt) return null
+  return entry.data as T
+}
+
+/** Fresh OR recently-expired data — the fail-open fallback when upstream fails. */
+function getStaleCached<T>(key: string): T | null {
+  const entry = memoryCache.get(key)
+  if (!entry) return null
+  if (Date.now() > entry.expiresAt + STALE_GRACE_MS) {
     memoryCache.delete(key)
     return null
   }
@@ -323,16 +337,19 @@ export function toAnime(media: AniListMedia): Anime {
 
 export class AniListUpstreamError extends Error {
   status: number
+  /** Upstream-provided retry hint in seconds (from the Retry-After header). */
+  retryAfter?: number
 
-  constructor(message: string, status: number) {
+  constructor(message: string, status: number, retryAfter?: number) {
     super(message)
     this.name = "AniListUpstreamError"
     this.status = status
+    this.retryAfter = retryAfter
   }
 }
 
 async function executeAniListFetch<T>(
-  query: string | { toString: () => string },
+  query: string,
   variables: Record<string, unknown>
 ): Promise<T> {
   const client = new GraphQLClient(getAniListEndpoint(), {
@@ -341,9 +358,9 @@ async function executeAniListFetch<T>(
     },
   })
 
-  const makeRequest = async () => {
+  const makeRequest = async (): Promise<{ data: T; retryAfter?: number }> => {
     try {
-      return await client.request<T>(query.toString(), variables)
+      return { data: await client.request<T>(query, variables) }
     } catch (err) {
       if (err instanceof ClientError) {
         const status = err.response.status
@@ -357,57 +374,55 @@ async function executeAniListFetch<T>(
         ) {
           throw new Error("Anime not found")
         }
+        const retryAfterHeader = err.response.headers.get("retry-after")
+        const retryAfter = retryAfterHeader ? Number(retryAfterHeader) : undefined
         if (
           status === 403 &&
           upstreamMessage.toLowerCase().includes("manually blocked")
         ) {
           throw new AniListUpstreamError(
-            "AniList blocks requests from this server IP; retrying directly from the browser",
+            "AniList is rejecting requests from this server IP",
             503
           )
         }
         throw new AniListUpstreamError(
           upstreamMessage,
-          status >= 500 ? 503 : status
+          status >= 500 ? 503 : status,
+          Number.isFinite(retryAfter) ? retryAfter : undefined
         )
       }
       throw err
     }
   }
 
-  try {
-    return await makeRequest()
-  } catch (err) {
-    // Retry once on rate limits or transient upstream responses.
-    if (
-      err instanceof Error &&
-      (err.message.includes("429") || err.message.includes("status 5"))
-    ) {
-      await new Promise((resolve) => setTimeout(resolve, 300))
-      return await makeRequest()
+  // Rate limits (429) and transient 5xx/network failures get up to three
+  // attempts, honoring AniList's Retry-After hint when present.
+  let lastError: unknown
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const { data } = await makeRequest()
+      return data
+    } catch (err) {
+      lastError = err
+      if (err instanceof Error && err.message === "Anime not found") throw err
+      if (!(err instanceof AniListUpstreamError)) throw err
+      if (attempt === 2) throw err
+      const backoff = err.retryAfter
+        ? Math.min(Math.max(err.retryAfter, 1), 10) * 1000
+        : 600 * 2 ** attempt
+      await new Promise((resolve) => setTimeout(resolve, backoff))
     }
-    if (err instanceof AniListUpstreamError) {
-      throw err
-    }
-    if (
-      err instanceof Error &&
-      /fetch|network|connection|socket/i.test(err.message)
-    ) {
-      throw new AniListUpstreamError(
-        "AniList is temporarily unreachable from this server",
-        503
-      )
-    }
-    throw err
   }
+  throw lastError
 }
 
 async function requestAniList<T>(
-  query: string | { toString: () => string },
+  query: string | DocumentNode,
   variables: Record<string, unknown>,
   ttlMs = 1000 * 60 * 60
 ): Promise<T> {
-  const cacheKey = `anilist:${hashCacheKey(query, variables)}`
+  const queryString = typeof query === "string" ? query : print(query)
+  const cacheKey = `anilist:${hashCacheKey(queryString, variables)}`
 
   // 1. Check in-memory cache (per-isolate, instant)
   const memory = getCached<T>(cacheKey)
@@ -420,18 +435,33 @@ async function requestAniList<T>(
     return inFlightRequests.get(cacheKey) as Promise<T>
   }
 
-  // 3. Initiate single request: Redis (shared across isolates) → upstream
+  // 3. Initiate single request: edge cache (shared across isolates) → upstream
   const requestPromise = (async () => {
-    const redisHit = (await redisGet(cacheKey)) as T | null
-    if (redisHit !== null && redisHit !== undefined) {
-      setCached(cacheKey, redisHit, ttlMs)
-      return redisHit
+    const edgeHit = (await edgeCacheGet(cacheKey)) as T | null
+    if (edgeHit !== null && edgeHit !== undefined) {
+      return edgeHit
     }
 
-    const data = await executeAniListFetch<T>(query, variables)
-    setCached(cacheKey, data, ttlMs)
-    void redisSet(cacheKey, data, Math.round(ttlMs / 1000))
-    return data
+    try {
+      const data = await executeAniListFetch<T>(queryString, variables)
+      setCached(cacheKey, data, ttlMs)
+      void edgeCacheSet(cacheKey, data, Math.round(ttlMs / 1000))
+      return data
+    } catch (error) {
+      // Fail-open: never let an upstream blip take a page down while we hold
+      // perfectly good recently-expired data in memory or the edge cache.
+      const stale = getStaleCached<T>(cacheKey)
+      if (stale !== null) {
+        console.warn(
+          `[AniList] Upstream failed, serving stale cache for ${cacheKey}:`,
+          error instanceof Error ? error.message : error
+        )
+        return stale
+      }
+      const edgeStale = await edgeCacheGetStale<T>(cacheKey)
+      if (edgeStale !== null && edgeStale !== undefined) return edgeStale
+      throw error
+    }
   })().finally(() => {
     inFlightRequests.delete(cacheKey)
   })
@@ -449,13 +479,54 @@ export async function getAnimeCollection(collection: CatalogCollection) {
   return data.Page.media.map(toAnime)
 }
 
-export async function searchAnime(search: string) {
+async function searchAnimeExact(search: string) {
   const data = await requestAniList<{ Page: { media: AniListMedia[] } }>(
     AnimeSearchDocument,
     { search },
     1000 * 60 * 60 * 6
   )
   return data.Page.media.map(toAnime)
+}
+
+const searchCandidatesQuery = `
+  query SearchCandidates($search: String) {
+    Page(page: 1, perPage: 50) {
+      media(type: ANIME, isAdult: false, search: $search, sort: [POPULARITY_DESC]) {
+        id
+        idMal
+        title { romaji english native }
+        coverImage { medium large extraLarge color }
+        bannerImage
+        averageScore
+        seasonYear
+        startDate { year }
+        format
+        status
+        episodes
+        duration
+        popularity
+        favourites
+        genres
+        description(asHtml: false)
+        trailer { id site thumbnail }
+        nextAiringEpisode { episode airingAt timeUntilAiring }
+        studios(isMain: true) { nodes { name } }
+      }
+    }
+  }
+`
+
+async function getSearchCandidates(search: string | null) {
+  const data = await requestAniList<{ Page: { media: AniListMedia[] } }>(
+    searchCandidatesQuery,
+    { search },
+    1000 * 60 * 60 * 6
+  )
+  return data.Page.media.map(toAnime)
+}
+
+export async function searchAnime(search: string) {
+  return searchWithFallback(search, searchAnimeExact, getSearchCandidates)
 }
 
 export async function getAiringSchedule(): Promise<AiringScheduleItem[]> {
@@ -497,7 +568,7 @@ function toCharacter(edge: AniListCharacterEdge): AnimeCharacter {
 
 export async function getAnimeDetail(id: number): Promise<AnimeDetailResponse> {
   const cacheKey = `anime:detail:${id}`
-  const cached = (await redisGet(cacheKey)) as AnimeDetailResponse | null
+  const cached = (await edgeCacheGet(cacheKey)) as AnimeDetailResponse | null
   if (cached) {
     // Warm in-memory entity cache so relations / recommendations are warm
     cacheAnimeEntity(cached.anime)
@@ -506,11 +577,19 @@ export async function getAnimeDetail(id: number): Promise<AnimeDetailResponse> {
     return cached
   }
 
-  const data = await requestAniList<{ Media: AniListDetailMedia | null }>(
-    AnimeDetailDocument,
-    { id },
-    1000 * 60 * 60 * 2
-  )
+  let data
+  try {
+    data = await requestAniList<{ Media: AniListDetailMedia | null }>(
+      AnimeDetailDocument,
+      { id },
+      1000 * 60 * 5
+    )
+  } catch (error) {
+    // Fail-open: an expired-but-present detail beats a broken page.
+    const stale = await edgeCacheGetStale<AnimeDetailResponse>(cacheKey)
+    if (stale) return stale
+    throw error
+  }
 
   if (!data.Media) throw new Error("Anime not found")
 
@@ -554,10 +633,10 @@ export async function getAnimeDetail(id: number): Promise<AnimeDetailResponse> {
     ttlSeconds = 60 * 60 * 24
   }
 
-  // Write detail to Redis
-  void redisSet(cacheKey, detail, ttlSeconds)
+  // Write detail to the edge cache
+  void edgeCacheSet(cacheKey, detail, ttlSeconds)
 
-  // Also cache the individual anime entity and relations/recommendations into Redis
+  // Also cache the individual anime entity and relations/recommendations into the edge cache
   const relatedAnime = [
     detail.anime,
     ...detail.relations,
@@ -569,7 +648,7 @@ export async function getAnimeDetail(id: number): Promise<AnimeDetailResponse> {
     ttlSeconds:
       (a.status || "").toUpperCase() === "RELEASING" ? 3600 : 60 * 60 * 24 * 30,
   }))
-  void redisMSet(entityItems)
+  void edgeCacheMSet(entityItems)
 
   return detail
 }
@@ -602,14 +681,22 @@ interface AniListCharacterDetailGql {
 
 export async function getCharacterDetail(id: number): Promise<CharacterDetail> {
   const cacheKey = `character:detail:${id}`
-  const cached = (await redisGet(cacheKey)) as CharacterDetail | null
+  const cached = (await edgeCacheGet(cacheKey)) as CharacterDetail | null
   if (cached) {
     return cached
   }
 
-  const data = await requestAniList<{
-    Character: AniListCharacterDetailGql | null
-  }>(CharacterDetailDocument, { id }, 1000 * 60 * 60 * 24 * 30)
+  let data
+  try {
+    data = await requestAniList<{
+      Character: AniListCharacterDetailGql | null
+    }>(CharacterDetailDocument, { id }, 1000 * 60 * 60 * 24 * 30)
+  } catch (error) {
+    // Fail-open: an expired-but-present biography beats a broken page.
+    const stale = await edgeCacheGetStale<CharacterDetail>(cacheKey)
+    if (stale) return stale
+    throw error
+  }
 
   if (!data.Character) throw new Error("Character not found")
 
@@ -638,9 +725,9 @@ export async function getCharacterDetail(id: number): Promise<CharacterDetail> {
   }
 
   // Character biographies are immutable, cache for 30 days (lifetime scale)
-  void redisSet(cacheKey, detail, 60 * 60 * 24 * 30)
+  void edgeCacheSet(cacheKey, detail, 60 * 60 * 24 * 30)
 
-  // Also seed the media entities into Redis
+  // Also seed the media entities into the edge cache
   if (detail.media.length > 0) {
     const entityItems = detail.media.map((a) => ({
       key: `anime:entity:${a.id}`,
@@ -650,7 +737,7 @@ export async function getCharacterDetail(id: number): Promise<CharacterDetail> {
           ? 3600
           : 60 * 60 * 24 * 30,
     }))
-    void redisMSet(entityItems)
+    void edgeCacheMSet(entityItems)
   }
 
   return detail
@@ -673,16 +760,16 @@ export async function getMultipleAnime(ids: number[]): Promise<Anime[]> {
     }
   }
 
-  // 2. Check Redis L2 cache in single batch mget
+  // 2. Check edge cache L2 in a single batch read
   let stillMissingIds = missingIds
   if (missingIds.length > 0) {
-    const redisKeys = missingIds.map((id) => `anime:entity:${id}`)
-    const redisEntities = await redisMGet(redisKeys)
+    const entityKeys = missingIds.map((id) => `anime:entity:${id}`)
+    const entityHits = await edgeCacheMGet(entityKeys)
     const unresolved: number[] = []
 
     for (let i = 0; i < missingIds.length; i++) {
       const id = missingIds[i]
-      const hit = redisEntities[i] as Anime | null
+      const hit = entityHits[i] as Anime | null
       if (hit) {
         cacheAnimeEntity(hit)
         resultsMap.set(id, hit)
@@ -723,7 +810,7 @@ export async function getMultipleAnime(ids: number[]): Promise<Anime[]> {
       resultsMap.set(anime.id, anime)
     }
 
-    // Persist all newly fetched entities into Redis with smart lifetime/airing TTL
+    // Persist all newly fetched entities into the edge cache with smart lifetime/airing TTL
     if (newlyFetched.length > 0) {
       const itemsToCache = newlyFetched.map((a) => ({
         key: `anime:entity:${a.id}`,
@@ -733,7 +820,7 @@ export async function getMultipleAnime(ids: number[]): Promise<Anime[]> {
             ? 3600
             : 60 * 60 * 24 * 30,
       }))
-      void redisMSet(itemsToCache)
+      void edgeCacheMSet(itemsToCache)
     }
   }
 

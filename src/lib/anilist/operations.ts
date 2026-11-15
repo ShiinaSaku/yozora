@@ -1,4 +1,4 @@
-import { graphql } from "@/gql"
+import { graphql } from "@/graphql/anilist"
 
 export const AnimeCatalogDocument = graphql(/* GraphQL */ `
   query AnimeCatalog(

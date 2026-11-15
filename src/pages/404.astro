@@ -1,0 +1,91 @@
+---
+import { Image } from "astro:assets"
+import BaseLayout from "@/layouts/BaseLayout.astro"
+import { HugeiconsIcon } from "@hugeicons/react"
+import { ArrowLeft01Icon, Search01Icon } from "@hugeicons/core-free-icons"
+import { linkVariants } from "@/components/ui/link"
+import notFoundImage from "@/assets/404-anime.jpg"
+
+export const prerender = false
+Astro.response.status = 404
+
+const suggestions = [
+  { href: "/seasonal", label: "Seasonal" },
+  { href: "/airing", label: "Airing now" },
+  { href: "/library", label: "Library" },
+]
+---
+
+<BaseLayout
+  title="Page Not Found | Yozora"
+  description="The page you requested does not exist or has moved."
+  robots="noindex, nofollow"
+>
+  <section
+    id="not-found-page-container"
+    aria-labelledby="not-found-heading"
+    class="container mx-auto flex min-h-[70svh] max-w-3xl flex-col justify-center px-4 py-10 sm:px-6 sm:py-14"
+  >
+    <div class="relative">
+      <div
+        aria-hidden="true"
+        class="pointer-events-none absolute -inset-x-6 -top-10 -z-10 h-40 rounded-full bg-amber-300/40 blur-3xl dark:bg-amber-400/10"
+      >
+      </div>
+
+      <div class="overflow-hidden rounded-3xl border border-border/70 bg-card shadow-sm">
+        {/* Native 16:9 still. object-contain keeps the face and the
+            handwritten title in frame — object-cover was cropping both. */}
+        <Image
+          src={notFoundImage}
+          alt="A pink-haired anime girl crying happy tears, with the handwritten title ぼっちざろっく！ beside her."
+          width={1280}
+          height={720}
+          loading="eager"
+          fetchpriority="high"
+          decoding="async"
+          class="aspect-video h-auto w-full bg-amber-50 object-contain dark:bg-amber-950/40"
+        />
+
+        <div class="flex flex-col gap-5 border-t border-border/70 p-6 sm:flex-row sm:items-end sm:justify-between sm:p-8">
+          <div class="flex max-w-md flex-col gap-3">
+            <p class="font-mono text-xs font-semibold tracking-widest text-primary uppercase">
+              404 <span aria-hidden="true">/</span> Episode not found
+            </p>
+            <h1
+              id="not-found-heading"
+              class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl"
+            >
+              This page never made the broadcast.
+            </h1>
+            <p class="text-sm leading-relaxed text-muted-foreground sm:text-base">
+              The link is wrong, or the page moved. The rest of the catalog is still on air.
+            </p>
+          </div>
+
+          <div class="flex shrink-0 flex-wrap gap-3">
+            <a id="not-found-home-link" href="/" class={linkVariants({ variant: "button" })}>
+              <HugeiconsIcon icon={ArrowLeft01Icon} size={16} strokeWidth={2} aria-hidden="true" />
+              Back to Yozora
+            </a>
+            <a href="/search" class={linkVariants({ variant: "button-outline" })}>
+              <HugeiconsIcon icon={Search01Icon} size={16} strokeWidth={2} aria-hidden="true" />
+              Search anime
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <nav aria-label="Suggested pages" class="mt-5 flex flex-wrap items-center gap-2">
+      <span class="mr-1 text-xs font-medium text-muted-foreground">Or try</span>
+      {
+        suggestions.map((item) => (
+          <a href={item.href} class={linkVariants({ variant: "pill" })}>
+            {item.label}
+          </a>
+        ))
+      }
+    </nav>
+  </section>
+</BaseLayout>

@@ -28,7 +28,7 @@ Yozora is a fast, modern anime web platform designed for discovering seasonal re
 
 ## Tech Stack
 
-- TanStack Start (React 19, Vite, Cloudflare Workers)
+- Astro 7 (React islands, Cloudflare Workers)
 - Tailwind CSS v4
 - Base UI / shadcn
 - AniList GraphQL + AnimeThemes GraphQL
@@ -58,7 +58,7 @@ bun install
 3. Configure environment variables:
 
 ```bash
-cp .env.example .env.local
+cp .env.temp .env
 ```
 
 4. Start the development server:
@@ -75,7 +75,9 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 - `bun run build` — Build production bundles
 - `bun run preview` — Preview production build locally
 - `bun run typecheck` — Run TypeScript type checking
-- `bun run codegen` — Regenerate GraphQL clients (AnimeThemes schema snapshot is refreshed via `curl` with a User-Agent header; see `schemas/animethemes-introspection.json`)
+- `bun run graphql:schema` — Refresh the committed GraphQL schema snapshots from the live endpoints (AniList + AnimeThemes with User-Agent header)
+- `bun run graphql:env` — Regenerate gql.tada schema typings from the snapshots (`schema.graphql`, `schemas/animethemes.graphql`)
+- `bun run graphql:doctor` — Verify gql.tada configuration against the committed schemas
 
 ## License
 

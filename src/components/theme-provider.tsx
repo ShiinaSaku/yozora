@@ -1,5 +1,8 @@
 import * as React from "react"
-import { ScriptOnce } from "@tanstack/react-router"
+
+// The blocking pre-hydration theme script is rendered by the Astro layout
+// (`is:inline` in BaseLayout.astro) so it also runs on fully prerendered
+// pages without any island hydration.
 
 export type Theme = "dark" | "light" | "system"
 
@@ -13,13 +16,6 @@ export interface ThemeProviderState {
   theme: Theme
   resolvedTheme: "dark" | "light"
   setTheme: (theme: Theme) => void
-}
-
-function getThemeScript(storageKey: string, defaultTheme: Theme) {
-  const key = JSON.stringify(storageKey)
-  const fallback = JSON.stringify(defaultTheme)
-
-  return `(function(){try{var t=localStorage.getItem(${key});if(t!=='light'&&t!=='dark'&&t!=='system'){t=${fallback}}var d=matchMedia('(prefers-color-scheme: dark)').matches;var r=t==='system'?(d?'dark':'light'):t;var e=document.documentElement;e.classList.remove('light','dark');e.classList.add(r);e.style.colorScheme=r}catch(e){}})();`
 }
 
 const ThemeProviderContext = React.createContext<
@@ -43,7 +39,7 @@ function applyTheme(theme: Theme): "dark" | "light" {
 }
 
 /**
- * Native TanStack Start theme provider.
+ * React theme provider for Astro islands.
  * Uses `ScriptOnce` to inject a blocking pre-hydration script, preventing flash of unstyled content (FOUC).
  */
 export function ThemeProvider({
@@ -68,6 +64,13 @@ export function ThemeProvider({
   React.useEffect(() => {
     const resolved = applyTheme(theme)
     setResolvedTheme(resolved)
+
+    const observer = new MutationObserver(() => {
+      const isDark = document.documentElement.classList.contains("dark")
+      setResolvedTheme(isDark ? "dark" : "light")
+    })
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] })
+    return () => observer.disconnect()
   }, [theme])
 
   React.useEffect(() => {
@@ -103,7 +106,6 @@ export function ThemeProvider({
 
   return (
     <ThemeProviderContext value={value}>
-      <ScriptOnce>{getThemeScript(storageKey, defaultTheme)}</ScriptOnce>
       {children}
     </ThemeProviderContext>
   )

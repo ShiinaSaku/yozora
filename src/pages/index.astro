@@ -1,0 +1,48 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro"
+import HomeContent from "@/components/pages/HomeContent.astro"
+import { getHomeAiring, getHomeData } from "@/lib/server/catalog"
+import { canonicalLinks } from "@/lib/seo/meta"
+
+export const prerender = false
+
+const [home, airing] = await Promise.all([getHomeData(), getHomeAiring()])
+const year = new Date().getUTCFullYear()
+const hero = home.trending[0]
+const heroBanner = hero?.banner
+const heroCover = hero?.coverExtraLarge || hero?.coverLarge || hero?.cover
+
+const links: Array<Record<string, string>> = [...canonicalLinks("/")]
+if (heroBanner) {
+  links.push({
+    rel: "preload",
+    as: "image",
+    href: heroBanner,
+    media: "(min-width: 640px)",
+    fetchpriority: "high",
+  })
+}
+if (heroCover) {
+  links.push({
+    rel: "preload",
+    as: "image",
+    href: heroCover,
+    media: heroBanner ? "(max-width: 639px)" : undefined,
+    fetchpriority: "high",
+  })
+}
+---
+
+<BaseLayout
+  title="Yozora (夜空) — Anime Airing Schedule & Creditless Themes"
+  description="Follow Japanese broadcast schedules, browse the current anime season, and play creditless opening and ending themes. Free, no ads."
+  keywords={`Yozora, Yozora anime, yozora.moe, anime, anime catalog, seasonal anime ${year}, anime schedule, anime countdown, anime airing countdown, anime themes, opening songs, ending songs, seiyuu, voice actors, 夜空, アニメ, 放送予定, 今期アニメ, 新番, 追番, 主題歌`}
+  links={links}
+>
+  <HomeContent
+    trending={home.trending}
+    seasonal={home.seasonal}
+    popular={home.popular}
+    airing={airing}
+  />
+</BaseLayout>

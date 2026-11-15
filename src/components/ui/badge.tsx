@@ -23,7 +23,7 @@ const badgeVariants = cva(
         bold: "bg-secondary font-bold text-secondary-foreground [a]:hover:bg-secondary/80",
         rose: "bg-secondary font-bold text-rose-500 [a]:hover:bg-secondary/80",
         overlay:
-          "border-white/10 bg-black/75 px-1.5 py-0 font-mono text-xs font-bold text-white backdrop-blur-md",
+          "border-white/10 bg-black/80 px-1.5 py-0 font-mono text-xs font-bold text-white",
         subtle:
           "border border-primary/20 bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary",
         tag: "px-1.5 py-0 font-mono text-xs font-bold text-primary shadow-xs",

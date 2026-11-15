@@ -1,0 +1,95 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro"
+import { CharacterClient } from "@/components/pages/character-client"
+import {
+  generateBreadcrumbsJsonLd,
+  generateCharacterFaqJsonLd,
+  generateCharacterJsonLd,
+  stringifyJsonLd,
+} from "@/lib/seo/json-ld"
+import { getCharacterPageData } from "@/lib/server/catalog"
+import { getCharacterUrl, parseAnimeId } from "@/lib/utils/slug"
+import { canonicalLinks, openGraphImageUrl } from "@/lib/seo/meta"
+
+export const prerender = false
+
+const id = parseAnimeId(Astro.params.id ?? "")
+const char = id ? await getCharacterPageData(String(id)) : null
+if (!char) {
+  return Astro.rewrite("/404")
+}
+
+const nativeSuffix = char.name.native ? ` (${char.name.native})` : ""
+const charFull = `${char.name.full}${nativeSuffix}`
+const longTitle = `${char.name.full} — Voice Actors & Roles | Yozora`
+const title =
+  charFull.length <= 34
+    ? `${charFull} — Voice Actors & Roles | Yozora`
+    : longTitle.length <= 58
+      ? longTitle
+      : `${char.name.full} | Yozora`
+
+const rawDesc = (
+  char.description ||
+  `Explore voice actors, character lore, and featured anime roles for ${char.name.full} on Yozora.`
+)
+  .replace(/<[^>]*>/g, "")
+  .replace(/\s+/g, " ")
+  .trim()
+const description =
+  rawDesc.length > 155 ? `${rawDesc.slice(0, 152).trim()}...` : rawDesc
+
+const canonicalPath = getCharacterUrl({
+  id: char.id,
+  name: { full: char.name.full },
+})
+if (Astro.url.pathname.replace(/\/$/, "") !== canonicalPath) {
+  return Astro.redirect(canonicalPath, 301)
+}
+const image = openGraphImageUrl({
+  type: "character",
+  title: char.name.full,
+  native: char.name.native || "",
+  tag: "Character Dossier",
+  description: description.slice(0, 170),
+  image: char.image || "",
+})
+
+const keywords = [
+  char.name.full,
+  char.name.native,
+  ...(char.name.alternative || []),
+  ...char.media.slice(0, 5).map((m) => m.title),
+  "anime character",
+  "voice actors",
+  "seiyuu",
+  "anime roles",
+  "声優",
+  "キャラクター",
+  "Yozora",
+]
+  .filter(Boolean)
+  .join(", ")
+
+const jsonLd = [
+  stringifyJsonLd(generateCharacterJsonLd(char)),
+  stringifyJsonLd(
+    generateBreadcrumbsJsonLd([
+      { name: "Home", url: "/" },
+      { name: char.name.full, url: canonicalPath },
+    ])
+  ),
+  stringifyJsonLd(generateCharacterFaqJsonLd(char)),
+]
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  keywords={keywords}
+  image={image}
+  links={canonicalLinks(canonicalPath)}
+  jsonLd={jsonLd}
+>
+  <CharacterClient client:load char={char} />
+</BaseLayout>

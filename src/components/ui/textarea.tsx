@@ -13,11 +13,14 @@ export const textareaVariants = cva(
           "rounded-xl border border-input bg-input/30 focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40",
         unstyled:
           "resize-none rounded-none border-0 bg-transparent shadow-none ring-0 focus-visible:ring-0 aria-invalid:ring-0 dark:bg-transparent",
+        editor:
+          "resize-y rounded-none border-0 bg-transparent font-mono leading-relaxed shadow-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-inset",
       },
       size: {
         default: "min-h-16 px-3 py-3 text-base md:text-sm",
         group: "min-h-0 py-2 text-base md:text-sm",
         sm: "min-h-12 px-3 py-2 text-sm",
+        editor: "min-h-0 p-4 text-xs sm:text-sm",
         none: "min-h-0 p-0 text-base md:text-sm",
       },
     },

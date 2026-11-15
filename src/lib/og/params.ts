@@ -48,7 +48,7 @@ const LIMITS = {
   tag: 60,
 } as const
 
-const DEFAULT_ACCENT = "#8b7cb8"
+const DEFAULT_ACCENT = "#7aa2f7"
 
 export function sanitizeAccent(value: string | null | undefined): string {
   return /^#[0-9a-f]{6}$/i.test(value || "") ? (value as string) : DEFAULT_ACCENT

@@ -1,4 +1,3 @@
-import { usePathname } from "@/lib/navigation"
 import Link from "@/components/ui/link"
 import {
   DiscordIcon,
@@ -10,7 +9,12 @@ import { BrandLogo } from "./brand-logo"
 import { ThemeToggle } from "./theme-toggle"
 import { cn } from "@/lib/utils"
 
-const HIDDEN_FOOTER_ROUTES = ["/sign-in", "/sign-up", "/settings"]
+/**
+ * Routes where the footer is hidden (authentication and account settings).
+ * The layout checks this list before rendering the footer island.
+ */
+export const HIDDEN_FOOTER_ROUTES = ["/sign-in", "/sign-up", "/settings"]
+
 
 function DiscoverColumn() {
   return (
@@ -206,8 +210,9 @@ export function FooterMeta({ className }: { className?: string }) {
       <div className="mx-auto flex max-w-7xl flex-col items-start gap-6 sm:flex-row sm:items-center sm:justify-between sm:gap-8">
         <div className="flex items-center gap-3">
           <span className="interactive-press">
-            <Link href="/" aria-label="Yozora Home">
-              <BrandLogo className="size-6 transition-transform hover:scale-105" />
+            <Link href="/" variant="brand" aria-label="Yozora home">
+              <BrandLogo className="size-8" />
+              <span className="font-heading text-base font-bold tracking-tight">Yozora</span>
             </Link>
           </span>
           <ThemeToggle />
@@ -251,15 +256,8 @@ export function FooterMeta({ className }: { className?: string }) {
 }
 
 export function Footer() {
-  const pathname = usePathname()
-
-  // Hide footer on focused flows (authentication and account settings)
-  if (HIDDEN_FOOTER_ROUTES.some((route) => pathname.startsWith(route))) {
-    return null
-  }
-
   return (
-    <footer className="relative mt-20 w-full shrink-0 bg-card/25 text-sm/loose text-foreground backdrop-blur-sm">
+    <footer className="relative mt-20 content-auto w-full shrink-0 bg-card/60 text-sm/loose text-foreground">
       <FooterSitemap />
       <FooterMeta />
     </footer>

@@ -135,7 +135,6 @@ export function ShareMenu({
               href={`https://x.com/intent/tweet?url=${urlEncoded}&text=${encodeURIComponent(shareText)}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2"
             >
               <XIcon className="size-4" />
               <span>Share on X</span>
@@ -149,7 +148,6 @@ export function ShareMenu({
               href={`https://www.linkedin.com/sharing/share-offsite?url=${urlEncoded}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2"
             >
               <LinkedInIcon className="size-4" />
               <span>Share on LinkedIn</span>

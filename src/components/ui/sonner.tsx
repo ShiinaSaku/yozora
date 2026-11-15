@@ -1,5 +1,3 @@
-import { useTheme } from "@/components/theme-provider"
-
 import { Toaster as Sonner } from "sonner"
 import type { ToasterProps } from "sonner"
 import { HugeiconsIcon } from "@hugeicons/react"
@@ -10,8 +8,21 @@ import {
   MultiplicationSignCircleIcon,
   Loading03Icon,
 } from "@hugeicons/core-free-icons"
+import { ThemeProvider, useTheme } from "@/components/theme-provider"
 
+/**
+ * Toast island. Self-wraps its provider because Astro islands are separate
+ * React roots that cannot share context.
+ */
 const Toaster = ({ ...props }: ToasterProps) => {
+  return (
+    <ThemeProvider defaultTheme="dark" storageKey="theme">
+      <StyledToaster {...props} />
+    </ThemeProvider>
+  )
+}
+
+const StyledToaster = ({ ...props }: ToasterProps) => {
   const { theme = "system" } = useTheme()
 
   return (

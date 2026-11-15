@@ -1,0 +1,39 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro"
+import { UserProfileClient } from "@/components/pages/profile-client"
+import { getPublicProfilePageData } from "@/lib/server/profile"
+import { canonicalLinks, openGraphImageUrl } from "@/lib/seo/meta"
+
+export const prerender = false
+
+const rawHandle = Astro.params.handle ?? ""
+const data =
+  rawHandle && rawHandle.length <= 50
+    ? await getPublicProfilePageData(rawHandle)
+    : null
+if (!data) {
+  return Astro.rewrite("/404")
+}
+
+const handle = data.profile.handle || rawHandle
+const title = `@${handle}'s Anime Profile | Yozora`
+const description = `Explore @${handle}'s anime profile, watchlist shelves, ratings, and stats on Yozora.`
+const image = openGraphImageUrl({
+  type: "user",
+  title: `@${handle}`,
+  subtitle: "Anime Watchlist & Personal Ratings",
+  tag: "Anime Profile",
+  description,
+  image: data.profile.avatarUrl || undefined,
+})
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  keywords={`${handle}, anime profile, anime list, anime watchlist, user profile, anime tracker, Yozora`}
+  image={image}
+  links={canonicalLinks(`/u/${encodeURIComponent(handle)}`)}
+>
+  <UserProfileClient client:load handle={rawHandle} initialData={data} />
+</BaseLayout>

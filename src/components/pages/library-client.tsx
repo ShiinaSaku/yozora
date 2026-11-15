@@ -1,6 +1,5 @@
 import * as React from "react"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { useUser } from "@clerk/tanstack-react-start"
+import { useUser } from "@/lib/clerk"
 import { toast } from "sonner"
 import { Loader2, Plus, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -8,30 +7,46 @@ import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AnimeCard, AnimeCardSkeleton } from "@/components/anime/anime-card"
 import { SaveDialog } from "@/components/anime/save-dialog"
+import { fetchMyLibrary } from "@/lib/api"
+import type { LibraryData } from "@/lib/api"
 import type { Anime } from "@/lib/types/anime"
 import type { AnimeEntry } from "@/lib/db/schema"
-import { myLibraryQueryOptions } from "@/lib/queries/library"
-import { incrementProgressFn } from "@/lib/server/entries"
+import { actions } from "astro:actions"
 
-export function LibraryClient({
-  data: initialData,
-}: {
+interface LibraryClientProps {
   data?: {
     entries: AnimeEntry[]
     anime: Anime[]
   }
-}) {
+}
+
+export function LibraryClient(props: LibraryClientProps) {
+  return <LibraryContent {...props} />
+}
+
+function LibraryContent({ data: initialData }: LibraryClientProps) {
   const { isSignedIn, isLoaded } = useUser()
-  const queryClient = useQueryClient()
   const [filterQuery, setFilterQuery] = React.useState("")
   const [selectedAnime, setSelectedAnime] = React.useState<Anime | null>(null)
   const [saveOpen, setSaveOpen] = React.useState(false)
+  const [libraryData, setLibraryData] = React.useState<LibraryData | null>(
+    initialData ?? null
+  )
+  const [isEntriesLoading, setIsEntriesLoading] = React.useState(
+    !initialData
+  )
 
-  const { data: libraryData, isLoading: isEntriesLoading } = useQuery({
-    ...myLibraryQueryOptions(),
-    initialData,
-    enabled: Boolean(isSignedIn),
-  })
+  React.useEffect(() => {
+    if (!isSignedIn) return
+    const controller = new AbortController()
+    fetchMyLibrary(controller.signal)
+      .then(setLibraryData)
+      .catch(() => {})
+      .finally(() => {
+        if (!controller.signal.aborted) setIsEntriesLoading(false)
+      })
+    return () => controller.abort()
+  }, [isSignedIn])
 
   const entries = libraryData?.entries || []
   const animeList = libraryData?.anime
@@ -44,25 +59,35 @@ export function LibraryClient({
     return map
   }, [animeList])
 
-  // Quick increment mutation
-  const incrementMutation = useMutation({
-    mutationFn: (anilistId: number) => incrementProgressFn({ data: anilistId }),
-    onSuccess: (entry) => {
+  // Quick "watched next episode" action.
+  const [incrementingId, setIncrementingId] = React.useState<number | null>(
+    null
+  )
+  const incrementProgress = async (anilistId: number) => {
+    setIncrementingId(anilistId)
+    try {
+      const { data, error } = await actions.library.incrementProgress({
+        anilistId,
+      })
+      if (error) throw new Error(error.message)
       toast.success("Episode Watched", {
-        description: entry.progress
-          ? `Updated progress to Episode ${entry.progress}.`
+        description: data.progress
+          ? `Updated progress to Episode ${data.progress}.`
           : "Recorded episode progress in your library.",
       })
-      queryClient.invalidateQueries({
-        queryKey: myLibraryQueryOptions().queryKey,
-      })
-    },
-    onError: () => {
+      const refreshed = await fetchMyLibrary()
+      setLibraryData(refreshed)
+    } catch (err) {
       toast.error("Failed to Update Progress", {
-        description: "Could not record episode progress. Please try again.",
+        description:
+          err instanceof Error && err.message
+            ? err.message
+            : "Could not record episode progress. Please try again.",
       })
-    },
-  })
+    } finally {
+      setIncrementingId(null)
+    }
+  }
 
   if (!libraryData && (!isLoaded || isEntriesLoading)) {
     return (
@@ -134,9 +159,7 @@ export function LibraryClient({
             return null
           }
 
-          const isCurrentPending =
-            incrementMutation.isPending &&
-            incrementMutation.variables === anime.id
+          const isCurrentPending = incrementingId === anime.id
 
           return (
             <div key={e.id} className="group relative">
@@ -154,8 +177,8 @@ export function LibraryClient({
                 <Button
                   size="sm"
                   variant="secondary"
-                  disabled={incrementMutation.isPending}
-                  onClick={() => incrementMutation.mutate(anime.id)}
+                  disabled={incrementingId !== null}
+                  onClick={() => void incrementProgress(anime.id)}
                   className="mt-2 w-full"
                 >
                   {isCurrentPending ? (
@@ -179,7 +202,7 @@ export function LibraryClient({
   return (
     <div className="container mx-auto flex max-w-7xl flex-col gap-8 px-4 py-8 sm:px-6">
       <div role="status" aria-live="polite" className="sr-only">
-        {incrementMutation.isPending ? "Updating library entry..." : ""}
+        {incrementingId !== null ? "Updating library entry..." : ""}
       </div>
 
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
@@ -258,6 +281,11 @@ export function LibraryClient({
         anime={selectedAnime}
         open={saveOpen}
         onOpenChange={setSaveOpen}
+        onChanged={() => {
+          fetchMyLibrary()
+            .then(setLibraryData)
+            .catch(() => {})
+        }}
       />
     </div>
   )

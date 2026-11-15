@@ -1,0 +1,124 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro"
+import { AnimeDetailClient } from "@/components/pages/anime-detail-client"
+import {
+  generateAnimeFaqJsonLd,
+  generateAnimeJsonLd,
+  generateBreadcrumbsJsonLd,
+  stringifyJsonLd,
+} from "@/lib/seo/json-ld"
+import { getAnimePageData } from "@/lib/server/catalog"
+import { getAnimeUrl, parseAnimeId } from "@/lib/utils/slug"
+import { canonicalLinks, openGraphImageUrl } from "@/lib/seo/meta"
+
+export const prerender = false
+
+const id = parseAnimeId(Astro.params.id ?? "")
+const data = id ? await getAnimePageData(String(id)) : null
+if (!data) {
+  return Astro.rewrite("/404")
+}
+
+const { detail, themes } = data
+const { anime, characters } = detail
+const canonicalPath = getAnimeUrl(anime)
+if (Astro.url.pathname.replace(/\/$/, "") !== canonicalPath) {
+  return Astro.redirect(canonicalPath, 301)
+}
+const yearStr = anime.year ? ` (${anime.year})` : ""
+const baseTitle = `${anime.title}${yearStr}`
+const title =
+  baseTitle.length <= 36
+    ? `${baseTitle} — Airing & Themes | Yozora`
+    : baseTitle.length <= 48
+      ? `${baseTitle} — Themes | Yozora`
+      : `${anime.title} | Yozora`
+
+const cleanDesc = (
+  anime.description ||
+  `Explore episodes, characters, themes, and soundtracks for ${anime.title} on Yozora.`
+)
+  .replace(/<[^>]*>/g, "")
+  .replace(/\s+/g, " ")
+  .trim()
+const description =
+  cleanDesc.length > 155 ? `${cleanDesc.slice(0, 152).trim()}...` : cleanDesc
+
+const keywords = [
+  anime.title,
+  anime.titles?.english,
+  anime.titles?.romaji,
+  anime.titles?.native,
+  anime.subtitle,
+  anime.year ? `${anime.year} anime` : "",
+  anime.format ? `${anime.format} anime` : "",
+  anime.tags.slice(0, 5).join(", "),
+  ...(anime.studios || []).map((s) => `${s} anime`),
+  ...characters.slice(0, 6).map((c) => c.name),
+  ...characters.slice(0, 6).flatMap((c) => (c.voiceActor?.name ? [c.voiceActor.name] : [])),
+  ...themes.slice(0, 4).map((t) => t.title),
+  `${anime.title} watch`,
+  `${anime.title} episodes`,
+  `${anime.title} voice actors`,
+  `${anime.title} opening song`,
+  `${anime.title} ending song`,
+  "anime themes",
+  "seiyuu",
+  "声優",
+  "主題歌",
+  "Yozora anime",
+]
+  .filter(Boolean)
+  .join(", ")
+
+const image = openGraphImageUrl({
+  type: "anime",
+  title: anime.title,
+  subtitle: anime.titles?.romaji || anime.subtitle || "",
+  native: anime.titles?.native || "",
+  description: cleanDesc.slice(0, 170),
+  image:
+    anime.coverExtraLarge || anime.coverLarge || anime.coverMedium || anime.cover || "",
+  accent: anime.accent || "#93c5fd",
+  score: anime.score && anime.score > 0 ? anime.score.toFixed(1) : "",
+  year: anime.year ? String(anime.year) : "",
+  format: anime.format || "TV",
+  tag: anime.tags[0] || "Anime Showcase",
+  genres: anime.tags.slice(0, 3).join(", "),
+  episodes: anime.episodes ? String(anime.episodes) : "",
+})
+
+const heroImage =
+  anime.banner || anime.coverExtraLarge || anime.coverLarge || anime.cover
+const links: Array<Record<string, string>> = [
+  ...canonicalLinks(canonicalPath),
+  ...(heroImage
+    ? [{ rel: "preload", as: "image", href: heroImage, fetchpriority: "high" }]
+    : []),
+]
+
+const jsonLd = [
+  stringifyJsonLd(generateAnimeJsonLd(anime, themes, characters)),
+  stringifyJsonLd(
+    generateBreadcrumbsJsonLd([
+      { name: "Home", url: "/" },
+      { name: "Seasonal", url: "/seasonal" },
+      { name: anime.title, url: canonicalPath },
+    ])
+  ),
+  stringifyJsonLd(generateAnimeFaqJsonLd(anime, themes, characters)),
+]
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  keywords={keywords}
+  image={image}
+  imageAlt={`${anime.title} anime details on Yozora`}
+  ogType={anime.format === "MOVIE" ? "video.movie" : "video.tv_show"}
+  links={links}
+  jsonLd={jsonLd}
+>
+  <AnimeDetailClient client:load detail={detail} themes={themes} />
+</BaseLayout>

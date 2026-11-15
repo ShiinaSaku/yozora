@@ -20,6 +20,7 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { MarkdownRenderer } from "@/components/ui/markdown-renderer"
+import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 
 interface MarkdownEditorProps {
@@ -27,6 +28,7 @@ interface MarkdownEditorProps {
   onChange: (value: string) => void
   placeholder?: string
   minHeight?: string
+  maxLength?: number
   className?: string
 }
 
@@ -263,7 +265,8 @@ export function MarkdownEditor({
   value,
   onChange,
   placeholder = "Write in GitHub Flavored Markdown...",
-  minHeight = "min-h-[220px]",
+  minHeight = "220px",
+  maxLength,
   className,
 }: MarkdownEditorProps) {
   const [activeTab, setActiveTab] = React.useState<TabType>("write")
@@ -333,22 +336,22 @@ export function MarkdownEditor({
 
       <div className="min-h-0 flex-1 bg-background">
         {activeTab === "write" && (
-          <textarea
+          <Textarea
             ref={textareaRef}
+            variant="editor"
+            size="editor"
             value={value}
             onChange={(e) => onChange(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
-            aria-label={placeholder || "Markdown source code"}
-            className={cn(
-              "w-full resize-y rounded-none border-0 bg-transparent p-4 font-mono text-xs leading-relaxed shadow-none focus:outline-none sm:text-sm",
-              minHeight
-            )}
+            aria-label="Markdown source"
+            maxLength={maxLength}
+            style={{ minHeight }}
           />
         )}
 
         {activeTab === "preview" && (
-          <div className={cn("max-h-125 overflow-y-auto p-5", minHeight)}>
+          <div className="max-h-125 overflow-y-auto p-5" style={{ minHeight }}>
             {value.trim() ? (
               <MarkdownRenderer content={value} />
             ) : (
@@ -362,23 +365,21 @@ export function MarkdownEditor({
 
         {activeTab === "split" && (
           <div className="grid grid-cols-1 divide-y divide-border/50 md:grid-cols-2 md:divide-x md:divide-y-0">
-            <textarea
+            <Textarea
               ref={textareaRef}
+              variant="editor"
+              size="editor"
               value={value}
               onChange={(e) => onChange(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder={placeholder}
-              aria-label={placeholder || "Markdown source code"}
-              className={cn(
-                "w-full resize-y rounded-none border-0 bg-transparent p-4 font-mono text-xs leading-relaxed shadow-none focus:outline-none",
-                minHeight
-              )}
+              aria-label="Markdown source"
+              maxLength={maxLength}
+              style={{ minHeight }}
             />
             <div
-              className={cn(
-                "max-h-125 overflow-y-auto bg-muted/10 p-4",
-                minHeight
-              )}
+              className="max-h-125 overflow-y-auto bg-muted/10 p-4"
+              style={{ minHeight }}
             >
               {value.trim() ? (
                 <MarkdownRenderer content={value} />

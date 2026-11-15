@@ -12,7 +12,7 @@
     "typecheck": "tsc --noEmit",
     "check": "astro check",
     "graphql:env": "gql-tada generate-output",
-    "graphql:schema": "gql-tada generate-schema --output ./schema.graphql https://graphql.anilist.co && gql-tada generate-schema --output ./schemas/animethemes.graphql --header \"User-Agent: Yozora/1.0 (https://yozora.moe)\" https://rs.animethemes.moe/graphql",
+    "graphql:schema": "gql-tada generate-schema --output ./schema.graphql https://okotsuu.vercel.app/graphql && gql-tada generate-schema --output ./schemas/animethemes.graphql --header \"User-Agent: Yozora/1.0 (https://yozora.moe)\" https://rs.animethemes.moe/graphql",
     "graphql:doctor": "gql-tada doctor",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",

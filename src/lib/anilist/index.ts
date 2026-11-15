@@ -23,10 +23,25 @@ const PLACEHOLDER_COVER =
   "https://placehold.co/600x850/171622/F8F7FC?text=Yozora"
 
 function getAniListEndpoint() {
-  if (import.meta.env.SSR) {
-    return process.env.ANILIST_API_URL || DEFAULT_ANILIST_ENDPOINT
+  const configuredEndpoint = import.meta.env.SSR
+    ? process.env.ANILIST_API_URL
+    : import.meta.env.PUBLIC_ANILIST_API_URL
+  const endpoint = configuredEndpoint?.trim()
+
+  // A malformed Worker binding should not take every SSR catalog page down.
+  // Keep this URL absolute because graphql-request resolves it with `new URL`.
+  if (endpoint) {
+    try {
+      const url = new URL(endpoint)
+      if (url.protocol === "https:" || url.protocol === "http:") {
+        return url.toString()
+      }
+    } catch {
+      // Fall through to the known-good default.
+    }
   }
-  return import.meta.env.PUBLIC_ANILIST_API_URL || DEFAULT_ANILIST_ENDPOINT
+
+  return DEFAULT_ANILIST_ENDPOINT
 }
 
 // Edge-cache helpers. The cache layer only exists on the server (Workers

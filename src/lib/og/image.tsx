@@ -16,11 +16,11 @@ const DISPLAY_FONT = "Inter, sans-serif"
 const JP_FONT = "'Zen Maru Gothic', sans-serif"
 const MONO_FONT = "monospace"
 
-const INK = "#f4f4f5"
-const MUTED = "#9d9da8"
-const FAINT = "#5c5c68"
-const HAIRLINE = "rgba(255, 255, 255, 0.08)"
-const PANEL = "#08070f"
+const INK = "#1c1a19"
+const MUTED = "#66615e"
+const FAINT = "#918b86"
+const HAIRLINE = "rgba(38, 34, 31, 0.14)"
+const PANEL = "#f5f4f1"
 
 type OgFont = {
   name: string
@@ -107,21 +107,6 @@ function accent(hex: string, alpha: number): string {
   const b = parseInt(hex.slice(5, 7), 16)
   return `rgba(${r}, ${g}, ${b}, ${alpha})`
 }
-
-/** Deterministic starfield so every render is identical. */
-const STARS = (() => {
-  let seed = 0x2f6ea2
-  const rand = () => {
-    seed = (seed * 1664525 + 1013904223) >>> 0
-    return seed / 0xffffffff
-  }
-  return Array.from({ length: 32 }, () => ({
-    left: Math.round(rand() * 1150),
-    top: Math.round(rand() * 580),
-    size: rand() < 0.85 ? 2 : 3,
-    opacity: Number((0.06 + rand() * 0.28).toFixed(2)),
-  }))
-})()
 
 function titleSize(length: number, base: number, floor: number): number {
   if (length > 80) return Math.round(base * 0.68)
@@ -387,17 +372,27 @@ function EditorialBody({ params }: { params: OgParams }) {
           style={{
             display: "flex",
             alignItems: "center",
-            gap: 14,
+            gap: 10,
             fontFamily: MONO_FONT,
-            fontSize: 12,
-            color: FAINT,
+            fontSize: 11,
+            color: INK,
           }}
         >
-          {features.map((feature, index) => (
-            <React.Fragment key={feature}>
-              {index > 0 && <span style={{ color: FAINT }}>·</span>}
-              <span>{feature}</span>
-            </React.Fragment>
+          {features.map((feature) => (
+            <span
+              key={feature}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                padding: "8px 11px",
+                borderRadius: 9999,
+                border: `1px solid ${HAIRLINE}`,
+                backgroundColor: "rgba(255, 255, 255, 0.035)",
+                color: MUTED,
+              }}
+            >
+              {feature}
+            </span>
           ))}
         </div>
       ) : null}
@@ -425,6 +420,9 @@ function MediaBody({ params }: { params: OgParams }) {
     >
       <div
         style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 9,
           fontFamily: MONO_FONT,
           fontSize: 11,
           fontWeight: 600,
@@ -433,6 +431,15 @@ function MediaBody({ params }: { params: OgParams }) {
           color: params.accent,
         }}
       >
+        <span
+          style={{
+            width: 7,
+            height: 7,
+            borderRadius: 9999,
+            backgroundColor: params.accent,
+            boxShadow: `0 0 16px ${accent(params.accent, 0.75)}`,
+          }}
+        />
         {params.tag || "Anime showcase"}
       </div>
 
@@ -540,60 +547,76 @@ function OgCard({
         width: CARD_WIDTH,
         height: CARD_HEIGHT,
         backgroundColor: PANEL,
+        backgroundImage:
+          "radial-gradient(ellipse at center, #faf9f7 0%, #f3f2ef 72%, #efeeeb 100%)",
         color: INK,
         fontFamily: DISPLAY_FONT,
         display: "flex",
         flexDirection: "column",
-        justifyContent: "space-between",
-        padding: "48px 64px 44px",
+        justifyContent: isMedia || isUser ? "space-between" : "center",
+        alignItems: isMedia || isUser ? "stretch" : "center",
+        padding: isMedia || isUser ? "56px 76px" : "48px 64px",
         position: "relative",
         overflow: "hidden",
       }}
     >
-      {/* Accent glow */}
+      <svg
+        aria-hidden="true"
+        width={CARD_WIDTH}
+        height={CARD_HEIGHT}
+        viewBox={`0 0 ${CARD_WIDTH} ${CARD_HEIGHT}`}
+        style={{ position: "absolute", inset: 0, opacity: 0.72 }}
+      >
+        {Array.from({ length: 27 }, (_, contour) => {
+          const radius = 180 + contour * 19
+          const amplitude = 2 + contour * 0.34
+          const contourPath = Array.from({ length: 181 }, (_value, point) => {
+            const angle = (point / 180) * Math.PI * 2
+            const wave = Math.sin(angle * 8) * amplitude
+            const x = CARD_WIDTH / 2 + (radius + wave) * 1.7 * Math.cos(angle)
+            const y = CARD_HEIGHT / 2 + (radius + wave) * Math.sin(angle)
+            return `${point === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`
+          }).join(" ")
+          return (
+            <path
+              key={contour}
+              d={`${contourPath} Z`}
+              fill="none"
+              stroke="#817b76"
+              strokeWidth="1"
+              opacity={contour % 4 === 0 ? 0.4 : 0.27}
+            />
+          )
+        })}
+      </svg>
       <div
         style={{
           position: "absolute",
-          top: -320,
-          left: 300,
-          width: 900,
-          height: 700,
-          borderRadius: 9999,
-          backgroundImage: `radial-gradient(ellipse at 50% 0%, ${accent(params.accent, 0.14)} 0%, transparent 70%)`,
+          left: 0,
+          right: 0,
+          top: CARD_HEIGHT / 2,
+          height: 1,
+          backgroundColor: "rgba(45, 41, 37, 0.16)",
         }}
       />
-
-      {/* Starfield */}
-      <div style={{ position: "absolute", inset: 0 }}>
-        {STARS.map((star, index) => (
-          <div
-            key={index}
-            style={{
-              position: "absolute",
-              left: star.left,
-              top: star.top,
-              width: star.size,
-              height: star.size,
-              borderRadius: 9999,
-              backgroundColor: "#ffffff",
-              opacity: star.opacity,
-            }}
-          />
-        ))}
-      </div>
-
       <div
         style={{
-          position: "relative",
-          display: "flex",
-          justifyContent: "space-between",
+          position: "absolute",
+          top: 0,
+          bottom: 0,
+          left: CARD_WIDTH / 2,
+          width: 1,
+          backgroundColor: "rgba(45, 41, 37, 0.11)",
         }}
-      >
-        <CardHeader
-          tag={params.tag || params.type.toUpperCase()}
-          color={params.accent}
-        />
-      </div>
+      />
+      {isMedia || isUser ? (
+        <div style={{ position: "relative", display: "flex" }}>
+          <CardHeader
+            tag={params.tag || params.type.toUpperCase()}
+            color={params.accent}
+          />
+        </div>
+      ) : null}
 
       {isMedia || isUser ? (
         <div
@@ -617,14 +640,36 @@ function OgCard({
           )}
         </div>
       ) : (
-        <div style={{ position: "relative" }}>
-          <EditorialBody params={params} />
+        <div
+          style={{
+            position: "relative",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            textAlign: "center",
+            maxWidth: 980,
+          }}
+        >
+          <div
+            style={{
+              fontFamily: DISPLAY_FONT,
+              fontSize: titleSize(params.title.length, 96, 64),
+              fontWeight: 700,
+              letterSpacing: "-0.055em",
+              lineHeight: 1,
+              color: INK,
+            }}
+          >
+            {params.title}
+          </div>
         </div>
       )}
 
-      <div style={{ position: "relative" }}>
-        <CardFooter color={params.accent} />
-      </div>
+      {isMedia || isUser ? (
+        <div style={{ position: "relative" }}>
+          <CardFooter color={params.accent} />
+        </div>
+      ) : null}
     </div>
   )
 }
@@ -646,15 +691,12 @@ function generateSvgFallback(title: string, description: string) {
       <stop offset="100%" stop-color="#8b7cb8" stop-opacity="0"/>
     </radialGradient>
   </defs>
-  <rect width="1200" height="630" fill="#08070f"/>
+  <rect width="1200" height="630" fill="#f5f4f1"/>
   <rect width="1200" height="630" fill="url(#glow)"/>
-  <text x="64" y="96" font-family="sans-serif" font-weight="700" font-size="22" fill="#f4f4f5" letter-spacing="-0.5">Yozora</text>
-  <text x="150" y="96" font-family="sans-serif" font-weight="700" font-size="14" fill="#5c5c68">夜空</text>
-  <text x="64" y="320" font-family="sans-serif" font-weight="700" font-size="56" fill="#f4f4f5" letter-spacing="-1">${esc(title)}</text>
-  <text x="64" y="368" font-family="sans-serif" font-size="19" fill="#9d9da8">${esc(description)}</text>
-  <line x1="64" y1="540" x2="1136" y2="540" stroke="rgba(255,255,255,0.08)"/>
-  <text x="64" y="572" font-family="monospace" font-size="12" fill="#5c5c68">open anime intelligence · 1080p themes</text>
-  <text x="1064" y="572" font-family="monospace" font-weight="600" font-size="12" fill="#8b7cb8">yozora.moe ↗</text>
+  <line x1="0" y1="315" x2="1200" y2="315" stroke="#bcb7b2" stroke-opacity="0.45"/>
+  <line x1="600" y1="0" x2="600" y2="630" stroke="#bcb7b2" stroke-opacity="0.35"/>
+  <text x="600" y="340" text-anchor="middle" font-family="sans-serif" font-weight="700" font-size="76" fill="#1c1a19" letter-spacing="-3">${esc(title)}</text>
+  <text x="600" y="385" text-anchor="middle" font-family="sans-serif" font-size="19" fill="#66615e">${esc(description)}</text>
 </svg>`
 }
 

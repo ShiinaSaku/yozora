@@ -14,7 +14,7 @@ const envSchema = z.compile(
     PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().min(1).optional(),
     CLERK_WEBHOOK_SIGNING_SECRET: z.string().min(1).optional(),
     PUBLIC_APP_URL: z.string().min(1).default("http://localhost:3000"),
-    ANILIST_API_URL: z.string().min(1).default("https://graphql.anilist.co"),
+    ANILIST_API_URL: z.string().min(1).default("https://okotsuu.vercel.app/graphql"),
     ANIMETHEMES_GRAPHQL_URL: z
       .string()
       .min(1)

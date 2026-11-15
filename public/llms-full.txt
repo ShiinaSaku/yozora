@@ -27,7 +27,7 @@
 ## 3. Data Providers & Resilience
 1. **AniList GraphQL API**:
    - Queries media metadata, airing schedules, character rosters, voice actors, and user lists.
-   - Endpoint: `https://graphql.anilist.co`
+   - Endpoint: `https://okotsuu.vercel.app/graphql`
 2. **AnimeThemes GraphQL API**:
    - Comprehensive archive of high-bitrate, creditless anime opening (OP) and ending (ED) videos.
    - Endpoint: `https://rs.animethemes.moe/graphql`; anime matched by AniList ID via `filterAnimeByExternalSite`.

@@ -30,7 +30,18 @@ const publicCatalog = defineMiddleware((context, next) => {
 
   // These pages render the same public catalog for everyone. Like prerendered
   // pages, they use Clerk client-side rather than embedding per-user SSR data.
-  return isPublicCatalog ? next() : clerk(context, next)
+  if (isPublicCatalog) return next()
+
+  // Astro's cache layer can return a Response with immutable headers. Clerk
+  // appends auth headers after `next()` resolves, so hand it a mutable clone.
+  return clerk(context, async () => {
+    const response = await next()
+    return new Response(response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers: new Headers(response.headers),
+    })
+  })
 })
 
 export const onRequest = sequence(publicCatalog, csrfProtection)

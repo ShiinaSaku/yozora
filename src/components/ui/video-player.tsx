@@ -44,7 +44,11 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Kbd } from "@/components/ui/kbd"
 import { Spinner } from "@/components/ui/spinner"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { useMergedRef } from "@/hooks/use-merged-ref"
 import { cn } from "@/lib/utils"
 
@@ -254,9 +258,9 @@ function canFullscreen() {
   const doc = document as FullscreenDocument
   return Boolean(
     doc.fullscreenEnabled ||
-      doc.webkitFullscreenEnabled ||
-      (typeof HTMLVideoElement !== "undefined" &&
-        "webkitEnterFullscreen" in HTMLVideoElement.prototype)
+    doc.webkitFullscreenEnabled ||
+    (typeof HTMLVideoElement !== "undefined" &&
+      "webkitEnterFullscreen" in HTMLVideoElement.prototype)
   )
 }
 
@@ -390,7 +394,9 @@ function createVideoPlayerStore(
       const doc = document as FullscreenDocument
       if (fullscreenElement()) {
         ignoreRejection(
-          doc.exitFullscreen ? doc.exitFullscreen() : doc.webkitExitFullscreen?.()
+          doc.exitFullscreen
+            ? doc.exitFullscreen()
+            : doc.webkitExitFullscreen?.()
         )
         return
       }
@@ -778,7 +784,9 @@ function VideoPlayer({
 }: VideoPlayerProps) {
   const rootRef = React.useRef<HTMLDivElement | null>(null)
   const videoRef = React.useRef<HTMLVideoElement | null>(null)
-  const [store] = React.useState(() => createVideoPlayerStore(videoRef, rootRef))
+  const [store] = React.useState(() =>
+    createVideoPlayerStore(videoRef, rootRef)
+  )
   const [controlsHidden, setControlsHidden] = React.useState(false)
   const [flash, setFlash] = React.useState<Flash | null>(null)
   const [announcement, setAnnouncement] = React.useState("")
@@ -1092,7 +1100,11 @@ function VideoPlayer({
               data-slot="video-player-error"
               className="flex max-w-xs flex-col items-center gap-2 px-6 text-center text-sm text-pretty text-muted-foreground [&_svg]:size-6"
             >
-              <HugeiconsIcon icon={TriangleAlertIcon} aria-hidden strokeWidth={2} />
+              <HugeiconsIcon
+                icon={TriangleAlertIcon}
+                aria-hidden
+                strokeWidth={2}
+              />
               {errorMessage}
             </div>
           )}
@@ -1593,7 +1605,9 @@ function VideoPlayerPlayButton({
           <HugeiconsIcon
             icon={PlayIcon}
             strokeWidth={2}
-            className={cn(state !== "paused" && "opacity-0 motion-safe:scale-50")}
+            className={cn(
+              state !== "paused" && "opacity-0 motion-safe:scale-50"
+            )}
           />
           <HugeiconsIcon
             icon={PauseIcon}
@@ -1605,7 +1619,9 @@ function VideoPlayerPlayButton({
           <HugeiconsIcon
             icon={RotateCcwIcon}
             strokeWidth={2}
-            className={cn(state !== "ended" && "opacity-0 motion-safe:scale-50")}
+            className={cn(
+              state !== "ended" && "opacity-0 motion-safe:scale-50"
+            )}
           />
         </span>
       )}
@@ -2229,9 +2245,17 @@ function VideoPlayerPictureInPictureButton({
     >
       {children ??
         (active ? (
-          <HugeiconsIcon icon={PictureInPictureExitIcon} aria-hidden strokeWidth={2} />
+          <HugeiconsIcon
+            icon={PictureInPictureExitIcon}
+            aria-hidden
+            strokeWidth={2}
+          />
         ) : (
-          <HugeiconsIcon icon={PictureInPictureIcon} aria-hidden strokeWidth={2} />
+          <HugeiconsIcon
+            icon={PictureInPictureIcon}
+            aria-hidden
+            strokeWidth={2}
+          />
         ))}
     </ControlButton>
   )
@@ -2273,9 +2297,17 @@ function VideoPlayerFullscreenButton({
     >
       {children ??
         (active ? (
-          <HugeiconsIcon icon={MinimizeScreenIcon} aria-hidden strokeWidth={2} />
+          <HugeiconsIcon
+            icon={MinimizeScreenIcon}
+            aria-hidden
+            strokeWidth={2}
+          />
         ) : (
-          <HugeiconsIcon icon={MaximizeScreenIcon} aria-hidden strokeWidth={2} />
+          <HugeiconsIcon
+            icon={MaximizeScreenIcon}
+            aria-hidden
+            strokeWidth={2}
+          />
         ))}
     </ControlButton>
   )

@@ -51,7 +51,9 @@ const LIMITS = {
 const DEFAULT_ACCENT = "#7aa2f7"
 
 export function sanitizeAccent(value: string | null | undefined): string {
-  return /^#[0-9a-f]{6}$/i.test(value || "") ? (value as string) : DEFAULT_ACCENT
+  return /^#[0-9a-f]{6}$/i.test(value || "")
+    ? (value as string)
+    : DEFAULT_ACCENT
 }
 
 function clamp(value: string | null, max: number): string {
@@ -62,7 +64,9 @@ function clamp(value: string | null, max: number): string {
 export function parseOgParams(searchParams: URLSearchParams): OgParams {
   const rawType = searchParams.get("type") as OgCardType | null
   return {
-    type: ogCardTypes.includes(rawType as OgCardType) ? (rawType as OgCardType) : "generic",
+    type: ogCardTypes.includes(rawType as OgCardType)
+      ? (rawType as OgCardType)
+      : "generic",
     title: clamp(searchParams.get("title"), LIMITS.title) || "Yozora",
     subtitle: clamp(searchParams.get("subtitle"), LIMITS.subtitle),
     native: clamp(searchParams.get("native"), LIMITS.native),
@@ -90,9 +94,7 @@ export function ogImageUrl(
 ): string {
   const search = new URLSearchParams()
   for (const [key, value] of Object.entries(params)) {
-    const serialized = Array.isArray(value)
-      ? value.join(", ")
-      : String(value)
+    const serialized = Array.isArray(value) ? value.join(", ") : String(value)
     if (serialized) search.set(key, serialized)
   }
   const query = search.toString()

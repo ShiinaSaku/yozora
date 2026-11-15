@@ -1,11 +1,7 @@
 import * as React from "react"
 import Link from "@/components/ui/link"
 import { usePathname } from "@/lib/navigation"
-import {
-  SignInButton,
-  SignUpButton,
-  UserButton,
-} from "@clerk/astro/react"
+import { SignInButton, SignUpButton, UserButton } from "@clerk/astro/react"
 import { useUser } from "@/lib/clerk"
 import { HugeiconsIcon } from "@hugeicons/react"
 import {

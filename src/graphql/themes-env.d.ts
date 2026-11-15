@@ -149,7 +149,7 @@ export type introspection_types = {
     'WatchHistoryConnection': { kind: 'OBJECT'; name: 'WatchHistoryConnection'; fields: { 'edges': { name: 'edges'; type: { kind: 'NON_NULL'; name: never; ofType: { kind: 'LIST'; name: never; ofType: { kind: 'NON_NULL'; name: never; ofType: { kind: 'OBJECT'; name: 'WatchHistoryEdge'; ofType: null; }; }; }; } }; 'nodes': { name: 'nodes'; type: { kind: 'NON_NULL'; name: never; ofType: { kind: 'LIST'; name: never; ofType: { kind: 'NON_NULL'; name: never; ofType: { kind: 'OBJECT'; name: 'WatchHistory'; ofType: null; }; }; }; } }; 'pageInfo': { name: 'pageInfo'; type: { kind: 'NON_NULL'; name: never; ofType: { kind: 'OBJECT'; name: 'PageInfo'; ofType: null; }; } }; }; };
     'WatchHistoryEdge': { kind: 'OBJECT'; name: 'WatchHistoryEdge'; fields: { 'cursor': { name: 'cursor'; type: { kind: 'NON_NULL'; name: never; ofType: { kind: 'SCALAR'; name: 'String'; ofType: null; }; } }; 'node': { name: 'node'; type: { kind: 'NON_NULL'; name: never; ofType: { kind: 'OBJECT'; name: 'WatchHistory'; ofType: null; }; } }; }; };
     'WatchHistorySort': { name: 'WatchHistorySort'; enumValues: 'ID' | 'ID_DESC' | 'RANDOM'; };
-};
+}
 
 /** An IntrospectionQuery representation of your schema.
  *
@@ -160,11 +160,11 @@ export type introspection_types = {
  * instead save to a .ts instead of a .d.ts file.
  */
 export type introspection = {
-  name: 'themes';
-  query: 'Query';
-  mutation: 'Mutation';
-  subscription: never;
-  types: introspection_types;
-};
+  name: "themes"
+  query: "Query"
+  mutation: "Mutation"
+  subscription: never
+  types: introspection_types
+}
 
-import * as gqlTada from 'gql.tada';
+import * as gqlTada from "gql.tada"

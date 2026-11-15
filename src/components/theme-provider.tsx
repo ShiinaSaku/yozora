@@ -69,7 +69,10 @@ export function ThemeProvider({
       const isDark = document.documentElement.classList.contains("dark")
       setResolvedTheme(isDark ? "dark" : "light")
     })
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] })
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    })
     return () => observer.disconnect()
   }, [theme])
 
@@ -104,11 +107,7 @@ export function ThemeProvider({
     [theme, resolvedTheme, handleSetTheme]
   )
 
-  return (
-    <ThemeProviderContext value={value}>
-      {children}
-    </ThemeProviderContext>
-  )
+  return <ThemeProviderContext value={value}>{children}</ThemeProviderContext>
 }
 
 /**

@@ -5,9 +5,7 @@ import type {
   AnimeThemeVideo,
   AnimeThemesResponse,
 } from "@/lib/types/anime"
-import {
-  AnimeThemesDocument,
-} from "./operations"
+import { AnimeThemesDocument } from "./operations"
 import type { ResultOf } from "gql.tada"
 
 const DEFAULT_ANIMETHEMES_ENDPOINT = "https://rs.animethemes.moe/graphql"
@@ -37,7 +35,11 @@ const edgeCacheGetStale = async (key: string) => {
   return cacheGetStale<AnimeThemesResponse>(key)
 }
 
-const edgeCacheSet = async (key: string, value: unknown, ttlSeconds: number) => {
+const edgeCacheSet = async (
+  key: string,
+  value: unknown,
+  ttlSeconds: number
+) => {
   if (!import.meta.env.SSR) return
   const { cacheSet } = await import("@/lib/cache")
   await cacheSet(key, value, ttlSeconds)
@@ -109,7 +111,9 @@ function toThemeVideo(v: GqlVideo): AnimeThemeVideo {
  */
 function toTheme(
   theme: NonNullable<
-    ResultOf<typeof AnimeThemesDocument>["filterAnimeByExternalSite"][number]["themes"][number]
+    ResultOf<
+      typeof AnimeThemesDocument
+    >["filterAnimeByExternalSite"][number]["themes"][number]
   >
 ): AnimeTheme {
   const entries: AnimeThemeEntry[] = theme.entries.map((entry) => {

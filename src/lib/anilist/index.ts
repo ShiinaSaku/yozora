@@ -18,7 +18,7 @@ import {
 } from "./operations"
 import { searchWithFallback } from "./fuzzy-search"
 
-const DEFAULT_ANILIST_ENDPOINT = "https://graphql.anilist.co"
+const DEFAULT_ANILIST_ENDPOINT = "https://okotsuu.vercel.app/graphql"
 const PLACEHOLDER_COVER =
   "https://placehold.co/600x850/171622/F8F7FC?text=Yozora"
 
@@ -43,7 +43,11 @@ const edgeCacheGetStale = async <T>(key: string) => {
   return cacheGetStale<T>(key)
 }
 
-const edgeCacheSet = async (key: string, value: unknown, ttlSeconds: number) => {
+const edgeCacheSet = async (
+  key: string,
+  value: unknown,
+  ttlSeconds: number
+) => {
   if (!import.meta.env.SSR) return
   const { cacheSet } = await import("@/lib/cache")
   await cacheSet(key, value, ttlSeconds)
@@ -55,7 +59,9 @@ const edgeCacheMGet = async (keys: string[]) => {
   return cacheMGet(keys)
 }
 
-const edgeCacheMSet = async (items: Array<{ key: string; value: unknown; ttlSeconds?: number }>) => {
+const edgeCacheMSet = async (
+  items: Array<{ key: string; value: unknown; ttlSeconds?: number }>
+) => {
   if (!import.meta.env.SSR) return
   const { cacheMSet } = await import("@/lib/cache")
   await cacheMSet(items)
@@ -375,7 +381,9 @@ async function executeAniListFetch<T>(
           throw new Error("Anime not found")
         }
         const retryAfterHeader = err.response.headers.get("retry-after")
-        const retryAfter = retryAfterHeader ? Number(retryAfterHeader) : undefined
+        const retryAfter = retryAfterHeader
+          ? Number(retryAfterHeader)
+          : undefined
         if (
           status === 403 &&
           upstreamMessage.toLowerCase().includes("manually blocked")

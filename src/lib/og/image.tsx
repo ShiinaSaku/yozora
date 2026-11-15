@@ -73,8 +73,18 @@ function loadOgFonts(): Promise<OgFont[]> {
 
       const fonts: OgFont[] = []
       if (interData) {
-        fonts.push({ name: "Inter", data: interData, weight: 700, style: "normal" })
-        fonts.push({ name: "Inter", data: interData, weight: 400, style: "normal" })
+        fonts.push({
+          name: "Inter",
+          data: interData,
+          weight: 700,
+          style: "normal",
+        })
+        fonts.push({
+          name: "Inter",
+          data: interData,
+          weight: 400,
+          style: "normal",
+        })
       }
       if (zenData) {
         fonts.push({
@@ -473,7 +483,9 @@ function MediaBody({ params }: { params: OgParams }) {
         ) : null}
         {meta.map((item, index) => (
           <React.Fragment key={item}>
-            {(params.score || index > 0) && <span style={{ color: FAINT }}>·</span>}
+            {(params.score || index > 0) && (
+              <span style={{ color: FAINT }}>·</span>
+            )}
             <span>{item}</span>
           </React.Fragment>
         ))}
@@ -513,7 +525,13 @@ function MediaBody({ params }: { params: OgParams }) {
 }
 
 /** The one card layout every OG image shares. */
-function OgCard({ params, imageDataUri }: { params: OgParams; imageDataUri: string }) {
+function OgCard({
+  params,
+  imageDataUri,
+}: {
+  params: OgParams
+  imageDataUri: string
+}) {
   const isMedia = params.type === "anime" || params.type === "character"
   const isUser = params.type === "user"
   return (
@@ -564,7 +582,13 @@ function OgCard({ params, imageDataUri }: { params: OgParams; imageDataUri: stri
         ))}
       </div>
 
-      <div style={{ position: "relative", display: "flex", justifyContent: "space-between" }}>
+      <div
+        style={{
+          position: "relative",
+          display: "flex",
+          justifyContent: "space-between",
+        }}
+      >
         <CardHeader
           tag={params.tag || params.type.toUpperCase()}
           color={params.accent}
@@ -581,8 +605,16 @@ function OgCard({ params, imageDataUri }: { params: OgParams; imageDataUri: stri
             width: "100%",
           }}
         >
-          <MediaImage imageDataUri={imageDataUri} color={params.accent} avatar={isUser} />
-          {isUser ? <EditorialBody params={params} /> : <MediaBody params={params} />}
+          <MediaImage
+            imageDataUri={imageDataUri}
+            color={params.accent}
+            avatar={isUser}
+          />
+          {isUser ? (
+            <EditorialBody params={params} />
+          ) : (
+            <MediaBody params={params} />
+          )}
         </div>
       ) : (
         <div style={{ position: "relative" }}>
@@ -648,7 +680,9 @@ export async function handleOgImageRequest({ request }: { request: Request }) {
     const params = parseOgParams(url.searchParams)
 
     const imageDataUri =
-      params.type === "anime" || params.type === "character" || params.type === "user"
+      params.type === "anime" ||
+      params.type === "character" ||
+      params.type === "user"
         ? await fetchSafeImageDataUri(params.image)
         : ""
 

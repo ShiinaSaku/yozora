@@ -4,7 +4,9 @@ import { defineMiddleware, sequence } from "astro:middleware"
 const csrfProtection = defineMiddleware(async (context, next) => {
   // Mutating requests must be same-origin: state-changing endpoints and actions
   // are CSRF-protected by verifying the request origin against the site origin.
-  const isMutation = !["GET", "HEAD", "OPTIONS"].includes(context.request.method)
+  const isMutation = !["GET", "HEAD", "OPTIONS"].includes(
+    context.request.method
+  )
   if (isMutation) {
     const requestOrigin = context.request.headers.get("origin")
     if (requestOrigin) {

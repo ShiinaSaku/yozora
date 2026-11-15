@@ -119,9 +119,7 @@ export function SaveDialog({
     const controller = new AbortController()
     setEntryState({ entry: null, loading: true })
     fetchEntry(anime.id, controller.signal)
-      .then((entry) =>
-        setEntryState({ entry: entry ?? null, loading: false })
-      )
+      .then((entry) => setEntryState({ entry: entry ?? null, loading: false }))
       .catch(() => setEntryState({ entry: null, loading: false }))
     return () => controller.abort()
   }, [open, isSignedIn, anime?.id])
@@ -486,7 +484,9 @@ function SaveForm({
   const deleteEntry = async () => {
     setIsDeleting(true)
     try {
-      const { error } = await actions.library.deleteEntry({ anilistId: anime.id })
+      const { error } = await actions.library.deleteEntry({
+        anilistId: anime.id,
+      })
       if (error) throw new Error(error.message)
 
       toast.success("Removed from Library", {
@@ -613,9 +613,7 @@ function SaveForm({
                 Cancel
               </Button>
               <Button type="submit" size="sm" disabled={isSaving}>
-                {isSaving && (
-                  <Loader2 className="size-3.5 animate-spin" />
-                )}
+                {isSaving && <Loader2 className="size-3.5 animate-spin" />}
                 {existingEntry ? "Save Changes" : "Add to Library"}
               </Button>
             </div>

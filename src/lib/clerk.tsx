@@ -1,10 +1,6 @@
 import * as React from "react"
 import type { Clerk } from "@clerk/shared/types"
-import {
-  $authStore,
-  $clerkStore,
-  $isLoadedStore,
-} from "@clerk/astro/client"
+import { $authStore, $clerkStore, $isLoadedStore } from "@clerk/astro/client"
 
 // @clerk/astro/react exports control components and `useAuth`, but not
 // `useUser` / `useClerk`. Islands that need the full user resource or the
@@ -12,7 +8,9 @@ import {
 
 type ClerkUser = NonNullable<ReturnType<typeof $authStore.get>["user"]>
 
-const EMPTY_AUTH = { userId: null, user: null } as ReturnType<typeof $authStore.get>
+const EMPTY_AUTH = { userId: null, user: null } as ReturnType<
+  typeof $authStore.get
+>
 
 function useStoreValue<T>(
   store: {
@@ -32,7 +30,11 @@ function useStoreValue<T>(
 /**
  * Current signed-in Clerk user (null when signed out or not yet loaded).
  */
-export function useUser(): { user: ClerkUser | null; isSignedIn: boolean; isLoaded: boolean } {
+export function useUser(): {
+  user: ClerkUser | null
+  isSignedIn: boolean
+  isLoaded: boolean
+} {
   const auth = useStoreValue($authStore, EMPTY_AUTH)
   const isLoaded = useStoreValue($isLoadedStore, false)
   return {

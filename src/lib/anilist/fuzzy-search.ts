@@ -5,8 +5,9 @@ const MAX_RESULTS = 16
 
 function fallbackTerms(query: string): Array<string | null> {
   const words = query.match(/[\p{L}\p{N}]+/gu) ?? []
-  const candidates = [...new Set(words.filter((word) => word.length >= 3))]
-    .sort((a, b) => b.length - a.length)
+  const candidates = [
+    ...new Set(words.filter((word) => word.length >= 3)),
+  ].sort((a, b) => b.length - a.length)
 
   if (candidates.length >= 2) return candidates.slice(0, 2)
   if (candidates.length === 1) {
@@ -28,7 +29,9 @@ export async function searchWithFallback(
   if (terms.length === 0) return []
 
   const responses = await Promise.allSettled(terms.map(candidates))
-  const successful = responses.filter((response) => response.status === "fulfilled")
+  const successful = responses.filter(
+    (response) => response.status === "fulfilled"
+  )
   if (successful.length === 0) {
     const failure = responses[0]
     if (failure.status === "rejected") throw failure.reason

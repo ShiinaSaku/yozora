@@ -23,7 +23,11 @@ export async function fetchSafeImageDataUri(
 
   try {
     const parsed = new URL(url)
-    if (parsed.protocol !== "https:" || parsed.port || !isAllowedImageHost(parsed.hostname)) {
+    if (
+      parsed.protocol !== "https:" ||
+      parsed.port ||
+      !isAllowedImageHost(parsed.hostname)
+    ) {
       return ""
     }
 
@@ -34,9 +38,21 @@ export async function fetchSafeImageDataUri(
     })
     if (!res.ok) return ""
 
-    const contentType = (res.headers.get("content-type") || "").split(";")[0].trim().toLowerCase()
-    if (!["image/jpeg", "image/png", "image/webp", "image/avif"].includes(contentType)) return ""
-    if (Number(res.headers.get("content-length")) > MAX_IMAGE_BYTES || !res.body) return ""
+    const contentType = (res.headers.get("content-type") || "")
+      .split(";")[0]
+      .trim()
+      .toLowerCase()
+    if (
+      !["image/jpeg", "image/png", "image/webp", "image/avif"].includes(
+        contentType
+      )
+    )
+      return ""
+    if (
+      Number(res.headers.get("content-length")) > MAX_IMAGE_BYTES ||
+      !res.body
+    )
+      return ""
 
     const reader = res.body.getReader()
     const chunks: Uint8Array[] = []

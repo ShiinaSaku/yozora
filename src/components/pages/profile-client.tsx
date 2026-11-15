@@ -325,7 +325,9 @@ function PinnedShowcase({ pinnedIds }: { pinnedIds: number[] }) {
       .then((items) => {
         const order = new Map(pinnedIds.map((id, i) => [id, i]))
         setPinnedAnime(
-          [...items].sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0))
+          [...items].sort(
+            (a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0)
+          )
         )
       })
       .catch(() => setPinnedAnime([]))
@@ -523,10 +525,26 @@ function ProfileLibraryTabs({
   )
 
   const shelves = [
-    { value: "all", items: filteredAndSortedEntries, empty: "No anime found in library." },
-    { value: "watching", items: watchingEntries, empty: "No anime currently being watched." },
-    { value: "completed", items: completedEntries, empty: "No completed anime recorded yet." },
-    { value: "planning", items: planningEntries, empty: "No anime planned to watch." },
+    {
+      value: "all",
+      items: filteredAndSortedEntries,
+      empty: "No anime found in library.",
+    },
+    {
+      value: "watching",
+      items: watchingEntries,
+      empty: "No anime currently being watched.",
+    },
+    {
+      value: "completed",
+      items: completedEntries,
+      empty: "No completed anime recorded yet.",
+    },
+    {
+      value: "planning",
+      items: planningEntries,
+      empty: "No anime planned to watch.",
+    },
     { value: "paused", items: pausedEntries, empty: "No paused anime." },
     { value: "dropped", items: droppedEntries, empty: "No dropped anime." },
   ]

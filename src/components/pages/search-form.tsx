@@ -2,7 +2,12 @@ import * as React from "react"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { Search01Icon } from "@hugeicons/core-free-icons"
 import { Button } from "@/components/ui/button"
-import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field"
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field"
 import {
   InputGroup,
   InputGroupAddon,
@@ -38,16 +43,21 @@ export function SearchForm({ initialQuery }: { initialQuery: string }) {
     const timer = window.setTimeout(async () => {
       setStatus("Loading suggestions.")
       try {
-        const response = await fetch(`/api/search?q=${encodeURIComponent(search)}`, {
-          signal: controller.signal,
-        })
+        const response = await fetch(
+          `/api/search?q=${encodeURIComponent(search)}`,
+          {
+            signal: controller.signal,
+          }
+        )
         if (!response.ok) throw new Error("Suggestions unavailable")
         const items = (await response.json()) as Anime[]
         const titles = [...new Set(items.map((item) => item.title))].slice(0, 8)
         if (!active) return
         cache.current.set(search, titles)
         setSuggestions(titles)
-        setStatus(titles.length ? `${titles.length} suggestions available.` : "")
+        setStatus(
+          titles.length ? `${titles.length} suggestions available.` : ""
+        )
       } catch {
         if (active) setStatus("")
       }
@@ -61,7 +71,12 @@ export function SearchForm({ initialQuery }: { initialQuery: string }) {
   }, [query, initialQuery])
 
   return (
-    <form action="/search" method="get" role="search" className="w-full max-w-2xl">
+    <form
+      action="/search"
+      method="get"
+      role="search"
+      className="w-full max-w-2xl"
+    >
       <FieldGroup>
         <Field>
           <FieldLabel htmlFor="anime-search" className="sr-only">
@@ -84,18 +99,28 @@ export function SearchForm({ initialQuery }: { initialQuery: string }) {
                 placeholder="Search by anime title"
               />
               <InputGroupAddon>
-                <HugeiconsIcon icon={Search01Icon} strokeWidth={2} aria-hidden="true" />
+                <HugeiconsIcon
+                  icon={Search01Icon}
+                  strokeWidth={2}
+                  aria-hidden="true"
+                />
               </InputGroupAddon>
             </InputGroup>
-            <Button type="submit" size="hero">Search anime</Button>
+            <Button type="submit" size="hero">
+              Search anime
+            </Button>
           </div>
           <datalist id="anime-search-suggestions">
-            {suggestions.map((title) => <option key={title} value={title} />)}
+            {suggestions.map((title) => (
+              <option key={title} value={title} />
+            ))}
           </datalist>
           <FieldDescription id="anime-search-help">
             Search in English, romaji, or Japanese.
           </FieldDescription>
-          <span className="sr-only" role="status">{status}</span>
+          <span className="sr-only" role="status">
+            {status}
+          </span>
         </Field>
       </FieldGroup>
     </form>

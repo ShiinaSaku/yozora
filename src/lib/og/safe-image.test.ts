@@ -34,12 +34,20 @@ test("rejects untrusted URLs before fetching", async () => {
 
 test("rejects redirects, non-images, and oversized streamed responses", async () => {
   for (const response of [
-    new Response(null, { status: 302, headers: { location: "https://example.com" } }),
+    new Response(null, {
+      status: 302,
+      headers: { location: "https://example.com" },
+    }),
     new Response("<svg/>", { headers: { "content-type": "image/svg+xml" } }),
-    new Response(new Uint8Array(2 * 1024 * 1024 + 1), { headers: { "content-type": "image/png" } }),
+    new Response(new Uint8Array(2 * 1024 * 1024 + 1), {
+      headers: { "content-type": "image/png" },
+    }),
   ]) {
     assert.equal(
-      await fetchSafeImageDataUri("https://img.clerk.com/avatar", async () => response),
+      await fetchSafeImageDataUri(
+        "https://img.clerk.com/avatar",
+        async () => response
+      ),
       ""
     )
   }

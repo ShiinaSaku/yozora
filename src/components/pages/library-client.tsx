@@ -32,9 +32,7 @@ function LibraryContent({ data: initialData }: LibraryClientProps) {
   const [libraryData, setLibraryData] = React.useState<LibraryData | null>(
     initialData ?? null
   )
-  const [isEntriesLoading, setIsEntriesLoading] = React.useState(
-    !initialData
-  )
+  const [isEntriesLoading, setIsEntriesLoading] = React.useState(!initialData)
 
   React.useEffect(() => {
     if (!isSignedIn) return

@@ -190,7 +190,7 @@ export type introspection_types = {
     'UserTitleLanguage': { name: 'UserTitleLanguage'; enumValues: 'ROMAJI' | 'ENGLISH' | 'NATIVE' | 'ROMAJI_STYLISED' | 'ENGLISH_STYLISED' | 'NATIVE_STYLISED'; };
     'UserVoiceActorStatistic': { kind: 'OBJECT'; name: 'UserVoiceActorStatistic'; fields: { 'chaptersRead': { name: 'chaptersRead'; type: { kind: 'NON_NULL'; name: never; ofType: { kind: 'SCALAR'; name: 'Int'; ofType: null; }; } }; 'characterIds': { name: 'characterIds'; type: { kind: 'NON_NULL'; name: never; ofType: { kind: 'LIST'; name: never; ofType: { kind: 'SCALAR'; name: 'Int'; ofType: null; }; }; } }; 'count': { name: 'count'; type: { kind: 'NON_NULL'; name: never; ofType: { kind: 'SCALAR'; name: 'Int'; ofType: null; }; } }; 'meanScore': { name: 'meanScore'; type: { kind: 'NON_NULL'; name: never; ofType: { kind: 'SCALAR'; name: 'Float'; ofType: null; }; } }; 'mediaIds': { name: 'mediaIds'; type: { kind: 'NON_NULL'; name: never; ofType: { kind: 'LIST'; name: never; ofType: { kind: 'SCALAR'; name: 'Int'; ofType: null; }; }; } }; 'minutesWatched': { name: 'minutesWatched'; type: { kind: 'NON_NULL'; name: never; ofType: { kind: 'SCALAR'; name: 'Int'; ofType: null; }; } }; 'voiceActor': { name: 'voiceActor'; type: { kind: 'OBJECT'; name: 'Staff'; ofType: null; } }; }; };
     'YearStats': { kind: 'OBJECT'; name: 'YearStats'; fields: { 'amount': { name: 'amount'; type: { kind: 'SCALAR'; name: 'Int'; ofType: null; } }; 'meanScore': { name: 'meanScore'; type: { kind: 'SCALAR'; name: 'Int'; ofType: null; } }; 'year': { name: 'year'; type: { kind: 'SCALAR'; name: 'Int'; ofType: null; } }; }; };
-};
+}
 
 /** An IntrospectionQuery representation of your schema.
  *
@@ -201,11 +201,11 @@ export type introspection_types = {
  * instead save to a .ts instead of a .d.ts file.
  */
 export type introspection = {
-  name: 'anilist';
-  query: 'Query';
-  mutation: 'Mutation';
-  subscription: never;
-  types: introspection_types;
-};
+  name: "anilist"
+  query: "Query"
+  mutation: "Mutation"
+  subscription: never
+  types: introspection_types
+}
 
-import * as gqlTada from 'gql.tada';
+import * as gqlTada from "gql.tada"

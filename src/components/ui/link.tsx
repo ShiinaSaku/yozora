@@ -51,7 +51,13 @@ export type LinkProps = React.AnchorHTMLAttributes<HTMLAnchorElement> & {
  * Styled anchor. Same-origin navigations are intercepted by Astro's
  * <ClientRouter /> and links are prefetched globally via the prefetch config.
  */
-export function Link({ href, children, className, variant, ...props }: LinkProps) {
+export function Link({
+  href,
+  children,
+  className,
+  variant,
+  ...props
+}: LinkProps) {
   const finalClass = cn(linkVariants({ variant }), className)
   return (
     <a {...props} href={href} className={finalClass}>

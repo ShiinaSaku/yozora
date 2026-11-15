@@ -204,10 +204,7 @@ export function AboutPage() {
                 >
                   Feature
                 </th>
-                <th
-                  scope="col"
-                  className="p-4 font-bold text-primary sm:px-6"
-                >
+                <th scope="col" className="p-4 font-bold text-primary sm:px-6">
                   Yozora (夜空)
                 </th>
                 <th scope="col" className="p-4 font-semibold sm:px-6">
@@ -301,7 +298,9 @@ export function AboutPage() {
                     <span>Zero Ads · Zero Trackers</span>
                   </div>
                 </td>
-                <td className="p-4 text-muted-foreground sm:px-6">Commercial ads &amp; trackers</td>
+                <td className="p-4 text-muted-foreground sm:px-6">
+                  Commercial ads &amp; trackers
+                </td>
                 <td className="p-4 sm:px-6">
                   Banner ads &amp; affiliate trackers
                 </td>
@@ -378,8 +377,8 @@ export function AboutPage() {
             Open Source &amp; Community Driven
           </h3>
           <p className="max-w-xl text-xs leading-relaxed text-muted-foreground">
-            Built with Astro, Cloudflare Workers, Vite, Tailwind CSS v4, Base UI,
-            Drizzle ORM, and Neon PostgreSQL. Contributor pull requests and
+            Built with Astro, Cloudflare Workers, Vite, Tailwind CSS v4, Base
+            UI, Drizzle ORM, and Neon PostgreSQL. Contributor pull requests and
             feedback are welcome.
           </p>
         </div>

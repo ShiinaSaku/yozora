@@ -120,7 +120,13 @@ function AudioVisualizer({
             )}
           >
             <span className="relative size-20 overflow-hidden rounded-full border-2 border-zinc-900 shadow-2xl ring-1 ring-white/20 sm:size-24">
-              <Image src={cover} alt="" fill unoptimized className="object-cover" />
+              <Image
+                src={cover}
+                alt=""
+                fill
+                unoptimized
+                className="object-cover"
+              />
               <span className="absolute inset-0 m-auto size-3 rounded-full border border-white/40 bg-zinc-950 shadow-inner" />
             </span>
           </span>
@@ -157,7 +163,8 @@ export function ThemeVideoPlayer({
   const [mode, setMode] = React.useState<"video" | "audio">("video")
   const isAudioMode = mode === "audio"
 
-  const title = activeTheme.title || `${activeTheme.type} ${activeTheme.sequence || 1}`
+  const title =
+    activeTheme.title || `${activeTheme.type} ${activeTheme.sequence || 1}`
   const artist =
     activeTheme.artists.length > 0 ? activeTheme.artists.join(", ") : animeTitle
   const tag = `${activeTheme.type}${activeTheme.sequence || 1}`
@@ -246,7 +253,9 @@ export function ThemeVideoPlayer({
             aria-label={
               isAudioMode ? "Switch to video mode" : "Switch to audio only"
             }
-            title={isAudioMode ? "Switch to Video Mode" : "Switch to Audio Only"}
+            title={
+              isAudioMode ? "Switch to Video Mode" : "Switch to Audio Only"
+            }
           >
             <HugeiconsIcon
               icon={isAudioMode ? Video01Icon : HeadphonesIcon}

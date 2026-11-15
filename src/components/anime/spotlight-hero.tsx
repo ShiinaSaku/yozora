@@ -73,7 +73,7 @@ function SpotlightArtwork({
             fetchPriority={isFirst ? "high" : "low"}
             loading={index < 2 ? "eager" : "lazy"}
             className={cn(
-              "absolute inset-0 size-full transform-gpu scale-110 object-cover object-center opacity-40 blur-2xl transition-transform duration-700 ease-out select-none",
+              "absolute inset-0 size-full scale-110 transform-gpu object-cover object-center opacity-40 blur-2xl transition-transform duration-700 ease-out select-none",
               isActive ? "scale-110" : "scale-120"
             )}
           />
@@ -120,10 +120,7 @@ function SpotlightSlideCard({
   const isActive = selectedIndex === index
 
   return (
-    <div
-      className="relative size-full"
-      inert={!isActive || undefined}
-    >
+    <div className="relative size-full" inert={!isActive || undefined}>
       <SpotlightArtwork anime={anime} index={index} isActive={isActive} />
 
       {/* Rating badge */}
@@ -166,20 +163,14 @@ function SpotlightSlideCard({
           {anime.year && <span>{anime.year}</span>}
           {anime.episodes && (
             <>
-              <span aria-hidden="true">
-                ·
-              </span>
+              <span aria-hidden="true">·</span>
               <span>{anime.episodes} Episodes</span>
             </>
           )}
           {anime.studios && anime.studios.length > 0 && (
             <>
-              <span aria-hidden="true">
-                ·
-              </span>
-              <span className="max-w-44 truncate">
-                {anime.studios[0]}
-              </span>
+              <span aria-hidden="true">·</span>
+              <span className="max-w-44 truncate">{anime.studios[0]}</span>
             </>
           )}
         </div>
@@ -324,7 +315,7 @@ export function SpotlightHero({ items, onSaveClick }: SpotlightHeroProps) {
               key={anime.id}
               className="relative h-120 spotlight-slide-basis snap-center lg:h-135 xl:h-145 @max-3xl:h-120 sm:@max-3xl:h-125"
             >
-              <div className="relative size-full overflow-hidden rounded-3xl border border-border/70 bg-card text-foreground select-none shadow-sm sm:rounded-4xl">
+              <div className="relative size-full overflow-hidden rounded-3xl border border-border/70 bg-card text-foreground shadow-sm select-none sm:rounded-4xl">
                 <SpotlightSlideCard
                   anime={anime}
                   index={index}

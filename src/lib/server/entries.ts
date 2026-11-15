@@ -41,7 +41,10 @@ export async function getMyEntry(userId: string, rawAnilistId: number) {
     .select()
     .from(animeEntries)
     .where(
-      and(eq(animeEntries.userId, userId), eq(animeEntries.anilistId, anilistId))
+      and(
+        eq(animeEntries.userId, userId),
+        eq(animeEntries.anilistId, anilistId)
+      )
     )
     .limit(1)) as (typeof animeEntries.$inferSelect | undefined)[]
 
@@ -128,7 +131,10 @@ export async function deleteEntry(userId: string, rawAnilistId: number) {
   await db
     .delete(animeEntries)
     .where(
-      and(eq(animeEntries.userId, userId), eq(animeEntries.anilistId, anilistId))
+      and(
+        eq(animeEntries.userId, userId),
+        eq(animeEntries.anilistId, anilistId)
+      )
     )
 
   return { success: true }

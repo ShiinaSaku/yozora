@@ -54,12 +54,7 @@ import type { UserProfile } from "@/lib/db/schema"
 import type { Anime } from "@/lib/types/anime"
 
 export type SettingsTab =
-  | "profile"
-  | "account"
-  | "showcase"
-  | "connections"
-  | "preferences"
-  | "danger"
+  "profile" | "account" | "showcase" | "connections" | "preferences" | "danger"
 
 const profileSchema = z.compile(
   z.object({
@@ -246,7 +241,8 @@ function ProfileSettingsClientContent({
 
   React.useEffect(() => {
     setHasChanges(
-      baselineRef.current !== "" && JSON.stringify(state) !== baselineRef.current
+      baselineRef.current !== "" &&
+        JSON.stringify(state) !== baselineRef.current
     )
   }, [state])
 
@@ -346,8 +342,8 @@ function ProfileSettingsClientContent({
           Settings
         </h1>
         <p className="text-sm text-muted-foreground">
-          Public profile, account security, connected services, and
-          preferences — all in one place.
+          Public profile, account security, connected services, and preferences
+          — all in one place.
         </p>
       </div>
 
@@ -427,7 +423,11 @@ function ProfileSettingsClientContent({
                 }
               />
 
-              <SaveRow isSaving={isSaving} dirtyBadge={dirtyBadge} label="Save Profile" />
+              <SaveRow
+                isSaving={isSaving}
+                dirtyBadge={dirtyBadge}
+                label="Save Profile"
+              />
             </form>
           )}
 
@@ -604,7 +604,7 @@ function ProfileLivePreview({ state }: { state: ProfileState }) {
             <div className="absolute inset-0 bg-linear-to-t from-card via-card/20 to-transparent" />
           </div>
 
-          <div className="flex items-end gap-3 px-4 pb-4 -mt-8 sm:px-5">
+          <div className="-mt-8 flex items-end gap-3 px-4 pb-4 sm:px-5">
             <div className="relative size-16 shrink-0 overflow-hidden rounded-2xl border-4 border-card bg-muted shadow-md">
               {state.avatarUrl ? (
                 <Image
@@ -815,38 +815,35 @@ function ProfileIntegrationsCard({
 
       <CardContent>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {trackers.map(({ id, label, icon: Icon, username, href, placeholder }) => (
-            <Field key={id}>
-              <FieldLabel htmlFor={id}>
-                <span className="flex items-center gap-1.5">
-                  <Icon className="size-3.5" />
-                  {label}
-                </span>
-              </FieldLabel>
-              <Input
-                id={id}
-                value={username}
-                onChange={(e) =>
-                  onChange(
-                    id,
-                    e.target.value
-                  )
-                }
-                placeholder={placeholder}
-              />
-              {username && (
-                <a
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
-                >
-                  View {username}
-                  <ExternalLink className="size-3" />
-                </a>
-              )}
-            </Field>
-          ))}
+          {trackers.map(
+            ({ id, label, icon: Icon, username, href, placeholder }) => (
+              <Field key={id}>
+                <FieldLabel htmlFor={id}>
+                  <span className="flex items-center gap-1.5">
+                    <Icon className="size-3.5" />
+                    {label}
+                  </span>
+                </FieldLabel>
+                <Input
+                  id={id}
+                  value={username}
+                  onChange={(e) => onChange(id, e.target.value)}
+                  placeholder={placeholder}
+                />
+                {username && (
+                  <a
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+                  >
+                    View {username}
+                    <ExternalLink className="size-3" />
+                  </a>
+                )}
+              </Field>
+            )
+          )}
         </div>
       </CardContent>
     </Card>
@@ -1142,7 +1139,8 @@ function DangerZoneCard() {
       void clerk?.signOut()
     } catch (error) {
       toast.error("Deletion Failed", {
-        description: error instanceof Error ? error.message : "Deletion failed.",
+        description:
+          error instanceof Error ? error.message : "Deletion failed.",
       })
     } finally {
       setIsDeleting(false)
@@ -1223,7 +1221,10 @@ function DangerZoneCard() {
               onClick={() => void deleteAll()}
             >
               {isDeleting ? (
-                <Loader2 className="size-4 animate-spin" data-icon="inline-start" />
+                <Loader2
+                  className="size-4 animate-spin"
+                  data-icon="inline-start"
+                />
               ) : (
                 <Trash2 data-icon="inline-start" className="size-4" />
               )}

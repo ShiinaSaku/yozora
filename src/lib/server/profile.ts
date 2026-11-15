@@ -44,14 +44,20 @@ export async function getPublicProfilePageData(rawHandle: string) {
     })
     .from(animeEntries)
     .where(
-      and(eq(animeEntries.userId, profile.userId), eq(animeEntries.private, false))
+      and(
+        eq(animeEntries.userId, profile.userId),
+        eq(animeEntries.private, false)
+      )
     )
 
   const entries = await db
     .select()
     .from(animeEntries)
     .where(
-      and(eq(animeEntries.userId, profile.userId), eq(animeEntries.private, false))
+      and(
+        eq(animeEntries.userId, profile.userId),
+        eq(animeEntries.private, false)
+      )
     )
     .orderBy(desc(animeEntries.updatedAt))
 

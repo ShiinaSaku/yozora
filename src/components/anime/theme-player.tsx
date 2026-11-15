@@ -71,7 +71,7 @@ const ThemeTrackRow = React.memo(
         type="button"
         disabled={!hasVideo}
         className={cn(
-          "group flex w-full items-center justify-between rounded-2xl border p-3 transition-colors duration-200 select-none text-left disabled:cursor-not-allowed sm:p-3.5",
+          "group flex w-full items-center justify-between rounded-2xl border p-3 text-left transition-colors duration-200 select-none disabled:cursor-not-allowed sm:p-3.5",
           isCurrent
             ? "border-primary/60 bg-primary/10 shadow-sm ring-1 ring-primary/20"
             : hasVideo

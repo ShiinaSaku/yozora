@@ -11,15 +11,19 @@ export function HomeInteractions({
   trending: Anime[]
   catalog: SaveableAnime[]
 }) {
-  const [selectedAnime, setSelectedAnime] = React.useState<SaveableAnime | null>(null)
+  const [selectedAnime, setSelectedAnime] =
+    React.useState<SaveableAnime | null>(null)
   const [saveOpen, setSaveOpen] = React.useState(false)
 
   React.useEffect(() => {
     const handleClick = (event: MouseEvent) => {
       if (!(event.target instanceof Element)) return
-      const button = event.target.closest<HTMLButtonElement>("[data-save-anime]")
+      const button =
+        event.target.closest<HTMLButtonElement>("[data-save-anime]")
       if (!button) return
-      const anime = catalog.find((item) => item.id === Number(button.dataset.saveAnime))
+      const anime = catalog.find(
+        (item) => item.id === Number(button.dataset.saveAnime)
+      )
       if (anime) {
         setSelectedAnime(anime)
         setSaveOpen(true)
@@ -40,7 +44,11 @@ export function HomeInteractions({
           }}
         />
       )}
-      <SaveDialog anime={selectedAnime} open={saveOpen} onOpenChange={setSaveOpen} />
+      <SaveDialog
+        anime={selectedAnime}
+        open={saveOpen}
+        onOpenChange={setSaveOpen}
+      />
     </>
   )
 }

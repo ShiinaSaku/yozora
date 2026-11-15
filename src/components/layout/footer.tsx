@@ -15,7 +15,6 @@ import { cn } from "@/lib/utils"
  */
 export const HIDDEN_FOOTER_ROUTES = ["/sign-in", "/sign-up", "/settings"]
 
-
 function DiscoverColumn() {
   return (
     <div>
@@ -212,7 +211,9 @@ export function FooterMeta({ className }: { className?: string }) {
           <span className="interactive-press">
             <Link href="/" variant="brand" aria-label="Yozora home">
               <BrandLogo className="size-8" />
-              <span className="font-heading text-base font-bold tracking-tight">Yozora</span>
+              <span className="font-heading text-base font-bold tracking-tight">
+                Yozora
+              </span>
             </Link>
           </span>
           <ThemeToggle />
@@ -257,7 +258,7 @@ export function FooterMeta({ className }: { className?: string }) {
 
 export function Footer() {
   return (
-    <footer className="relative mt-20 content-auto w-full shrink-0 bg-card/60 text-sm/loose text-foreground">
+    <footer className="content-auto relative mt-20 w-full shrink-0 bg-card/60 text-sm/loose text-foreground">
       <FooterSitemap />
       <FooterMeta />
     </footer>

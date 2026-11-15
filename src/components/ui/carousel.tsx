@@ -303,8 +303,7 @@ class CarouselStore {
       const align = getComputedStyle(this.slides[index]).scrollSnapAlign
       let target: number
       if (align.startsWith("start")) {
-        target =
-          start - (parseFloat(style.scrollPaddingInlineStart) || 0)
+        target = start - (parseFloat(style.scrollPaddingInlineStart) || 0)
       } else if (align === "center") {
         target = start + (end - start - this.size) / 2
       } else {
@@ -1198,28 +1197,31 @@ function CarouselItem({
   })
 }
 
-const carouselNavVariants = cva("absolute rounded-full aria-disabled:opacity-50", {
-  variants: {
-    orientation: {
-      horizontal: "inset-y-0 my-auto",
-      vertical: "inset-x-0 mx-auto",
+const carouselNavVariants = cva(
+  "absolute rounded-full aria-disabled:opacity-50",
+  {
+    variants: {
+      orientation: {
+        horizontal: "inset-y-0 my-auto",
+        vertical: "inset-x-0 mx-auto",
+      },
+      direction: {
+        previous: "",
+        next: "",
+      },
     },
-    direction: {
-      previous: "",
-      next: "",
-    },
-  },
-  compoundVariants: [
-    {
-      orientation: "horizontal",
-      direction: "previous",
-      className: "-start-12",
-    },
-    { orientation: "horizontal", direction: "next", className: "-end-12" },
-    { orientation: "vertical", direction: "previous", className: "-top-12" },
-    { orientation: "vertical", direction: "next", className: "-bottom-12" },
-  ],
-})
+    compoundVariants: [
+      {
+        orientation: "horizontal",
+        direction: "previous",
+        className: "-start-12",
+      },
+      { orientation: "horizontal", direction: "next", className: "-end-12" },
+      { orientation: "vertical", direction: "previous", className: "-top-12" },
+      { orientation: "vertical", direction: "next", className: "-bottom-12" },
+    ],
+  }
+)
 
 type CarouselNavProps = React.ComponentProps<typeof Button>
 
@@ -1295,7 +1297,11 @@ function CarouselNext({
   children,
   ...props
 }: CarouselNavProps) {
-  const { orientation, ...buttonProps } = useNavButton("CarouselNext", "next", props)
+  const { orientation, ...buttonProps } = useNavButton(
+    "CarouselNext",
+    "next",
+    props
+  )
 
   return (
     <Button
@@ -1466,7 +1472,7 @@ function CarouselDots({
               tabIndex={active ? 0 : -1}
               onClick={() => store.scrollTo(index)}
               className={cn(
-                "group/dot relative flex shrink cursor-pointer items-center justify-center rounded-full outline-none [--dot-active:0] [--dot-floor:20%] [-webkit-tap-highlight-color:transparent] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden in-data-jumping:transition-[width,height,min-width,min-height] in-data-jumping:duration-200 in-data-jumping:ease-spring aria-[current=true]:[--dot-active:1] motion-reduce:in-data-jumping:duration-0 pointer-coarse:after:absolute pointer-coarse:after:inset-x-0 pointer-coarse:after:-inset-y-2.5 [@media(hover:hover)]:hover:[--dot-floor:45%]",
+                "group/dot in-data-jumping:ease-spring relative flex shrink cursor-pointer items-center justify-center rounded-full outline-none [--dot-active:0] [--dot-floor:20%] [-webkit-tap-highlight-color:transparent] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-hidden in-data-jumping:transition-[width,height,min-width,min-height] in-data-jumping:duration-200 aria-[current=true]:[--dot-active:1] motion-reduce:in-data-jumping:duration-0 pointer-coarse:after:absolute pointer-coarse:after:inset-x-0 pointer-coarse:after:-inset-y-2.5 [@media(hover:hover)]:hover:[--dot-floor:45%]",
                 vertical
                   ? "h-[calc(1.5rem+0.25rem*var(--dot-active))] min-h-[calc(0.625rem+1.125rem*var(--dot-active))] w-6"
                   : "h-6 w-[calc(1.5rem+0.25rem*var(--dot-active))] min-w-[calc(0.625rem+1.125rem*var(--dot-active))]"
@@ -1475,7 +1481,7 @@ function CarouselDots({
               <span
                 data-slot="carousel-dot-indicator"
                 className={cn(
-                  "relative overflow-hidden rounded-full bg-[color-mix(in_oklab,var(--foreground)_max(var(--dot-floor),calc(20%+80%*var(--dot-active)*var(--dot-fill))),transparent)] in-data-jumping:transition-[width,height,background-color] in-data-jumping:duration-200 in-data-jumping:ease-spring motion-reduce:in-data-jumping:duration-0",
+                  "in-data-jumping:ease-spring relative overflow-hidden rounded-full bg-[color-mix(in_oklab,var(--foreground)_max(var(--dot-floor),calc(20%+80%*var(--dot-active)*var(--dot-fill))),transparent)] in-data-jumping:transition-[width,height,background-color] in-data-jumping:duration-200 motion-reduce:in-data-jumping:duration-0",
                   vertical
                     ? "h-[calc(0.375rem+0.875rem*var(--dot-active))] w-1.5"
                     : "h-1.5 w-[calc(0.375rem+0.875rem*var(--dot-active))]"
